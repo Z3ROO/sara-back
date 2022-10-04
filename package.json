@@ -1,0 +1,31 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "NODE_ENV=prod node src/index.js",
+    "dev": "scripts/sandbox.sh",
+    "test": "scripts/test.sh",
+    "migrate": "NODE_ENV=dev ts-node scripts/tests.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "express": "^4.18.0",
+    "pg": "^8.7.3"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.13",
+    "@types/jest": "^28.1.1",
+    "@types/node": "^17.0.29",
+    "@types/pg": "^8.6.5",
+    "@types/supertest": "^2.0.12",
+    "jest": "^28.1.1",
+    "supertest": "^6.2.3",
+    "ts-jest": "^28.0.5"
+  }
+}
