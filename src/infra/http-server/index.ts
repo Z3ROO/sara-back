@@ -1,6 +1,5 @@
 import express from 'express';
 import routes from '../../api-http-presenter';
-import '../../../dotenv.config.ts'; // environment variables
 import { dbCheck } from '../database/index';
 
 export const app = applyRoutes(express(), routes);
