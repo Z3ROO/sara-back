@@ -1,9 +1,63 @@
+import { Dirent } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 
 const notesDir = path.join(__dirname, '../../../../notes/');
 
 export default class NotesAPIHandlers {
+  // get'/notes/tree-listing/:category'
+  static async getTreeListing(req: any, res: any) {
+    const { category } = req.params;
+
+    console.log(req.params)
+
+    const listing = [await NotesAPIHandlers.buildListing([category])]
+
+    res.json({
+      status: 'ok',
+      err: '',
+      body: listing
+    })
+  }
+
+  private static async buildListing(directory: string[], nodeStat?: Dirent) {
+    const finalDir = path.join(notesDir, ...directory);
+    
+    let dirListing:Dirent[];
+    if (directory.length === 1 || (nodeStat && nodeStat.isDirectory()))
+      dirListing = await fs.readdir(finalDir, {withFileTypes: true});
+
+    const node:any = {};
+
+    if (directory.length === 1){
+      node.name = directory[0];
+      node.type = 'category';
+    }
+    else {
+      node.name = directory[directory.length - 1];
+      node.type = nodeStat.isDirectory() ? 'folder' : 'file';
+    }
+
+    if (directory.length === 1 || (nodeStat && nodeStat.isDirectory()))
+      node.content = await Promise.all(dirListing.map(async (val) => {
+        return await NotesAPIHandlers.buildListing([...directory, val.name], val)
+      }));
+    
+    return node;
+  }
+
+  // get'/notes/note/*/*.md'
+  static async getNote(req:any, res:any) {
+    const pathToNote = path.join(notesDir,req.params[0]);
+    const fileContent = await fs.readFile(pathToNote, 'utf-8');
+
+    res.json({
+      status: 'ok',
+      err: '',
+      body: fileContent
+    })
+  }
+
   // get'/notes'
   static async getCategories(req: any, res: any) {
     const categories = await fs.readdir(notesDir);
