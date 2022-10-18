@@ -94,15 +94,13 @@ export default class NotesAPIHandlers {
     
     const finalDir = path.join(notesDir, ...directory);
 
-    await fs.writeFile(directory, content, 'utf-8');
+    await fs.writeFile(finalDir, content, 'utf-8');
 
     res.json({
       status: 'ok',
       err: '',
-      body: {
-
-      }
-    })
+      body: {}
+    });
   }
 
     // delete'/notes/folder'
@@ -115,7 +113,7 @@ export default class NotesAPIHandlers {
         status: 'ok',
         err: '',
         body:{}
-      })
+      });
     }
   
     // delete'/notes/note'
