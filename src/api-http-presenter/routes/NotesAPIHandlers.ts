@@ -60,7 +60,8 @@ export default class NotesAPIHandlers {
 
   // post'/notes/folder'
   static async createFolder(req: any, res: any) {
-    const {directory, name} = req.body;
+    let {directory, name} = req.body;
+    name = name.replace(/ /g, '_');
     const finalDir = path.join(notesDir, ...directory, name);
     await fs.mkdir(finalDir);
 
@@ -74,6 +75,7 @@ export default class NotesAPIHandlers {
   // post'/notes/note'
   static async createNote(req: any, res: any) {
     let {directory, name} = req.body;
+    name = name.replace(/ /g, '_');
     if (!name.match(/.+\.md$/))
       name += '.md'
     const finalDir = path.join(notesDir, ...directory, name)
@@ -102,4 +104,31 @@ export default class NotesAPIHandlers {
       }
     })
   }
+
+    // delete'/notes/folder'
+    static async deleteFolder(req: any, res: any) {
+      const {directory} = req.body;
+      const finalDir = path.join(notesDir, ...directory);
+      await fs.rmdir(finalDir, {recursive:true});
+  
+      res.json({
+        status: 'ok',
+        err: '',
+        body:{}
+      })
+    }
+  
+    // delete'/notes/note'
+    static async deleteNote(req: any, res: any) {
+      let {directory} = req.body;
+
+      const finalDir = path.join(notesDir, ...directory)
+      await fs.rm(finalDir);
+  
+      res.json({
+        status: 'ok',
+        err: '',
+        body: {}
+      });
+    }
 }

@@ -17,15 +17,15 @@ export default [
     handler: NotesAPIHandlers.createNote
   },
   {
-    method: 'post', path: '/notes/save-note/*/*.md',
+    method: 'put', path: '/notes/save-note',
     handler: NotesAPIHandlers.saveNote
   },
-  // {
-  //   method: 'delete', path: '/notes/note/*/*.md',
-  //   handler: NotesAPIHandlers.deleteFolder
-  // },
-  // {
-  //   method: 'delete', path: '/notes/folder/*/*.md',
-  //   handler: NotesAPIHandlers.deleteNote
-  // },
+  {
+    method: 'delete', path: '/notes/note',
+    handler: NotesAPIHandlers.deleteNote
+  },
+  {
+    method: 'delete', path: '/notes/folder',
+    handler: NotesAPIHandlers.deleteFolder
+  },
 ];
