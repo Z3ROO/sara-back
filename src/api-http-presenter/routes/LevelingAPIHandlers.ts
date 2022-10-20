@@ -1,9 +1,9 @@
-import { Feats } from "../../features/Feats";
+import { Feats } from "../../features/Leveling/Feats";
 import { IQuest, IQuestLine } from "../../features/interfaces/interfaces";
-import { Leveling } from "../../features/Leveling";
-import { Quest } from "../../features/Quest";
-import { QuestLine } from "../../features/QuestLine";
-import { Records } from "../../features/Records";
+import { Leveling } from "../../features/Leveling/Leveling";
+import { Quest } from "../../features/Leveling/Quest";
+import { QuestLine } from "../../features/Leveling/QuestLine";
+import { Records } from "../../features/Leveling/Records";
 
 export default class StatsAPIHandlers {
   //[GET]/leveling/stats
@@ -71,7 +71,6 @@ export default class StatsAPIHandlers {
   //[POST]/leveling/quest/finish
   static async finishQuest(req: any, res: any) {
     const { questId, focusScore } = req.body;
-    console.log(req.body)
     await Quest.finishQuest(questId, focusScore);
     
     res.json({ok: true})

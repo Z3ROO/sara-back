@@ -1,6 +1,6 @@
-import AchievementsRepo from "../repositories/leveling/AchievementsRepo"
-import { BadRequest, InternalServerError } from "../util/errors/HttpStatusCode";
-import { IAchievement } from "./interfaces/interfaces";
+import AchievementsRepo from "../../repositories/leveling/AchievementsRepo"
+import { BadRequest, InternalServerError } from "../../util/errors/HttpStatusCode";
+import { IAchievement } from "../interfaces/interfaces";
 
 export default class AchievementsUsecase {
   static async getAllAchievements() {

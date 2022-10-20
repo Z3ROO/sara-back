@@ -1,7 +1,7 @@
-import { UserRepo } from "../repositories/UserRepo";
+import { UserRepo } from "../../repositories/UserRepo";
 import Achievements from "./Achievements";
 import { Feats } from "./Feats";
-import { IQuest, IQuestLine, IStats } from "./interfaces/interfaces";
+import { IQuest, IQuestLine, IStats } from "../interfaces/interfaces";
 import { PassiveSkills } from "./PassiveSkills";
 import { Quest } from "./Quest";
 import { QuestLine } from "./QuestLine";
@@ -65,14 +65,15 @@ export class Leveling {
   }
 
   private static async eachDay(yesterday?: Date, timeline?: boolean) {
-    if (yesterday) await this.prepareForNewDay(yesterday);
+    if (yesterday) 
+      await this.prepareForNewDay(yesterday);
     const today = this.stats.day;
-    const todaysQuests = await Quest.getEveryFinishedQuestOfOneDay(today);
+    const todaysFineshedQuests = await Quest.getEveryFinishedQuestOfOneDay(today);
     
     await this.sideEventsOfToday(today);
 
-    for (let index = 0; index < todaysQuests.length; index++) {
-      const quest = todaysQuests[index];
+    for (let index = 0; index < todaysFineshedQuests.length; index++) {
+      const quest = todaysFineshedQuests[index];
 
       const boostXp = quest.type === 'side' ? 0 : await this.calculateQuestBoostXp(quest);
       this.increaseXp(quest.xp + boostXp);
@@ -92,21 +93,21 @@ export class Leveling {
       this.updateFocusHashira(quest);
     }
 
-    const todaysQuestLine = await QuestLine.getFineshedQuestLinesOfOneDay(today);
+    const todaysFinishedQuestLines = await QuestLine.getFineshedQuestLinesOfOneDay(today);
 
     //what if invalidate 2 questlines in one day
-    for (let index = 0; index < todaysQuestLine.length; index++){
-      const boostXp = await this.calculateQuestBoostXp(todaysQuestLine[index]);
-      this.increaseXp(todaysQuestLine[index].xp + boostXp);
+    for (let index = 0; index < todaysFinishedQuestLines.length; index++){
+      const boostXp = await this.calculateQuestBoostXp(todaysFinishedQuestLines[index]);
+      this.increaseXp(todaysFinishedQuestLines[index].xp + boostXp);
       this.stats.todaysHistory.push({
         type: 'Quest Line',
         body: {
-          ...todaysQuestLine[index],
+          ...todaysFinishedQuestLines[index],
           boostXp
         }
       });
 
-      this.updatePlanningHashiraForQuestLine(todaysQuestLine[index]);
+      this.updatePlanningHashiraForQuestLine(todaysFinishedQuestLines[index]);
     }
 
     if (today.toLocaleDateString() === new Date().toLocaleDateString()){
@@ -146,7 +147,7 @@ export class Leveling {
   }
 
   private static async prepareForNewDay(yesterday: Date) {
-    this.updatePerseverenceHashira(yesterday)
+    this.updatePerseverenceHashira(yesterday);
 
     let today = new Date(yesterday);
     today.setDate(today.getDate() + 1);   
@@ -273,25 +274,25 @@ export class Leveling {
     const currentScore = this.stats.hashiras.planning.score;
     
     if (questLine.state === 'invalidated')
-      planningScore = -30
+      planningScore = -30;
     else {
       const questDuration = new Date(questLine.finished_at).getTime() - new Date(questLine.created_at).getTime();
       const durationRateOverTimecap = Math.round(questDuration / questLine.timecap * 100);
 
       let timacapScoreReduction = durationRateOverTimecap > 100 ? durationRateOverTimecap - 100 : 100 - durationRateOverTimecap;
-          timacapScoreReduction = Math.floor(timacapScoreReduction/10);    
+          timacapScoreReduction = Math.floor(timacapScoreReduction/10);
       timecapScore = 10 - timacapScoreReduction;
 
       planningScore = timecapScore;
     }
 
-    let finalScore = planningScore + currentScore
-    let [level, title] = await this.definePlanningHashiraLevel(finalScore);    
+    let finalScore = planningScore + currentScore;
+    let [level, title] = await this.definePlanningHashiraLevel(finalScore);
 
     this.stats.hashiras.planning.level = level;
     this.stats.hashiras.planning.title = title;
     this.stats.hashiras.planning.score = finalScore;
-    this.stats.hashiras.planning.todaysEarnings =+ planningScore
+    this.stats.hashiras.planning.todaysEarnings =+ planningScore;
   }
 
   private static async definePlanningHashiraLevel(finalScore: number): Promise<[number, string]> {

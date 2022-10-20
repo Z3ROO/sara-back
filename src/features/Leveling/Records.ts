@@ -1,5 +1,5 @@
-import { RecordsRepo } from "../repositories/leveling/RecordsRepo";
-import { IRecords } from "./interfaces/interfaces";
+import { RecordsRepo } from "../../repositories/leveling/RecordsRepo";
+import { IRecords } from "../interfaces/interfaces";
 
 export class Records {
   static async getAllRecords() {

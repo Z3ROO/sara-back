@@ -1,4 +1,4 @@
-import { PassiveSkillsRepo } from "../repositories/leveling/PassiveSkillsRepo";
+import { PassiveSkillsRepo } from "../../repositories/leveling/PassiveSkillsRepo";
 
 export class PassiveSkills {
   static async getPassiveSkillsHistoryOfOneDay(date: Date) {
