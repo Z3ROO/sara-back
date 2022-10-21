@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto"
 import { IPassiveSkill, IUpdatePassiveSkill } from "../../features/interfaces/interfaces";
-import { queryDatabase } from "../../infra/database"
+import { queryDatabase } from "../../infra/database/postgresql"
 import { RepositoryError } from "../../util/errors/RepositoryError"
 import Repository from "../RepoResultHandler"
 

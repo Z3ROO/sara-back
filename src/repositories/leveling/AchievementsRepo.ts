@@ -1,6 +1,6 @@
 import { RepositoryError } from '../../util/errors/RepositoryError';
 import { IAchievement, IUpdateAchievement } from '../../features/interfaces/interfaces';
-import { queryDatabase } from '../../infra/database/index'
+import { queryDatabase } from '../../infra/database/postgresql'
 import Repository from '../RepoResultHandler';
 import { randomUUID } from 'crypto';
 

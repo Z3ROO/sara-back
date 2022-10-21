@@ -1,10 +1,11 @@
 import express from 'express';
 import routes from '../../api-http-presenter';
-import { dbCheck } from '../database/index';
+import { db, initMongoDB } from '../database/mongodb';
+import { dbCheck } from '../database/postgresql';
 
 export const app = applyRoutes(express(), routes);
 
-export const init = () => dbCheck(() => {
+export const initServer = () => dbCheck(() => {
   app.listen(
     process.env.SERVER_PORT, () => {
       console.log("Servidor conectado à porta "+process.env.SERVER_PORT)
@@ -34,5 +35,5 @@ function applyRoutes(app: any, routess: any[]) {
   return app
 }
 
-init();
+initMongoDB(initServer);
 

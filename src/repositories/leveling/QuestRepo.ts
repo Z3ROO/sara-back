@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto"
 import { IQuest } from "../../features/interfaces/interfaces";
-import { handleTransaction, queryDatabase } from "../../infra/database"
+import { handleTransaction, queryDatabase } from "../../infra/database/postgresql"
 import { RepositoryError } from "../../util/errors/RepositoryError"
 import Repository from "../RepoResultHandler"
 

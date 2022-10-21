@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto"
-import { handleTransaction, queryDatabase } from "../../infra/database"
+import { handleTransaction, queryDatabase } from "../../infra/database/postgresql"
 import Repository from "../RepoResultHandler"
 
 interface IQuestTodo {

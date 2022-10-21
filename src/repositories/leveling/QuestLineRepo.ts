@@ -1,5 +1,5 @@
 import Repository from "../RepoResultHandler"
-import { handleTransaction, queryDatabase } from '../../infra/database/index';
+import { handleTransaction, queryDatabase } from '../../infra/database/postgresql';
 import { RepositoryError } from "../../util/errors/RepositoryError";
 import { randomUUID } from 'crypto';
 import { IQuestLine } from "../../features/interfaces/interfaces";

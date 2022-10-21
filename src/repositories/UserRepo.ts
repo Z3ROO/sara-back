@@ -1,4 +1,4 @@
-import user from '../infra/database/user.json';
+import user from '../infra/database/local/user.json';
 
 export class UserRepo {
   static getUserInfo() {
