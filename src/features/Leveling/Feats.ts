@@ -1,9 +1,9 @@
-import { FeatsRepo } from "../../repositories/leveling/FeatsRepo";
+import FeatsRepoo, {FeatsRepo} from "../../repositories/leveling/FeatsRepo";
 import { IFeats } from "../interfaces/interfaces";
 
 export class Feats {
   static async getAllFeats() {
-    const { records } = await FeatsRepo.findAllFeats();
+    const { records } = await FeatsRepoo.findAllFeats();
 
     return records
   }
@@ -30,6 +30,6 @@ export class Feats {
       ...properties,
       xp: properties.tier*50
     }
-    await FeatsRepo.insertOneFeat(properties);
+    await FeatsRepoo.insertOneFeat(properties);
   }
 }

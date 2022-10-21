@@ -1,11 +1,26 @@
+import { db } from "../infra/http-server";
 import { RepositoryError, DatabaseError } from "../util/errors/RepositoryError";
+import { Collection } from 'mongodb';
 
 interface IRepositoryResult {
   record?: any
   records?: any[]
 }
 
+export class NoSQLRepository<Document> {
+  protected dbName:string;
+  protected collectionName:string;
+  protected collection:() => Collection<Document>;
+
+  constructor(dbName:string, collectionName: string) {
+    this.dbName = dbName;
+    this.collectionName = collectionName;
+    this.collection = () => db(this.dbName).collection(this.collectionName);
+  }
+}
+
 export default class Repository {
+  
   protected static async RepoResultHandler(callback:(()=> any)) {
 
     try {      
