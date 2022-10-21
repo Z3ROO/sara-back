@@ -1,6 +1,6 @@
 import express from 'express';
 import routes from '../../api-http-presenter';
-import { db, initMongoDB } from '../database/mongodb';
+import { connection, initMongoDB } from '../database/mongodb';
 import { dbCheck } from '../database/postgresql';
 
 export const app = applyRoutes(express(), routes);
@@ -37,3 +37,4 @@ function applyRoutes(app: any, routess: any[]) {
 
 initMongoDB(initServer);
 
+export const db = (dbname:string) => connection().db(dbname);

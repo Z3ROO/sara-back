@@ -20,4 +20,4 @@ export function initMongoDB(cb:() => void) {
   })
 }
 
-export const db = (dbName:string) => state.connection.db(dbName)
+export const connection = () => state.connection
