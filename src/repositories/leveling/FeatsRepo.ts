@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb'
 const dbName = 'leveling';
 const collectionName = 'feats';
 
-type uniqueIdentifier = {title?: string, _id?: string}
+export type uniqueIdentifier = {title?: string, _id?: string}
 
 class FeatsRepo extends NoSQLRepository<IFeats>{
   async findAllFeats() {

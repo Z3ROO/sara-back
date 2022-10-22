@@ -57,6 +57,7 @@ export interface IRecords {
   categories: string
   tier: number
   level?: number
+  history?: {direction:-1|0|1, date: Date}[]
   xp?: number
 }
 

@@ -121,8 +121,8 @@ export class Leveling {
   private static async sideEventsOfToday(today: Date) {
     let todaysFeats = (await Feats.getEveryCompleteFeatOfOneDay(today))
       .map(event => ({type: 'Feat', body: event}));
-    let todaysRecords = await Records.getRecordsHistoryOfOneDay(today);
-      todaysRecords = todaysRecords.map(event => ({type: 'Record', body: event}));
+    let todaysRecords = (await Records.getRecordsHistoryOfOneDay(today))
+      .map(event => ({type: 'Record', body: event}));
     let todaysAchievements = await Achievements.getEveryCompleteAchievementOfOneDay(today);
       todaysAchievements = todaysAchievements.map(event => ({type: 'Achievement', body: event}));
     let todaysPassiveSkills = await PassiveSkills.getPassiveSkillsHistoryOfOneDay(today);

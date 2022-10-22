@@ -1,72 +1,56 @@
-import { randomUUID } from "crypto"
+import { ObjectId } from "mongodb";
 import { IRecords } from "../../features/interfaces/interfaces";
-import { queryDatabase } from "../../infra/database/postgresql"
-import { RepositoryError } from "../../util/errors/RepositoryError"
-import Repository from "../RepoResultHandler"
+import { RepositoryError } from "../../util/errors/RepositoryError";
+import { NoSQLRepository } from "../RepoResultHandler";
+import { uniqueIdentifier } from "./FeatsRepo";
 
-export class RecordsRepo extends Repository{
-  static async findAllRecords() {
-    return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM records;`));
+
+class RecordsRepo extends NoSQLRepository<IRecords>{
+  async findAllRecords() {
+    const records = await this.collection().find().toArray();
+
+    return { records }
   }
 
-  static async findOneRecord(identifier: string) {
-    return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM records WHERE id = $1;`, [identifier]));
+  async findOneRecord(identifier: uniqueIdentifier) {
+    const searchParams = this.searchParams(identifier);
+    const record = await this.collection().findOne(searchParams);
+
+    return { record };
   }
 
-  static async findOneRecordByTitle(identifier: string) {
-    return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM records WHERE title = $1;`, [identifier]));
-  }
-   
-  static async findEveryRecordsHistoryInDateRange(begin: string, end: string) {
-    return this.RepoResultHandler(() => queryDatabase(`
-      SELECT id, questline_id, title, description, qtd, xp, current_level, finished_at FROM records_history 
-      LEFT OUTER JOIN records ON id = record_id
-      WHERE finished_at >= $1 AND finished_at <= $2;
-      `,[begin, end]));
+  async insertOneRecord(properties: IRecords) {
+    await this.collection().insertOne(properties);
   }
 
-  static async insertOneRecord(properties: IRecords) {
-    const queryString = `
-      INSERT INTO records (id, questline_id, title, description, qtd, categories, xp)
-      VALUES ($1, $2, $3, $4, $5, $6, $7);
-    `;
-    const queryParameters = [
-      randomUUID(),
-      properties.questline_id,
-      properties.title,
-      properties.description,
-      properties.qtd,
-      properties.categories,
-      properties.xp
-    ];
-
-    return this.RepoResultHandler(() => queryDatabase(queryString, queryParameters));
-  }
-
-  static async insertOneHistoryOfRecord(identifier: string, change: string, level: number) {
-    return this.RepoResultHandler(() => queryDatabase(`
-      INSERT INTO records_history (record_id, change, current_level, finished_at)
-      VALUES ($1, $2, $3, $4);
-    `,[identifier, change, level, this.currentDate()]));
-  }
-
-  static async updateOneRecord(identifier: string, properties: any) {
+  async updateOneRecord(identifier: uniqueIdentifier, properties: Partial<IRecords>) {
     const invalidProperty = Object.keys(properties).find( prop => !['questline_id', 'title', 'description', 'qtd', 'categories', 'tier', 'level', 'xp'].includes(prop))
     if (invalidProperty)
       throw new RepositoryError('Invalid property issued: '+ invalidProperty);
 
-    const propertiesNamesMountedForUpdate = this.mountPropertiesNamesToUpdate(properties, 2);
-    const propertiesValues = Object.values(properties);
+    const searchParams = this.searchParams(identifier);
 
-    return this.RepoResultHandler(() => queryDatabase(`
-      UPDATE records 
-      SET ${propertiesNamesMountedForUpdate}
-      WHERE id = $1;
-    `, [identifier, ...propertiesValues]));
+    await this.collection().findOneAndUpdate(searchParams, {$set: properties});
   }
   
+  async deleteOneRecord(identifier: uniqueIdentifier) {
+    const searchParams = this.searchParams(identifier);
+    await this.collection().findOneAndDelete(searchParams);
+  }
 
-  static async deleteOneRecord(identifier: string) {
-    return this.RepoResultHandler(() => queryDatabase(`DELETE FROM records WHERE id = $1;`, [identifier]))
+  private searchParams(identifier: uniqueIdentifier) {
+    let result:{title: string}|{_id: ObjectId};
+    const { title, _id } = identifier;
+
+    if (title)
+      result = {title};
+    else if(_id)
+      result = {_id: new ObjectId(_id)};
+    else
+      throw new Error('An identifier must be specified.');
+
+    return result;
   }
 }
+
+export default new RecordsRepo('leveling', 'records');
