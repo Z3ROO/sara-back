@@ -1,28 +1,28 @@
-import FeatsRepoo, {FeatsRepo} from "../../repositories/leveling/FeatsRepo";
+import FeatsRepo from "../../repositories/leveling/FeatsRepo";
 import { IFeats } from "../interfaces/interfaces";
 
 export class Feats {
   static async getAllFeats() {
-    const { records } = await FeatsRepoo.findAllFeats();
+    const { records } = await FeatsRepo.findAllFeats();
 
     return records
   }
 
   static async getEveryCompleteFeatOfOneDay(date: Date) {
-    const beginning = date.toLocaleDateString('sv') + ' 00:00:00';
-    const ending = date.toLocaleDateString('sv') + ' 23:59:59';
-    const { records } = await FeatsRepo.findAllCompleteFeatsInDateRange(beginning, ending);
+    const begin = date.toLocaleDateString('sv') + ' 00:00:00';
+    const end = date.toLocaleDateString('sv') + ' 23:59:59';
+    const { records } = await FeatsRepo.findAllCompleteFeatsInDateRange({begin, end});
 
     return records
   }
 
   static async completeFeat(identifier: string) {
     let properties = {
-        finished_at: FeatsRepo.currentDate(),
+        finished_at: new Date(),
         completed: true
       }
-    
-    await FeatsRepo.updateOneFeat(identifier, properties)
+
+    await FeatsRepo.updateOneFeat({_id: identifier}, properties)
   }
 
   static async createNewFeat(properties: IFeats) {
@@ -30,6 +30,6 @@ export class Feats {
       ...properties,
       xp: properties.tier*50
     }
-    await FeatsRepoo.insertOneFeat(properties);
+    await FeatsRepo.insertOneFeat(properties);
   }
 }

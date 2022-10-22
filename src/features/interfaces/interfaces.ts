@@ -44,7 +44,7 @@ export interface IFeats {
   tier: number
   completed?: boolean
   xp?: number
-  finished_at?: string
+  finished_at?: Date
 }
 
 
