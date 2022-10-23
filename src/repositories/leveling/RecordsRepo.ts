@@ -12,6 +12,23 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
     return { records }
   }
 
+  async findRecordsByCategory(categories: string[]) {
+
+    const records = await this.collection().find({
+      categories: {$all: categories}
+    }).toArray();
+
+    return { records }
+  }
+
+  async findRecordsByQuestline(questline: string) {
+    const records = await this.collection().find({
+      questline_id: questline
+    }).toArray();
+
+    return { records }
+  }
+
   async findOneRecord(identifier: uniqueIdentifier) {
     const searchParams = this.searchParams(identifier);
     const record = await this.collection().findOne(searchParams);
@@ -19,8 +36,42 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
     return { record };
   }
 
-  async insertOneRecord(properties: IRecords) {
-    await this.collection().insertOne(properties);
+  async findEveryRecordsHistoryInDateRange(range: {begin: Date, end: Date}) {
+    const { begin, end } = range;
+    const records = await this.collection().find({"history.date": { $gte: begin, $lt: end }}).toArray();
+
+    return { records };
+  }
+
+  async insertOneRecord(properties: Partial<IRecords>) {
+    const {
+      questline_id,
+      title,
+      description,
+      metric,
+      status,
+      categories,
+      level,
+      history,
+      xp
+    } = properties;
+
+    await this.collection().insertOne({
+      questline_id,
+      title,
+      description,
+      metric,
+      status: {
+        waitTime: status.waitTime,
+        stageAmount: status.stageAmount,
+        stage: null,
+        last_commitment: null
+      },
+      categories: categories ? categories : [],
+      level: 0,
+      history: [],
+      xp: 50
+    });
   }
 
   async updateOneRecord(identifier: uniqueIdentifier, properties: Partial<IRecords>) {
@@ -31,6 +82,18 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
     const searchParams = this.searchParams(identifier);
 
     await this.collection().findOneAndUpdate(searchParams, {$set: properties});
+  }
+
+  async updateRecordLevel(identifier: uniqueIdentifier, direction: -1|0|1) {
+    const searchParams = this.searchParams(identifier);
+    await this.collection().findOneAndUpdate(searchParams, {
+      $push: {
+        history: {
+          direction: direction,
+          date: new Date()
+        }
+      }
+    });
   }
   
   async deleteOneRecord(identifier: uniqueIdentifier) {

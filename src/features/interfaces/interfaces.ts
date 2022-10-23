@@ -10,7 +10,7 @@ export interface IQuestLine {
   finished_at: Date|null
   level: number|null
   history: levelHistory|null
-  xp: number
+  xp: number|null
 }
 
 export interface IQuest {
@@ -34,7 +34,7 @@ export interface IQuest {
 }
 
 export interface IFeats {
-  questline_id: string
+  questline_id: string|null
   title: string
   description: string
   todos: {
@@ -52,14 +52,16 @@ export interface IFeats {
 
 
 export interface IRecords {
-  questline_id: string
+  questline_id: string|null
   title: string
   description: string
   metric: 'unit'|'time'|'distance'
   status: {
-    state: number
-    last_commitment: Date
-  }|null
+    waitTime: number
+    stageAmount: number
+    stage: number|null
+    last_commitment: Date|null
+  }
   categories: string[]
   level: number
   history: levelHistory

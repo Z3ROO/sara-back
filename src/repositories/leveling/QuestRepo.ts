@@ -63,8 +63,6 @@ class QuestRepo extends NoSQLRepository<IQuest>{
       xp
     } = properties;
 
-    
-
     if (type === 'main') {
       const mainQuest = await this.findMainQuest();
 

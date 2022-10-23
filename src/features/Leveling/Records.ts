@@ -8,27 +8,35 @@ export class Records {
     return records
   }
 
-  static async getRecordsHistoryOfOneDay(date: Date) {
+  static async getRecordsByCategory(categories: string|string[]) {
+    if (typeof categories === 'string')
+      categories = [categories];
+      
+    const { records } = await RecordsRepo.findRecordsByCategory(categories);
+
+    return records
+  }
+
+  static async getRecordsByQuestline(questline: string) {
+    const { records } = await RecordsRepo.findRecordsByQuestline(questline);
+
+    return records
+  }
+
+  static async getRecordsWithHistoryInOneDay(date: Date) {
     const begin = new Date(date.setHours(0,0,0));
     const end = new Date(date.setHours(23,59,59));
     
-    //const { records } = await RecordsRepo.findEveryRecordsHistoryInDateRange(begin, end);
+    const { records } = await RecordsRepo.findEveryRecordsHistoryInDateRange({begin, end});
 
-    return [];
+    return records;
   }
 
-  static async updateRecordLevel(identifier: string, change: string) {
-    const { record } = await RecordsRepo.findOneRecord({_id: identifier});
+  static async updateRecordLevel(identifier: string, direction: -1|0|1) {
+    if (direction < -1 || direction > 1)
+      throw new Error('Direction must be -1, 0 or 1');
 
-    let level = Number(record.level);
-    
-    if (change === 'up')
-      level += 1
-    if (change === 'down')
-      level -= 1
-
-    await RecordsRepo.updateOneRecord({_id: identifier}, {level});
-    //await RecordsRepo.insertOneHistoryOfRecord(identifier, change, level);
+    await RecordsRepo.updateRecordLevel({_id: identifier}, direction);
   }
 
   static async createNewRecord(properties: Partial<IRecords>) {
@@ -44,16 +52,6 @@ export class Records {
       xp
     } = properties;
     
-    await RecordsRepo.insertOneRecord({
-      questline_id,
-      title,
-      description,
-      metric,
-      status: null,
-      categories: categories ? categories : [],
-      level: 0,
-      history: [],
-      xp: 50
-    });
+    await RecordsRepo.insertOneRecord(properties);
   }
 }

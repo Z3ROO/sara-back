@@ -69,7 +69,7 @@ class QuestLineRepo extends NoSQLRepository<IQuestLine>{
       finished_at: null,
       level: type === 'main' ? null : 0,
       history: type === 'main' ? null : [],
-      xp: 1000
+      xp: type === 'main' ? 1000 : null
     });
   }
 

@@ -119,7 +119,7 @@ export class Leveling {
   private static async sideEventsOfToday(today: Date) {
     let todaysFeats = (await Feats.getEveryCompleteFeatOfOneDay(today))
       .map(event => ({type: 'Feat', body: event}));
-    let todaysRecords = (await Records.getRecordsHistoryOfOneDay(today))
+    let todaysRecords = (await Records.getRecordsWithHistoryInOneDay(today))
       .map(event => ({type: 'Record', body: event}));
   
     const sideEventsOfToday = [...todaysFeats, ...todaysRecords];
