@@ -21,6 +21,18 @@ class FeatsRepo extends NoSQLRepository<IFeats>{
     return { record };
   }
 
+  async findFeatsByCategory(categories: string[]) {
+    const records = await this.collection().find({categories: {$all: categories}}).toArray();
+
+    return { records };
+  }
+
+  async findFeatsByQuestline(questline: string) {
+    const records = await this.collection().find({questline_id: questline}).toArray();
+
+    return { records };
+  }
+
   async findAllCompleteFeatsInDateRange(range: {begin: Date, end: Date}) {
     const { begin, end } = range;
     const records = await this.collection().find({finished_at: {$gte: begin, $lt: end}}).toArray();

@@ -8,6 +8,21 @@ export class Feats {
     return records
   }
 
+  static async getFeatsByCategory(categories: string|string[]) {
+    if (typeof categories === 'string')
+      categories = [categories];
+
+    const { records } = await FeatsRepo.findFeatsByCategory(categories)
+
+    return records;
+  }
+  
+  static async getFeatsByQuestline(questline: string) {
+    const { records } = await FeatsRepo.findFeatsByQuestline(questline)
+
+    return records;
+  }
+
   static async getEveryCompleteFeatOfOneDay(date: Date) {
     const begin = new Date(date.setHours(0,0,0));
     const end = new Date(date.setHours(23,59,59));
