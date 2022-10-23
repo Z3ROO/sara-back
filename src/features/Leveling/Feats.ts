@@ -9,8 +9,8 @@ export class Feats {
   }
 
   static async getEveryCompleteFeatOfOneDay(date: Date) {
-    const begin = date.toLocaleDateString('sv') + ' 00:00:00';
-    const end = date.toLocaleDateString('sv') + ' 23:59:59';
+    const begin = new Date(date.setHours(0,0,0));
+    const end = new Date(date.setHours(23,59,59));
     const { records } = await FeatsRepo.findAllCompleteFeatsInDateRange({begin, end});
 
     return records
@@ -39,17 +39,6 @@ export class Feats {
       finished_at,
     } = properties;
     
-    await FeatsRepo.insertOneFeat({
-      questline_id,
-      title,
-      description,
-      todos: todos ? todos : null,
-      categories,
-      tier,
-      completed: false,
-      xp: tier*50,
-      created_at: new Date(),
-      finished_at: null
-    });
+    await FeatsRepo.insertOneFeat(properties);
   }
 }

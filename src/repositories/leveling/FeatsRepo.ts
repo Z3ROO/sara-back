@@ -21,33 +21,37 @@ class FeatsRepo extends NoSQLRepository<IFeats>{
     return { record };
   }
 
-  async findAllCompleteFeatsInDateRange(range: {begin: string, end: string}) {
+  async findAllCompleteFeatsInDateRange(range: {begin: Date, end: Date}) {
     const { begin, end } = range;
-    const records = await this.collection().find({finished_at: {$gte: new Date(begin), $lt: new Date(end)}}).toArray()
+    const records = await this.collection().find({finished_at: {$gte: begin, $lt: end}}).toArray();
     
-    return {records};
+    return { records };
   }
 
-  async insertOneFeat(properties: IFeats) {
+  async insertOneFeat(properties: Partial<IFeats>) {
     const {
       questline_id,
       title,
       description,
+      todos,
       categories,
       tier,
       completed,
       xp,
-      finished_at
+      created_at,
+      finished_at,
     } = properties;
     
     await this.collection().insertOne({
       questline_id,
       title,
       description,
+      todos: todos ? todos : null,
       categories,
       tier,
-      completed,
-      xp,
+      completed: false,
+      xp: tier*50,
+      created_at: new Date(),
       finished_at: null
     })
   }

@@ -1,8 +1,6 @@
 import { UserRepo } from "../../repositories/UserRepo";
-import Achievements from "./Achievements";
 import { Feats } from "./Feats";
 import { IQuest, IQuestLine, IStats } from "../interfaces/interfaces";
-import { PassiveSkills } from "./PassiveSkills";
 import { Quest } from "./Quest";
 import { QuestLine } from "./QuestLine";
 import { Records } from "./Records";
@@ -123,12 +121,8 @@ export class Leveling {
       .map(event => ({type: 'Feat', body: event}));
     let todaysRecords = (await Records.getRecordsHistoryOfOneDay(today))
       .map(event => ({type: 'Record', body: event}));
-    let todaysAchievements = await Achievements.getEveryCompleteAchievementOfOneDay(today);
-      todaysAchievements = todaysAchievements.map(event => ({type: 'Achievement', body: event}));
-    let todaysPassiveSkills = await PassiveSkills.getPassiveSkillsHistoryOfOneDay(today);
-      todaysPassiveSkills = todaysPassiveSkills.map(event => ({type: 'Passive Skill', body: event}));
   
-    const sideEventsOfToday = [...todaysFeats, ...todaysAchievements, ...todaysPassiveSkills, ...todaysRecords];
+    const sideEventsOfToday = [...todaysFeats, ...todaysRecords];
     this.stats.todaysHistory.push(...sideEventsOfToday);
 
     const sideEventsXp = sideEventsOfToday.reduce((acc, val) => val.body.xp ? acc+val.body.xp : acc, 0);
@@ -208,10 +202,9 @@ export class Leveling {
   }
 
   private static async calculateQuestBoostXp(quest: IQuest|IQuestLine) {
-    const titlesBoostUntilNow = await Achievements.getTitlesBoostUntilDate(quest.finished_at);
-    const passiveSkillsBoostUntilNow = await PassiveSkills.getPassiveSkillsBoostUntilDate(quest.finished_at);
+
     const hashirasBoost = this.calculateHashirasBoost();
-    const totalBoost = titlesBoostUntilNow + passiveSkillsBoostUntilNow + hashirasBoost;
+    const totalBoost = hashirasBoost;
     
     return ((quest.xp/100) * totalBoost);
   }
@@ -232,7 +225,7 @@ export class Leveling {
       planningScore = -30
     }
     else {
-      const questTodos = await Quest.getQuestTodos(quest.id);
+      const questTodos = [];
 
       const finishedTodosQtd = questTodos.filter(todo => todo.state === 'finished').length;
       const invalidTodosQtd = questTodos.filter(todo => todo.state === 'invalidated').length;
@@ -296,34 +289,19 @@ export class Leveling {
   }
 
   private static async definePlanningHashiraLevel(finalScore: number): Promise<[number, string]> {
-    if (
-      (finalScore >= 1500 && finalScore < 10000) &&
-      await Achievements.isAchievementComplete('Planning Level 1')
-      ){      
+    if ((finalScore >= 1500 && finalScore < 10000)){      
       return [1, 'Jogador'];
     }
-    else if (
-      (finalScore >= 10000 && finalScore < 40000) &&
-      await Achievements.isAchievementComplete('Planning Level 2')
-      ){
+    else if ((finalScore >= 10000 && finalScore < 40000)){
       return [2, 'Estrategista'];
     }
-    else if (
-      (finalScore >= 40000 && finalScore < 120000) &&
-      await Achievements.isAchievementComplete('Planning Level 3')
-      ){
+    else if ((finalScore >= 40000 && finalScore < 120000)){
       return [3, 'Um passo a frente'];
     }
-    else if (
-      (finalScore >= 120000 && finalScore < 250000) &&
-      await Achievements.isAchievementComplete('Planning Level 4')
-      ){
+    else if ((finalScore >= 120000 && finalScore < 250000)){
       return [4, 'Mastermind'];
     }
-    else if (
-      (finalScore >= 250000) &&
-      await Achievements.isAchievementComplete('Planning Level 5')
-      ){
+    else if ((finalScore >= 250000)){
       return [5, 'Profeta'];
     }
 
@@ -351,34 +329,19 @@ export class Leveling {
   }
 
   private static async calculateFocusHashiraLevel(focusScore: number): Promise<[number, string]> {
-    if (
-      (focusScore >= 2200 && focusScore < 15000) &&
-      await Achievements.isAchievementComplete('Focus Level 1')
-      ){      
+    if ((focusScore >= 2200 && focusScore < 15000)){      
       return [1, 'Observador'];
     }
-    else if (
-      (focusScore >= 15000 && focusScore < 60000) &&
-      await Achievements.isAchievementComplete('Focus Level 2')
-      ){
+    else if ((focusScore >= 15000 && focusScore < 60000)){
       return [2, 'Detalhista'];
     }
-    else if (
-      (focusScore >= 60000 && focusScore < 180000) &&
-      await Achievements.isAchievementComplete('Focus Level 3')
-      ){
+    else if ((focusScore >= 60000 && focusScore < 180000)){
       return [3, 'Artista'];
     }
-    else if (
-      (focusScore >= 180000 && focusScore < 375000) &&
-      await Achievements.isAchievementComplete('Focus Level 4')
-      ){
+    else if ((focusScore >= 180000 && focusScore < 375000)){
       return [4, 'Flow'];
     }
-    else if (
-      (focusScore >= 375000) &&
-      await Achievements.isAchievementComplete('Focus Level 5')
-      ){
+    else if ((focusScore >= 375000)){
       return [5, 'Perfeito'];
     }
 
