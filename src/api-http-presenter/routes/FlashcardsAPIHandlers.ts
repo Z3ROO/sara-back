@@ -35,7 +35,9 @@ export default class FlashcardsAPIHandlers {
     }
     console.log(finalArr);
     
-    res.json(finalArr)
+    return {
+      body: finalArr
+    }
   }
 
   //post'/flashcards/answer'
@@ -89,7 +91,10 @@ export default class FlashcardsAPIHandlers {
     if(updatedPage)
       fs.writeFile(path.join(notesDir,pageDir), updatedPage)
   
-    res.json({ok:true})
+    return {
+      status: 202,
+      message: 'Flash-card answered'
+    }
   }
 }
 

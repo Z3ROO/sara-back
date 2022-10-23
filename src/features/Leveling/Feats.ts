@@ -25,11 +25,31 @@ export class Feats {
     await FeatsRepo.updateOneFeat({_id: identifier}, properties)
   }
 
-  static async createNewFeat(properties: IFeats) {
-    properties = {
-      ...properties,
-      xp: properties.tier*50
-    }
-    await FeatsRepo.insertOneFeat(properties);
+  static async createNewFeat(properties: Partial<IFeats>) {
+    const {
+      questline_id,
+      title,
+      description,
+      todos,
+      categories,
+      tier,
+      completed,
+      xp,
+      created_at,
+      finished_at,
+    } = properties;
+    
+    await FeatsRepo.insertOneFeat({
+      questline_id,
+      title,
+      description,
+      todos: todos ? todos : null,
+      categories,
+      tier,
+      completed: false,
+      xp: tier*50,
+      created_at: new Date(),
+      finished_at: null
+    });
   }
 }

@@ -9,11 +9,12 @@ export class Records {
   }
 
   static async getRecordsHistoryOfOneDay(date: Date) {
-    const begin = date.toLocaleDateString('sv') + ' 00:00:00';
-    const end = date.toLocaleDateString('sv') + ' 23:59:59';
-    //const { records } = await RecordsRepo.findEveryRecordsHistoryInDateRange(beginning, ending);
+    const begin = new Date(date.setHours(0,0,0));
+    const end = new Date(date.setHours(23,59,59));
+    
+    //const { records } = await RecordsRepo.findEveryRecordsHistoryInDateRange(begin, end);
 
-    return []
+    return [];
   }
 
   static async updateRecordLevel(identifier: string, change: string) {
@@ -30,11 +31,29 @@ export class Records {
     //await RecordsRepo.insertOneHistoryOfRecord(identifier, change, level);
   }
 
-  static async createNewRecord(properties: IRecords) {
-    properties = {
-      ...properties,
-      xp: properties.tier*50
-    }
-    await RecordsRepo.insertOneRecord(properties);
+  static async createNewRecord(properties: Partial<IRecords>) {
+    const {
+      questline_id,
+      title,
+      description,
+      metric,
+      status,
+      categories,
+      level,
+      history,
+      xp
+    } = properties;
+    
+    await RecordsRepo.insertOneRecord({
+      questline_id,
+      title,
+      description,
+      metric,
+      status: null,
+      categories: categories ? categories : [],
+      level: 0,
+      history: [],
+      xp: 50
+    });
   }
 }

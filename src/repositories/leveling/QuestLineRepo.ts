@@ -1,103 +1,89 @@
-import Repository from "../RepoResultHandler"
+import Repository, { NoSQLRepository } from "../RepoResultHandler"
 import { handleTransaction, queryDatabase } from '../../infra/database/postgresql';
 import { RepositoryError } from "../../util/errors/RepositoryError";
 import { randomUUID } from 'crypto';
 import { IQuestLine } from "../../features/interfaces/interfaces";
+import { ObjectId } from "mongodb";
 
-export class QuestLineRepo extends Repository{
-  static async findMainQuestLine(){
-    const queryString = `SELECT * FROM questlines WHERE type = 'main' AND state = 'active'`;
-    return this.RepoResultHandler(() => queryDatabase(queryString,[]));
+class QuestLineRepo extends NoSQLRepository<IQuestLine>{
+  async findMainQuestLine(){
+    const record = await this.collection().findOne({type: 'main', state: 'active'});
+    return { record };
   }
   
-  static async findAllActiveQuestLines(){
-    const queryString = `SELECT * FROM questlines WHERE state = 'active';`;
-    return this.RepoResultHandler(() => queryDatabase(queryString, []));
+  async findAllActiveQuestLines(){
+    const records = await this.collection().find({state: 'active'}).toArray();
+    return { records };
   }
 
-  static async findAllFinishedQuestLines(){
-    const queryString = `SELECT * FROM questlines WHERE state = 'finished';`;
-    return this.RepoResultHandler(() => queryDatabase(queryString, []));
+  async findAllFinishedQuestLines(){
+    const records = await this.collection().find({state: 'finished'}).toArray();
+    return { records };
   }
   
-  static async findOneQuestLine(identifier: string) {
-    const queryString = `SELECT * FROM questlines WHERE id = $1;`;
-    
-    return this.RepoResultHandler(() => queryDatabase(queryString, [identifier]));
+  async findOneQuestLine(identifier: string) {
+    const record = await this.collection().findOne({_id: new ObjectId(identifier)});
+
+    return { record };
   }
 
-  static async findOneQuestLineByTitle(identifier: string) {
-    const queryString = `SELECT * FROM questlines WHERE title = $1;`;
-    
-    return this.RepoResultHandler(() => queryDatabase(queryString, [identifier]));
+  async findFineshedQuestLineInDateRange(range: {begin: Date, end: Date}) {
+    const  { begin, end } = range;
+    const records = await this.collection().find({finished_at: {$gte: begin, $lt: end}}).toArray();
+    return { records };
   }
 
-  static async findFineshedQuestLineInDateRange(beginning: string, ending: string) {
-    return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM questlines WHERE finished_at >= $1 AND finished_at <= $2;`, [beginning, ending]))
-  }
-
-  static async createNewQuestLine(questProperties: IQuestLine) {
-    const { title, description, type, timecap } = questProperties;
-    const propertiesKeys = Object.keys(questProperties);
-    const propertiesValues = Object.values(questProperties);
+  async createNewQuestLine(questProperties: Partial<IQuestLine>) {
+    const { 
+      title,
+      description,
+      type,
+      state,
+      timecap,
+      created_at,
+      finished_at,
+      level,
+      history,
+      xp
+    } = questProperties;
     
     const isTypeValid = ['main', 'practice'].includes(type);
-    const isEveryPropertyKeyValid = propertiesKeys.every(prop => ['title', 'description', 'type', 'timecap'].includes(prop));
-    
-    if (!isEveryPropertyKeyValid)
-      throw new RepositoryError('An invalid questline_property was issued.');
+
     if (!isTypeValid)
       throw new RepositoryError('An invalid questline_type was issued');
-      
-    const parametersPosition = propertiesKeys.map((prop, ind) => `$${ind+4}`).toString();
     
-    const primaryKeyUUID = randomUUID();
-    const created_at = this.currentDate();
-    const xp = 1000;
+    if (type === 'main') {
+      const mainQuestline = await this.findMainQuestLine();
 
-    const queryString = `
-      INSERT INTO questlines (id, created_at, xp, ${propertiesKeys.toString()})
-      VALUES ($1, $2, $3, ${parametersPosition});
-    `;
-
-    if (type === 'main'){      
-      const transaction = await handleTransaction(async (transaction) => {
-
-        const mainQuestLine = await transaction.query(`
-          SELECT * FROM questlines WHERE type = 'main' AND state = 'active';
-        `,[]);
-
-        if (mainQuestLine.rowCount >= 1)
-          throw new RepositoryError('There is a main quest line activated already');
-
-        await  transaction.query(queryString, [primaryKeyUUID, created_at, xp, ...propertiesValues]);
-      });
-
-      return transaction
+      if (mainQuestline.record)
+        throw new Error('Main questline already');
     }
 
-    return this.RepoResultHandler(() => queryDatabase(queryString, [primaryKeyUUID, created_at, xp, ...propertiesValues]))    
+    this.collection().insertOne({
+      title,
+      description,
+      type,
+      state: 'active',
+      timecap,
+      created_at: new Date(),
+      finished_at: null,
+      level: type === 'main' ? null : 0,
+      history: type === 'main' ? null : [],
+      xp: 1000
+    });
   }
 
-  static async finishMainQuestLine() {
-    const finished_at = this.currentDate();
-    return this.RepoResultHandler(() => queryDatabase(`
-      UPDATE questlines 
-      SET finished_at = $1, state = 'finished'
-      WHERE type = 'main' AND state = 'active'
-    `, [finished_at]));
+  async finishMainQuestLine() {
+    await this.collection().updateOne({type: 'main', state: 'active'}, {finished_at: new Date(), state:'finished'});
   }
   
-  static async invalidateQuestLine(identifier: string) {
-    const finished_at = this.currentDate();
-    return this.RepoResultHandler(() => queryDatabase(`
-      UPDATE questlines 
-      SET finished_at = $2, state = 'invalidated'
-      WHERE id = $1
-    `, [identifier, finished_at]));
+  async invalidateQuestLine(identifier: string) {
+    await this.collection().updateOne({_id: new ObjectId(identifier)}, {finished_at: new Date(), state:'invalidated'});
   }
 
-  static async deleteQuestline(identifier: string) {
-    return this.RepoResultHandler(() => queryDatabase(`DELETE FROM questlines WHERE id = $1`,[identifier]))
+  async deleteQuestline(identifier: string) {
+    await this.collection().deleteOne({_id: new ObjectId(identifier)});
   }
 }
+
+export default new QuestLineRepo('leveling', 'questlines');

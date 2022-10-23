@@ -1,14 +1,19 @@
-import { QuestLineRepo } from "../../repositories/leveling/QuestLineRepo";
+import QuestLineRepo from "../../repositories/leveling/QuestLineRepo";
 import { IQuestLine } from "../interfaces/interfaces";
 
 export class QuestLine {
   static async getMainQuestLine() {
     const { record } = await QuestLineRepo.findMainQuestLine();
+
+    if (!record)
+      return null
+
     return record
   }
 
   static async getAllActiveQuestLines() {
     const { records } = await QuestLineRepo.findAllActiveQuestLines();
+
     return records;
   }
 
@@ -26,14 +31,14 @@ export class QuestLine {
     if (typeof date === 'string')
       date = new Date(date);
 
-    const beginning = date.toLocaleDateString('sv') + ' 00:00:00';
-    const ending =  date.toLocaleDateString('sv') + ' 23:59:59';
-    const { records } = await QuestLineRepo.findFineshedQuestLineInDateRange(beginning, ending);
+    const begin = new Date(date.setHours(0,0,0));
+    const end =  new Date(date.setHours(23,59,59));
+    const { records } = await QuestLineRepo.findFineshedQuestLineInDateRange({begin, end});
 
     return records
   }
 
-  static async createNewQuestLine(questline: IQuestLine) {
+  static async createNewQuestLine(questline: Partial<IQuestLine>) {
     return QuestLineRepo.createNewQuestLine(questline);
   }
 

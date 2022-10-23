@@ -1,5 +1,5 @@
 import { Feats } from "../../features/Leveling/Feats";
-import { IQuest, IQuestLine } from "../../features/interfaces/interfaces";
+import { IFeats, IQuest, IQuestLine, IRecords } from "../../features/interfaces/interfaces";
 import { Leveling } from "../../features/Leveling/Leveling";
 import { Quest } from "../../features/Leveling/Quest";
 import { QuestLine } from "../../features/Leveling/QuestLine";
@@ -11,17 +11,18 @@ export default class StatsAPIHandlers {
     await Leveling.init();
     const stats = Leveling.stats;
 
-    res.json(stats);
+    return {
+      body: {}
+    };
   }
 
   //[GET]/leveling/active-quest
   static async getActiveQuest(req: any, res: any) {
-    const questBody = await Quest.getActiveQuest();
+    const questBody = await Quest.getActiveMainQuest();
 
-    if (!questBody)
-      res.json('no_quest_activated')
-    else
-      res.json(questBody);
+    return {
+      body: questBody
+    };
   }
 
   //[GET]/leveling/questline/info/:id
@@ -30,42 +31,52 @@ export default class StatsAPIHandlers {
 
     const questLine = await QuestLine.getOneQuestLine(id);
 
-    res.json(questLine);
+    return {
+      body: questLine
+    };
   }
 
   //[GET]/leveling/questline/list
   static async getListOfActiveQuestLines(req: any, res: any) {
     const questLines = await QuestLine.getAllActiveQuestLines();
 
-    res.json(questLines);
+    return {
+      body: questLines
+    };
   }
 
   //[POST]/leveling/quest/new-main
   static async createNewQuest(req: any, res: any) {
     const { questLine, title, description, timecap, type, xp, todos } = req.body;
-    const mainQuestline = await QuestLine.getMainQuestLine();
-    console.log(req.body)
 
-    const questBody: IQuest = {
+    const questBody: Partial<IQuest> = {
       questline_id: questLine,
       title,
       description,
       timecap,
       type,
+      todos,
       xp
     }
 
-    await Quest.createNewQuest(questBody, todos);
+    await Quest.createNewQuest(questBody);
 
-    res.json({ok: true})
+    return {
+      status: 201,
+      message: 'Quest created'
+    };
   }
 
   //[POST]/leveling/quest/todo
   static async handleQuestTodo(req: any, res: any) {
-    const { todoId, action } = req.body;
+    const { questId, todoDescription, action } = req.body;
 
-    Quest.handlerQuestTodos(todoId, action);
-    res.json({ok: true})
+    Quest.handleQuestTodo(questId, todoDescription, action);
+    
+    return {
+      status: 202,
+      message: 'To-do '+action
+    };
   }
 
   //[POST]/leveling/quest/finish
@@ -73,31 +84,42 @@ export default class StatsAPIHandlers {
     const { questId, focusScore } = req.body;
     await Quest.finishQuest(questId, focusScore);
     
-    res.json({ok: true})
+    return {
+      status: 202,
+      message: 'Quest finished'
+    };
   }
 
   static async increaseDistractionScore(req: any, res: any) {
     await Quest.insertDistractionPoint();
 
-    res.json({ok: true});
+    return {
+      status: 202,
+      message: 'Distraction score increased'
+    };
   }
 
   static async finishMainQuestLine(req: any, res: any) {
     await QuestLine.finishMainQuestLine();
     
-    res.json({ok: true});
+    return {
+      status: 202,
+      message: 'Questline finished'
+    };
   }
 
   static async getAllFinishedQuestLines(req: any, res: any) {
     const questlines = await QuestLine.getAllFineshedQuestLines();
 
-    res.json(questlines);
+    return {
+      body: questlines
+    };
   }
 
   static async createNewQuestLine(req: any, res: any) {
     const { title, description, duration, type } = req.body;
 
-    const questLine: IQuestLine = {
+    const questLine: Partial<IQuestLine> = {
       title,
       description,
       timecap: duration,
@@ -106,13 +128,18 @@ export default class StatsAPIHandlers {
 
     await QuestLine.createNewQuestLine(questLine);
     const createdQuestLine = await QuestLine.getMainQuestLine();
-    res.json(createdQuestLine);
+    
+    return {
+      body: createdQuestLine
+    };
   }
 
   static async getFeats(req: any, res: any) {
     const feats = await Feats.getAllFeats();
 
-    res.json(feats)
+    return {
+      body: feats
+    }
   }
 
   static async completeFeat(req: any, res: any) {
@@ -120,49 +147,66 @@ export default class StatsAPIHandlers {
 
     await Feats.completeFeat(featId);
 
-    res.json('updated');
+    return {
+      status: 202,
+      message: 'Feat updated'
+    };
   }
 
   static async createNewFeat(req: any, res: any) {
     const  {title, description, category, tier, questLine} = req.body
 
-    await Feats.createNewFeat({
+    const feat: Partial<IFeats> = {
       title,
       description,
       categories: category,
       tier,
       questline_id: questLine
-    });
+    }
 
-    res.json('created')
+    await Feats.createNewFeat(feat);
+
+    return {
+      status: 201,
+      message: 'Feat created'
+    }
   }
 
   static async getRecords(req: any, res: any) {
     const records = await Records.getAllRecords();
 
-    res.json(records)
+    return {
+      body: records
+    }
   }
 
   static async updateRecordLevel(req: any, res: any) {
     const { recordId, change } = req.body;
 
-    await Records.updateRecordLevel(recordId, 'up')
+    await Records.updateRecordLevel(recordId, 'up');
 
-    res.json('updated');
+    return {
+      status: 202,
+      message: 'updated'
+    };
   }
 
   static async createNewRecord(req: any, res: any) {
-    const  {title, description, qtd, categories, tier, questLine} = req.body
+    const  {title, description, metric, categories, questLine} = req.body
 
-    await Records.createNewRecord({
+    const record: Partial<IRecords> = {
+      questline_id: questLine,
       title,
       description,
-      qtd,
-      categories,
-      tier,
-      questline_id: questLine
-    });
+      metric,
+      categories
+    }
 
-    res.json('created')
+    await Records.createNewRecord(record);
+
+    return {
+      status: 201,
+      message: 'created'
+    }
   }
 }

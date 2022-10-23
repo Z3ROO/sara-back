@@ -13,23 +13,60 @@ export const initServer = () => dbCheck(() => {
   )
 });
 
+function routeHandlerWrapper(handler: (req:any, res: any) => any) {
+  return (req: any, res: any) => {
+    try {
+      let {status, message, body} = handler(req, res);
+      
+      if (!status)
+        status = 200
+      
+      if (!message)
+        message = null;
+
+      if (!body)
+        body = null;
+      
+        
+      res.status(status);
+
+      res.json({
+        status,
+        message,
+        body
+      });
+    }
+    catch(err) {
+      res.status(500);
+
+      res.json({
+        status: '500',
+        message: 'Default message, to be fully implemented',
+        body:null
+      })
+    }
+  }
+}
+
 
 function applyRoutes(app: any, routess: any[]) {
   routess.forEach((route) => {
     let { method, path, handler } = route;
     if (!Array.isArray(handler))
       handler = [handler];
+    
+    handler = routeHandlerWrapper(handler);
 
     if (method === 'middleware') {
       if (path)
-        app.use(path, ...handler)
+        app.use(path, handler)
       else
-        app.use(...handler)
+        app.use(handler)
       
       return
     }
 
-    app[method](path, ...handler);
+    app[method](path, handler);
   })
 
   return app

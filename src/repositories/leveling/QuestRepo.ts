@@ -1,141 +1,156 @@
 import { randomUUID } from "crypto"
+import { ObjectId } from "mongodb";
 import { IQuest } from "../../features/interfaces/interfaces";
 import { handleTransaction, queryDatabase } from "../../infra/database/postgresql"
 import { RepositoryError } from "../../util/errors/RepositoryError"
-import Repository from "../RepoResultHandler"
+import Repository, { NoSQLRepository } from "../RepoResultHandler"
 
-export class QuestRepo extends Repository{
-  static async findMainQuest() {
-    return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM quests WHERE type != 'side' AND state = 'active';`,[]));
+class QuestRepo extends NoSQLRepository<IQuest>{
+  async findMainQuest() {
+    const record = await this.collection().findOne({type: 'main', state:'active'});
+    return { record };
   }
 
-  static async findOneQuest(identifier: string) {
-    return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM quests WHERE id = $1;`,[identifier]));
+  async findOneQuest(identifier: string) {
+    const record = await this.collection().findOne({_id: new ObjectId(identifier)});
+    return { record };
   }
 
-  static async findActiveSideQuest() {
-    return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM quests WHERE type = 'side' AND state = 'active';`))
+  async findActiveSideQuest() {
+    const record = await this.collection().find({type: 'side', state: 'active'}).toArray();
+    return { record };
   }
 
-  static async findAllSideQuests() {
-    return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM quests WHERE type = 'side' AND state != 'finished';`, []));
+  async findAllSideQuests() {
+    const records = await this.collection().find({type: 'side', state: {$ne:'finished'}}).toArray();
+    return { records };
   }
 
-  static async findAllFinishedQuests() {
-    return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM quests WHERE (state = 'finished' OR state = 'invalidated');`, []))
+  async findAllFinishedQuests() {
+    const records = await this.collection().find({$or: [ {state: 'finished'}, {state: 'invalidated'}]}).toArray();
+    return { records };
   }
 
-  static async findAllFinishedMainQuests() {
-    return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM quests WHERE state = 'finished' AND type != 'side';`, []))
+  async findAllFinishedMainQuests() {
+    const records = await this.collection().find({type: 'main', state: 'finished'}).toArray();
+    return { records };
   }
 
-  static async findAllFinishedSideQuests() {
-    return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM quests WHERE state = 'finished' AND type = 'side';`, []))
+  async findAllFinishedSideQuests() {
+    const records = await this.collection().find({type: 'side', state: 'finished'}).toArray();
+    return { records };
   }
 
-  static async findAllFinishedQuestsInDateRange(begin: string, end: string) {
-    return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM quests WHERE (state = 'finished' OR state = 'invalidated') AND finished_at >= $1 AND finished_at <= $2;`, [begin, end]));
+  async findAllFinishedQuestsInDateRange(range: {begin: Date, end: Date}) {
+    const { begin, end } = range;
+    const records = await this.collection().find({
+      $or: [{state: 'finished'}, {state: 'invalidated'}],
+      finished_at: { $gte: begin,  $lt: end}
+    }).toArray();
+
+    return { records };
   }
 
-  // //TEST
-  // static async findFirstQuestEver() {
-  //   return this.RepoResultHandler(() => queryDatabase(`SELECT * FROM quests ORDER BY finished_at LIMIT 1;`))
-  // }
+  async insertNewQuest(properties: Partial<IQuest>) {
+    const { 
+      questline_id,
+      mission_id,
+      title,
+      description,
+      type,
+      todos,
+      timecap,
+      xp
+    } = properties;
 
-
-  static async insertNewQuest(properties: IQuest) {
-    const { questline_id, title, description, type, timecap, xp } = properties;
-    const propertiesKeys = Object.keys(properties);
-    const propertiesValues = Object.values(properties);
-    const receivablePropertiesKeys = ['questline_id', 'title', 'description', 'type', 'timecap', 'xp'];
-    const isEveryPropertyKeyValid = propertiesKeys.every(prop => receivablePropertiesKeys.includes(prop));
-    const parametersPosition = propertiesKeys.map((prop, ind) => `$${ind+4}`).toString();
-    const primaryKeyUUID = randomUUID();
-    const created_at = this.currentDate();
-    const queryString = `
-      INSERT INTO quests (id, created_at, state, ${propertiesKeys.toString()})
-      VALUES ($1, $2, $3, ${parametersPosition});
-    `
-    console.log(created_at);
-    if (!isEveryPropertyKeyValid)
-      throw new RepositoryError('An invalid propertie was issued at createNewQuest');
+    
 
     if (type === 'main') {
-      const transaction = await handleTransaction(async (transaction) => {
-        const mainQuest = await transaction.query(`SELECT * FROM quests WHERE type != 'side' AND state = 'active'`);
+      const mainQuest = await this.findMainQuest();
 
-        if (mainQuest.rowCount >= 1)
-          throw new RepositoryError('An active main quest already exists');
-
-        await transaction.query(queryString, [primaryKeyUUID, created_at, 'active', ...propertiesValues]);
-      });
-
-      return {id: primaryKeyUUID};
+      if (mainQuest.record)
+        throw new RepositoryError('An active main quest already exist.');
     }
     else if (type === 'side'){
-      const transaction = await handleTransaction(async (transaction) => {
-        const sideQuests = await transaction.query(`SELECT * FROM quests WHERE type = 'side' AND state != 'finished';`)
+      const sideQuests = await this.findAllSideQuests();
 
-        if (sideQuests.rowCount >= 5)
-          throw new RepositoryError('Maximum sidequests exceeded')
-        
-        await transaction.query(queryString, [primaryKeyUUID, created_at, 'deferred', ...propertiesValues]);
-      });
-
-      return {id: primaryKeyUUID};
+      if (sideQuests.records.length >= 5)
+        throw new RepositoryError('Maximun amount of side quests pre-registered reached.');
     }
+
+    await this.collection().insertOne({
+      questline_id,
+      mission_id: mission_id ? mission_id : null,
+      title,
+      description,
+      type,
+      state: type === 'main' ? 'active' : 'deferred',
+      todos,
+      timecap,
+      focus_score: 0,
+      distraction_score: 0,
+      created_at: new Date(),
+      finished_at: null,
+      xp
+    });
   }
 
-  static async finishQuest(identifier: string, focus_score: number) {
-    const transaction = await handleTransaction(async (transaction) => {
-      const { rows } = await transaction.query(`SELECT * FROM quests WHERE id = $1`, [identifier]);
-      const finished_at = this.currentDate();
-      if (rows[0]?.state === 'active') {
-        await transaction.query(`
-          UPDATE quests
-          SET finished_at = $2, focus_score = $3, state = 'finished'
-          WHERE id = $1;
-        `,[identifier, finished_at, focus_score]);
-  
+  async finishQuest(identifier: string, focus_score: number) {
+    await this.collection().findOneAndUpdate({_id: new ObjectId(identifier)}, {$set: {
+      finished_at: new Date(),
+      focus_score,
+      state: 'finished'
+    }})
+  }
+
+  async insertDistractionPoint(identifier: string) {
+    await this.collection().findOneAndUpdate(
+      {_id: new ObjectId(identifier)}, 
+      { $inc: {distraction_score: 1}}
+    );
+  }
+
+  async deleteQuest(identifier: string) {
+    await this.collection().findOneAndDelete({_id: new ObjectId(identifier)});
+  }
+
+  async activateSideQuest(identifier: string) {
+    const activeSideQuest = await this.findActiveSideQuest();
+
+    if (activeSideQuest.record)
+      throw new RepositoryError('An active side quest already exists.')
+
+    await this.collection().findOneAndUpdate(
+      {_id: new ObjectId(identifier)},
+      {$set: { state: 'active' }}
+      );
+  }
+
+  async invalidateQuestTodo(questIdentifier: string, todoIdentifier: string,) {
+    await this.collection().findOneAndUpdate({_id: new ObjectId(questIdentifier)}, {
+      $set: {
+        "todos.$[tds].state": 'invalidated',
+        "todos.$[tds].finished_at": new Date()
       }
-      else
-        throw new RepositoryError('Quest cant be finished.');
-    });
-
-    return transaction
+    },
+    {
+      arrayFilters: [ { "tds.description": todoIdentifier } ]
+    })
   }
 
-  static async insertDistractionPoint(identifier: string) {
-    return this.RepoResultHandler(() => queryDatabase(`UPDATE quests SET distraction_score = (distraction_score::INTEGER + 1) WHERE id = $1`, [identifier]))
-  }
-
-  static async deleteQuest(identifier: string) {
-    return this.RepoResultHandler(() => queryDatabase(`DELETE FROM quests WHERE id = $1;`,[identifier]))
-  }
-
-  static async activateSideQuest(identifier: string) {
-    const transaction = await handleTransaction(async (transaction) => {
-      const { rows } = await transaction.query(`SELECT * FROM quests WHERE type = 'side' AND state != 'finished'`);
-      
-      if (rows.find(row => row.state === 'active'))
-        throw new RepositoryError('Already exist a side quest active.')
-      
-      await transaction.query(`
-        UPDATE quests
-        SET state = 'active'
-        WHERE id = $1;
-      `, [identifier]);
-    });
-
-    return transaction;
+  async finishQuestTodo(questIdentifier: string, todoIdentifier: string,) {
+    await this.collection().findOneAndUpdate({_id: new ObjectId(questIdentifier)}, {
+      $set: {
+        "todos.$[tds].state": 'finished',
+        "todos.$[tds].finished_at": new Date()
+      }
+    },
+    {
+      arrayFilters: [ { "tds.description": todoIdentifier } ]
+    })
   }
 }
 
-/*
-  questline_table
-  quest_table
-  questtodo_table
-  finished_questline_table
-  finished_quest_table
-  finished_questtodo_table
-*/
+
+
+export default new QuestRepo('leveling', 'quests')

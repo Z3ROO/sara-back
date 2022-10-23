@@ -13,11 +13,9 @@ export default class NotesAPIHandlers {
 
     const listing = [await NotesAPIHandlers.buildListing([category])]
 
-    res.json({
-      status: 'ok',
-      err: '',
+    return {
       body: listing
-    })
+    }
   }
 
   private static async buildListing(directory: string[], nodeStat?: Dirent) {
@@ -51,11 +49,9 @@ export default class NotesAPIHandlers {
     const pathToNote = path.join(notesDir,req.params[0]);
     const fileContent = await fs.readFile(pathToNote, 'utf-8');
 
-    res.json({
-      status: 'ok',
-      err: '',
+    return {
       body: fileContent
-    })
+    };
   }
 
   // post'/notes/folder'
@@ -65,11 +61,10 @@ export default class NotesAPIHandlers {
     const finalDir = path.join(notesDir, ...directory, name);
     await fs.mkdir(finalDir);
 
-    res.json({
-      status: 'ok',
-      err: '',
-      body:{}
-    })
+    return {
+      status: 201,
+      message: 'Folder created'
+    }
   }
 
   // post'/notes/note'
@@ -81,11 +76,10 @@ export default class NotesAPIHandlers {
     const finalDir = path.join(notesDir, ...directory, name)
     await fs.writeFile(finalDir, '', 'utf-8');
 
-    res.json({
-      status: 'ok',
-      err: '',
-      body: {}
-    });
+    return {
+      status: 201,
+      message: 'Note created'
+    }
   }
 
   // post'/notes/save-note
@@ -96,11 +90,10 @@ export default class NotesAPIHandlers {
 
     await fs.writeFile(finalDir, content, 'utf-8');
 
-    res.json({
-      status: 'ok',
-      err: '',
-      body: {}
-    });
+    return {
+      status: 202,
+      message: 'Note saved'
+    }
   }
 
     // delete'/notes/folder'
@@ -109,11 +102,10 @@ export default class NotesAPIHandlers {
       const finalDir = path.join(notesDir, ...directory);
       await fs.rmdir(finalDir, {recursive:true});
   
-      res.json({
-        status: 'ok',
-        err: '',
-        body:{}
-      });
+      return {
+        status: 202,
+        message: 'Folder deleted'
+      }
     }
   
     // delete'/notes/note'
@@ -123,10 +115,9 @@ export default class NotesAPIHandlers {
       const finalDir = path.join(notesDir, ...directory)
       await fs.rm(finalDir);
   
-      res.json({
-        status: 'ok',
-        err: '',
-        body: {}
-      });
+      return {
+        status: 202,
+        message: 'Note deleted'
+      }
     }
 }
