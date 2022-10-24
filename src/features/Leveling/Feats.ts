@@ -1,6 +1,6 @@
 import FeatsRepo from "../../repositories/leveling/FeatsRepo";
-import { IFeats } from "../interfaces/interfaces";
-
+import { IFeats, IRecords } from "../interfaces/interfaces";
+//feat/record under analysis
 export class Feats {
   static async getAllFeats() {
     const { records } = await FeatsRepo.findAllFeats();
@@ -45,15 +45,42 @@ export class Feats {
       questline_id,
       title,
       description,
+      acceptance,
       todos,
       categories,
       tier,
       completed,
       xp,
-      created_at,
       finished_at,
     } = properties;
     
     await FeatsRepo.insertOneFeat(properties);
   }
+
+  static async proceedFeatAcceptanceLevel(identifier: string) {
+    const feat = (await FeatsRepo.findOneFeat({_id: identifier})).record;
+    const stage = proceedAcceptanceLevel(feat);
+
+    await FeatsRepo.proceedAcceptanceLevel({_id: identifier}, stage);
+  }
+}
+
+
+export function proceedAcceptanceLevel(item: IRecords|IFeats): 'reviewed'|'ready' {
+  const sevenDays = 1000 * 60 * 60 * 24 * 7;
+    let stage: 'reviewed'|'ready';
+
+    if (item.acceptance.stage === 'ready')
+      throw new Error('This \'feat\' already got accepted.');
+      
+    if (item.acceptance.stage === 'reviewed' &&
+      (item.acceptance.date[0].setHours(0,0,0) + sevenDays) < new Date().getTime())
+      stage = 'ready'
+    if (item.acceptance.stage === 'created' &&
+      (item.acceptance.date[1].setHours(0,0,0) + sevenDays) < new Date().getTime())
+      stage = 'reviewed'
+    else
+      throw new Error("Something went wrong proceeding Feat acceptance.");
+
+  return stage
 }

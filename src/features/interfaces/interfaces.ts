@@ -37,16 +37,19 @@ export interface IFeats {
   questline_id: string|null
   title: string
   description: string
+  acceptance: {
+    stage: 'created'|'reviewed'|'ready',
+    date: Date[]
+  }
   todos: {
     description: string
     complete: boolean
     finished_at: Date|null
-  }[]
+  }[]|null
   categories: string[]
   tier: number
   completed: boolean
   xp: number
-  created_at: Date
   finished_at: Date|null
 }
 
@@ -55,6 +58,10 @@ export interface IRecords {
   questline_id: string|null
   title: string
   description: string
+  acceptance: {
+    stage: 'created'|'reviewed'|'ready',
+    date: Date[]
+  }
   metric: 'unit'|'time'|'distance'
   status: {
     waitTime: number

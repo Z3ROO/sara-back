@@ -45,12 +45,12 @@ class FeatsRepo extends NoSQLRepository<IFeats>{
       questline_id,
       title,
       description,
+      acceptance,
       todos,
       categories,
       tier,
       completed,
       xp,
-      created_at,
       finished_at,
     } = properties;
     
@@ -58,12 +58,15 @@ class FeatsRepo extends NoSQLRepository<IFeats>{
       questline_id,
       title,
       description,
+      acceptance: {
+        stage: 'created',
+        date: [new Date()]
+      },
       todos: todos ? todos : null,
       categories,
       tier,
       completed: false,
       xp: tier*50,
-      created_at: new Date(),
       finished_at: null
     })
   }
@@ -76,6 +79,14 @@ class FeatsRepo extends NoSQLRepository<IFeats>{
     const searchParams = this.searchParams(identifier);
 
     await this.collection().findOneAndUpdate(searchParams, {$set: properties});
+  }
+
+  async proceedAcceptanceLevel(identifier: uniqueIdentifier, stage: 'reviewed'|'ready') {
+    const searchParams = this.searchParams(identifier);
+    await this.collection().findOneAndUpdate(searchParams, {
+      $set:{"acceptance.stage":stage},
+      $push: {"acceptance.date": new Date()}
+    });
   }
 
   async deleteOneFeat(identifier: uniqueIdentifier) {

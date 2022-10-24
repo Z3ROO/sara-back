@@ -1,5 +1,6 @@
 import RecordsRepo from "../../repositories/leveling/RecordsRepo";
 import { IRecords } from "../interfaces/interfaces";
+import { proceedAcceptanceLevel } from "./Feats";
 
 export class Records {
   static async getAllRecords() {
@@ -11,7 +12,7 @@ export class Records {
   static async getRecordsByCategory(categories: string|string[]) {
     if (typeof categories === 'string')
       categories = [categories];
-      
+
     const { records } = await RecordsRepo.findRecordsByCategory(categories);
 
     return records
@@ -44,6 +45,7 @@ export class Records {
       questline_id,
       title,
       description,
+      acceptance,
       metric,
       status,
       categories,
@@ -53,5 +55,12 @@ export class Records {
     } = properties;
     
     await RecordsRepo.insertOneRecord(properties);
+  }
+
+  static async proceedFeatAcceptanceLevel(identifier: string) {
+    const feat = (await RecordsRepo.findOneRecord({_id: identifier})).record;
+    const stage = proceedAcceptanceLevel(feat);
+
+    await RecordsRepo.proceedAcceptanceLevel({_id: identifier}, stage);
   }
 }

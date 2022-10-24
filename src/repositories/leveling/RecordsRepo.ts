@@ -48,6 +48,7 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
       questline_id,
       title,
       description,
+      acceptance,
       metric,
       status,
       categories,
@@ -60,6 +61,10 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
       questline_id,
       title,
       description,
+      acceptance: {
+        stage: 'created',
+        date: [new Date()]
+      },
       metric,
       status: {
         waitTime: status.waitTime,
@@ -82,6 +87,14 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
     const searchParams = this.searchParams(identifier);
 
     await this.collection().findOneAndUpdate(searchParams, {$set: properties});
+  }
+  
+  async proceedAcceptanceLevel(identifier: uniqueIdentifier, stage: 'reviewed'|'ready') {
+    const searchParams = this.searchParams(identifier);
+    await this.collection().findOneAndUpdate(searchParams, {
+      $set:{"acceptance.stage":stage},
+      $push: {"acceptance.date": new Date()}
+    });
   }
 
   async updateRecordLevel(identifier: uniqueIdentifier, direction: -1|0|1) {
