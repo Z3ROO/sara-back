@@ -1,9 +1,9 @@
-import { Feats } from "../../features/Leveling/Feats";
+import { Feats } from "../../features/Feats";
 import { IFeats, IQuest, IQuestLine, IRecords } from "../../features/interfaces/interfaces";
-import { Leveling } from "../../features/Leveling/Leveling";
-import { Quest } from "../../features/Leveling/Quest";
-import { QuestLine } from "../../features/Leveling/QuestLine";
-import { Records } from "../../features/Leveling/Records";
+import { Leveling } from "../../features/Leveling";
+import { Quest } from "../../features/Quest";
+import { QuestLine } from "../../features/Questline";
+import { Records } from "../../features/Records";
 
 export default class StatsAPIHandlers {
   //[GET]/leveling/stats
@@ -183,7 +183,7 @@ export default class StatsAPIHandlers {
   static async updateRecordLevel(req: any, res: any) {
     const { recordId, change } = req.body;
 
-    await Records.updateRecordLevel(recordId, 'up');
+    await Records.updateRecordLevel(recordId, 1);
 
     return {
       status: 202,

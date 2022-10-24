@@ -1,5 +1,5 @@
-import QuestRepo from "../../repositories/leveling/QuestRepo";
-import { IQuest } from "../interfaces/interfaces";
+import QuestRepo from "../repositories/leveling/QuestRepo";
+import { IQuest } from "./interfaces/interfaces";
 
 export class Quest {
   static async getActiveMainQuest() {

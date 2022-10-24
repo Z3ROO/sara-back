@@ -1,5 +1,5 @@
-import QuestLineRepo from "../../repositories/leveling/QuestLineRepo";
-import { IQuestLine } from "../interfaces/interfaces";
+import QuestLineRepo from "../repositories/leveling/QuestLineRepo";
+import { IQuestLine } from "./interfaces/interfaces";
 
 export class QuestLine {
   static async getMainQuestLine() {

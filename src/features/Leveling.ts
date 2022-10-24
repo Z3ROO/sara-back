@@ -1,8 +1,8 @@
-import { UserRepo } from "../../repositories/UserRepo";
+import { UserRepo } from "../repositories/UserRepo";
 import { Feats } from "./Feats";
-import { IQuest, IQuestLine, IStats } from "../interfaces/interfaces";
+import { IQuest, IQuestLine, IStats } from "./interfaces/interfaces";
 import { Quest } from "./Quest";
-import { QuestLine } from "./QuestLine";
+import { QuestLine } from "./Questline";
 import { Records } from "./Records";
 
 export class Leveling {

@@ -1,5 +1,5 @@
-import FeatsRepo from "../../repositories/leveling/FeatsRepo";
-import { IFeats, IRecords } from "../interfaces/interfaces";
+import FeatsRepo from "../repositories/leveling/FeatsRepo";
+import { IFeats, IRecords } from "./interfaces/interfaces";
 //feat/record under analysis
 export class Feats {
   static async getAllFeats() {
