@@ -21,7 +21,7 @@ class QuestRepo extends NoSQLRepository<IQuest>{
     return { record };
   }
 
-  async findAllSideQuests() {
+  async findAllUnfineshedSideQuests() {
     const records = await this.collection().find({type: 'side', state: {$ne:'finished'}}).toArray();
     return { records };
   }
@@ -70,7 +70,7 @@ class QuestRepo extends NoSQLRepository<IQuest>{
         throw new RepositoryError('An active main quest already exist.');
     }
     else if (type === 'side'){
-      const sideQuests = await this.findAllSideQuests();
+      const sideQuests = await this.findAllUnfineshedSideQuests();
 
       if (sideQuests.records.length >= 5)
         throw new RepositoryError('Maximun amount of side quests pre-registered reached.');

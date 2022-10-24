@@ -20,8 +20,8 @@ export class Quest {
     return record;
   }
 
-  static async getAllSideQuest() {
-    const { records } = await QuestRepo.findAllSideQuests();
+  static async getAllUnfineshedSideQuest() {
+    const { records } = await QuestRepo.findAllUnfineshedSideQuests();
     return records;
   }
 
