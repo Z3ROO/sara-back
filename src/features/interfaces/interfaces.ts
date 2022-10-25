@@ -75,6 +75,13 @@ export interface IRecords {
   xp: number
 }
 
+export interface IPills {
+  name: string
+  description: string
+  times_taken: number|null
+  last_taken: Date|null
+}
+
 export interface IPassiveSkill {
   id?: string
   title: string
