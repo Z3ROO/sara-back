@@ -135,41 +135,5 @@ export default class StatsAPIHandlers {
   }
   
 
-  static async getRecords(req: any, res: any) {
-    const records = await Records.getAllRecords();
-
-    return {
-      body: records
-    }
-  }
-
-  static async updateRecordLevel(req: any, res: any) {
-    const { recordId, change } = req.body;
-
-    await Records.updateRecordLevel(recordId, 1);
-
-    return {
-      status: 202,
-      message: 'updated'
-    };
-  }
-
-  static async createNewRecord(req: any, res: any) {
-    const  {title, description, metric, categories, questLine} = req.body
-
-    const record: Partial<IRecords> = {
-      questline_id: questLine,
-      title,
-      description,
-      metric,
-      categories
-    }
-
-    await Records.createNewRecord(record);
-
-    return {
-      status: 201,
-      message: 'created'
-    }
-  }
+  
 }

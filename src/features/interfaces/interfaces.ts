@@ -66,8 +66,8 @@ export interface IRecords {
   status: {
     waitTime: number
     stageAmount: number
-    stage: number|null
-    last_commitment: Date|null
+    stage?: number|null
+    last_commitment?: Date|null
   }
   categories: string[]
   level: number

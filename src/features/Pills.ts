@@ -3,6 +3,10 @@ import PillsRepo from "../repositories/PillsRepo";
 import { IPills } from "./interfaces/interfaces";
 //Todo mundo tem de lidar com o mesmo.
 
+
+//
+//pills also has to pass though acceptance test
+
 export class Pills {
   static async getAllPills(){
     const { records } = await PillsRepo.findAllPills();

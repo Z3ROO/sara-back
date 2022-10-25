@@ -46,16 +46,4 @@ export default [
     handler: StatsAPIHandlers.createNewQuestLine
   },
 
-  {
-    method: 'get', path: '/leveling/records',
-    handler: StatsAPIHandlers.getRecords
-  },
-  {
-    method: 'post', path: '/leveling/records/up',
-    handler: StatsAPIHandlers.updateRecordLevel
-  },
-  {
-    method: 'post', path: '/leveling/records/new',
-    handler: StatsAPIHandlers.createNewRecord
-  }
 ];
