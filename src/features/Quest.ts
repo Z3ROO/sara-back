@@ -1,4 +1,4 @@
-import QuestRepo from "../repositories/leveling/QuestRepo";
+import QuestRepo from "../repositories/QuestRepo";
 import { IQuest } from "./interfaces/interfaces";
 
 export class Quest {

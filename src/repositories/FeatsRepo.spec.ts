@@ -1,4 +1,4 @@
-import { IFeats } from "../../features/interfaces/interfaces";
+import { IFeats } from "../features/interfaces/interfaces";
 import { FeatsRepo } from "./FeatsRepo";
 
 describe('Feats Repository', () => {

@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
-import { IRecords } from "../../features/interfaces/interfaces";
-import { RepositoryError } from "../../util/errors/RepositoryError";
-import { NoSQLRepository } from "../RepoResultHandler";
-import { uniqueIdentifier } from "./FeatsRepo";
+import { IRecords } from "./../features/interfaces/interfaces";
+import { RepositoryError } from "./../util/errors/RepositoryError";
+import { NoSQLRepository } from "./RepoResultHandler";
+import { buildSearchString, uniqueIdentifier } from "./FeatsRepo";
 
 
 class RecordsRepo extends NoSQLRepository<IRecords>{
@@ -30,7 +30,7 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
   }
 
   async findOneRecord(identifier: uniqueIdentifier) {
-    const searchParams = this.searchParams(identifier);
+    const searchParams = buildSearchString(identifier);
     const record = await this.collection().findOne(searchParams);
 
     return { record };
@@ -84,13 +84,13 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
     if (invalidProperty)
       throw new RepositoryError('Invalid property issued: '+ invalidProperty);
 
-    const searchParams = this.searchParams(identifier);
+    const searchParams = buildSearchString(identifier);
 
     await this.collection().findOneAndUpdate(searchParams, {$set: properties});
   }
   
   async proceedAcceptanceLevel(identifier: uniqueIdentifier, stage: 'reviewed'|'ready') {
-    const searchParams = this.searchParams(identifier);
+    const searchParams = buildSearchString(identifier);
     await this.collection().findOneAndUpdate(searchParams, {
       $set:{"acceptance.stage":stage},
       $push: {"acceptance.date": new Date()}
@@ -98,7 +98,7 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
   }
 
   async updateRecordLevel(identifier: uniqueIdentifier, direction: -1|0|1) {
-    const searchParams = this.searchParams(identifier);
+    const searchParams = buildSearchString(identifier);
     await this.collection().findOneAndUpdate(searchParams, {
       $push: {
         history: {
@@ -110,23 +110,10 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
   }
   
   async deleteOneRecord(identifier: uniqueIdentifier) {
-    const searchParams = this.searchParams(identifier);
+    const searchParams = buildSearchString(identifier);
     await this.collection().findOneAndDelete(searchParams);
   }
 
-  private searchParams(identifier: uniqueIdentifier) {
-    let result:{title: string}|{_id: ObjectId};
-    const { title, _id } = identifier;
-
-    if (title)
-      result = {title};
-    else if(_id)
-      result = {_id: new ObjectId(_id)};
-    else
-      throw new Error('An identifier must be specified.');
-
-    return result;
-  }
 }
 
 export default new RecordsRepo('leveling', 'records');

@@ -45,18 +45,7 @@ export default [
     method: 'post', path: '/leveling/questline/new',
     handler: StatsAPIHandlers.createNewQuestLine
   },
-  {
-    method: 'get', path: '/leveling/feats',
-    handler: StatsAPIHandlers.getFeats
-  },
-  {
-    method: 'post', path: '/leveling/feats/complete',
-    handler: StatsAPIHandlers.completeFeat
-  },
-  {
-    method: 'post', path: '/leveling/feats/new',
-    handler: StatsAPIHandlers.createNewFeat
-  },
+
   {
     method: 'get', path: '/leveling/records',
     handler: StatsAPIHandlers.getRecords

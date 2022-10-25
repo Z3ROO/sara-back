@@ -1,8 +1,7 @@
-import Repository, { NoSQLRepository } from "../RepoResultHandler"
-import { handleTransaction, queryDatabase } from '../../infra/database/postgresql';
-import { RepositoryError } from "../../util/errors/RepositoryError";
+import Repository, { NoSQLRepository } from "./RepoResultHandler"
+import { RepositoryError } from "./../util/errors/RepositoryError";
 import { randomUUID } from 'crypto';
-import { IQuestLine } from "../../features/interfaces/interfaces";
+import { IQuestLine } from "./../features/interfaces/interfaces";
 import { ObjectId } from "mongodb";
 
 class QuestLineRepo extends NoSQLRepository<IQuestLine>{

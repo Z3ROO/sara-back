@@ -1,9 +1,7 @@
-import { randomUUID } from "crypto"
 import { ObjectId } from "mongodb";
-import { IQuest } from "../../features/interfaces/interfaces";
-import { handleTransaction, queryDatabase } from "../../infra/database/postgresql"
-import { RepositoryError } from "../../util/errors/RepositoryError"
-import Repository, { NoSQLRepository } from "../RepoResultHandler"
+import { IQuest } from "./../features/interfaces/interfaces";
+import { RepositoryError } from "./../util/errors/RepositoryError"
+import Repository, { NoSQLRepository } from "./RepoResultHandler"
 
 class QuestRepo extends NoSQLRepository<IQuest>{
   async findMainQuest() {

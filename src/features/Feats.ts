@@ -1,4 +1,4 @@
-import FeatsRepo from "../repositories/leveling/FeatsRepo";
+import FeatsRepo from "../repositories/FeatsRepo";
 import { IFeats, IRecords } from "./interfaces/interfaces";
 
 export class Feats {
