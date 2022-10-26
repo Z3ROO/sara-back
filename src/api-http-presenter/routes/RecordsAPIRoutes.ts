@@ -1,5 +1,6 @@
 import { IRecords } from "../../features/interfaces/interfaces";
 import { Records } from "../../features/Records";
+import { checkForMissingProperties } from "./utils";
 
 
 export default [  
@@ -14,11 +15,11 @@ export default [
     }
   },
   {
-    method: 'get', path: '/records/up/:recordId',
+    method: 'get', path: '/records/up/:record_id',
     handler: async function updateRecordLevel(req: any) {
-      const { recordId } = req.params;
+      const { record_id } = req.params;
   
-      await Records.updateRecordLevel(recordId, 1);
+      await Records.updateRecordLevel(record_id, 1);
   
       return {
         status: 202,
@@ -46,7 +47,9 @@ export default [
         },
         categories
       }
-  
+
+      checkForMissingProperties(record);
+
       await Records.createNewRecord(record);
   
       return {

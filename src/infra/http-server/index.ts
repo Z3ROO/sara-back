@@ -13,33 +13,32 @@ export const initServer = () => dbCheck(() => {
   )
 });
 
-function routeHandlerWrapper(handler: (req:any, res: any) => any) {
-  return (req: any, res: any) => {
+function routeHandlerWrapper(handler: (req:any, res: any, next: any) => any) {
+  return (req: any, res: any, next: any) => {
     try {
-      let {status, message, body} = handler(req, res);
+      let route = handler(req, res, next)||{};
       
-      if (!status)
-        status = 200
+      if (!route?.status)
+        route.status = 200
       
-      if (!message)
-        message = null;
+      if (!route?.message)
+        route.message = null;
 
-      if (!body)
-        body = null;
+      if (!route?.body)
+        route.body = null;
       
-        
-      res.status(status);
-
-      res.json({
-        status,
-        message,
-        body
-      });
+      if (!next) {
+        res.status(route.status)
+        .json({
+          status: route.status,
+          message: route.message,
+          body: route.body
+        });
+      }
     }
     catch(err) {
-      res.status(500);
-
-      res.json({
+      console.error(err);
+      res.status(500).json({
         status: '500',
         message: 'Default message, to be fully implemented',
         body:null
@@ -50,12 +49,12 @@ function routeHandlerWrapper(handler: (req:any, res: any) => any) {
 
 
 function applyRoutes(app: any, routess: any[]) {
-  routess.forEach((route) => {
+  routess.forEach((route: {method:string, path: string, handler:any|any[]}) => {
     let { method, path, handler } = route;
     if (!Array.isArray(handler))
       handler = [handler];
     
-    handler = routeHandlerWrapper(handler);
+    handler = routeHandlerWrapper(handler[0]);
 
     if (method === 'middleware') {
       if (path)

@@ -4,6 +4,10 @@ export default [
   {
     method: 'get', path: '/quests/active-quest',
     handler: QuestsAPIHandlers.getActiveQuest
+  },  
+  {
+    method: 'post', path: '/quests/questline/new',
+    handler: QuestsAPIHandlers.createNewQuestLine
   },
   {
     method: 'get', path: '/quests/questline/:id',
@@ -36,9 +40,5 @@ export default [
   {
     method: 'get', path: '/quests/questline/all-finished',
     handler: QuestsAPIHandlers.getAllFinishedQuestLines
-  },
-  {
-    method: 'post', path: '/quests/questline/new',
-    handler: QuestsAPIHandlers.createNewQuestLine
   },
 ]

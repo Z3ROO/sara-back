@@ -1,4 +1,4 @@
-import RecordsRepo from "../repositories/leveling/RecordsRepo";
+import RecordsRepo from "../repositories/RecordsRepo";
 import { IRecords } from "./interfaces/interfaces";
 import { proceedAcceptanceLevel } from "./Feats";
 

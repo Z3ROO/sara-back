@@ -1,5 +1,6 @@
 import { Feats } from "../../features/Feats";
 import { IFeats } from "../../features/interfaces/interfaces";
+import { checkForMissingProperties } from "./utils";
 
 export default [
   {
@@ -28,10 +29,10 @@ export default [
   {
     method: 'post', path: '/feats/new',
     handler: async function createNewFeat(req: any, res: any) {
-      const  {questLine, title, description, categories, todos, tier} = req.body
+      const  {questline_id, title, description, categories, todos, tier} = req.body
   
       const feat: Partial<IFeats> = {
-        questline_id: questLine || null,
+        questline_id: questline_id || null,
         title,
         description,
         todos: todos||null,
@@ -39,10 +40,7 @@ export default [
         tier
       }
 
-      Object.keys(feat).forEach(key => {
-        if (feat[key] === undefined)
-          throw new Error('Missing parameter to insert feat')
-      })
+      checkForMissingProperties(feat)
   
       await Feats.createNewFeat(feat);
   

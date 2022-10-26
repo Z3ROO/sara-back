@@ -1,4 +1,4 @@
-import QuestLineRepo from "../repositories/leveling/QuestLineRepo";
+import QuestLineRepo from "../repositories/QuestLineRepo";
 import { IQuestLine } from "./interfaces/interfaces";
 
 export class QuestLine {

@@ -1,6 +1,7 @@
 import { IQuest, IQuestLine } from "../../features/interfaces/interfaces";
 import { Quest } from "../../features/Quest";
 import { QuestLine } from "../../features/Questline";
+import { checkForMissingProperties } from "./utils";
 
 export default class QuestsAPIHandlers {
    //[GET]/quests/active-quest
@@ -35,7 +36,7 @@ export default class QuestsAPIHandlers {
   //[POST]/quests/quest/new
   static async createNewQuest(req: any) {
     const { questLine, title, description, timecap, type, xp, todos } = req.body;
-
+    
     const questBody: Partial<IQuest> = {
       questline_id: questLine,
       title,
@@ -45,6 +46,8 @@ export default class QuestsAPIHandlers {
       todos,
       xp
     }
+
+    checkForMissingProperties(questBody);
 
     await Quest.createNewQuest(questBody);
 
@@ -57,12 +60,18 @@ export default class QuestsAPIHandlers {
   //[POST]/quests/quest/handle-todo
   static async handleQuestTodo(req: any, res: any) {
     const { 
-      questId, 
+      quest_id, 
       todoDescription, 
       action 
     } = req.body;
 
-    Quest.handleQuestTodo(questId, todoDescription, action);
+    checkForMissingProperties({ 
+      quest_id, 
+      todoDescription, 
+      action 
+    });
+
+    await Quest.handleQuestTodo(quest_id, todoDescription, action);
     
     return {
       status: 202,
@@ -72,8 +81,11 @@ export default class QuestsAPIHandlers {
 
   //[POST]/quests/quest/finish
   static async finishQuest(req: any, res: any) {
-    const { questId, focusScore } = req.body;
-    await Quest.finishQuest(questId, focusScore);
+    const { quest_id, focusScore } = req.body;
+    
+    checkForMissingProperties({ quest_id, focusScore });
+
+    await Quest.finishQuest(quest_id, focusScore);
     
     return {
       status: 202,
@@ -90,6 +102,7 @@ export default class QuestsAPIHandlers {
       message: 'Distraction score increased'
     };
   }
+
   //[GET]/quests/questline/finish
   static async finishMainQuestLine(req: any, res: any) {
     await QuestLine.finishMainQuestLine();
@@ -99,6 +112,7 @@ export default class QuestsAPIHandlers {
       message: 'Questline finished'
     };
   }
+
   ///[GET]/quests/questline/all-finished
   static async getAllFinishedQuestLines(req: any, res: any) {
     const questlines = await QuestLine.getAllFineshedQuestLines();
@@ -110,20 +124,18 @@ export default class QuestsAPIHandlers {
   //[POST]/quests/questline/new
   static async createNewQuestLine(req: any, res: any) {
     const { title, description, duration, type } = req.body;
-
-    const questLine: Partial<IQuestLine> = {
+    
+    const questline: Partial<IQuestLine> = {
       title,
       description,
       type,
       timecap: duration
     }
-
-    await QuestLine.createNewQuestLine(questLine);
-    const createdQuestLine = await QuestLine.getMainQuestLine();
     
-    return {
-      body: createdQuestLine
-    };
+    checkForMissingProperties(questline);
+    await QuestLine.createNewQuestLine(questline);
+
+    return;
   }
   
 }
