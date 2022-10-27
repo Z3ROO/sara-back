@@ -14,12 +14,12 @@ export const initServer = () => dbCheck(() => {
 });
 
 function routeHandlerWrapper(handler: (req:any, res: any, next: any) => any) {
-  return (req: any, res: any, next: any) => {
+  return async (req: any, res: any, next: any) => {
     try {
-      let route = handler(req, res, next)||{};
+      let route = await handler(req, res, next)||{};
       
       if (!route?.status)
-        route.status = 200
+        route.status = 200;
       
       if (!route?.message)
         route.message = '';
@@ -27,15 +27,12 @@ function routeHandlerWrapper(handler: (req:any, res: any, next: any) => any) {
       if (!route?.body)
         route.body = null;
       
-      if (route.next)
-        next();
-      else
-        res.status(route.status)
-        .json({
-          status: route.status,
-          message: route.message,
-          body: route.body
-        });
+      res.status(route.status)
+      .json({
+        status: route.status,
+        message: route.message,
+        body: route.body
+      });
       
     }
     catch(err) {
@@ -56,7 +53,7 @@ function applyRoutes(app: any, routess: any[]) {
     if (!Array.isArray(handler))
       handler = [handler];
     
-    handler = routeHandlerWrapper(handler[0]);
+    handler = handler[0];
 
     if (method === 'middleware') {
       if (path)
@@ -67,7 +64,7 @@ function applyRoutes(app: any, routess: any[]) {
       return
     }
 
-    app[method](path, handler);
+    app[method](path, routeHandlerWrapper(handler));
   })
 
   return app

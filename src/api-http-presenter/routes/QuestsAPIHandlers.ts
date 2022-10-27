@@ -35,10 +35,10 @@ export default class QuestsAPIHandlers {
 
   //[POST]/quests/quest/new
   static async createNewQuest(req: any) {
-    const { questLine, title, description, timecap, type, xp, todos } = req.body;
+    const { questline_id, title, description, timecap, type, xp, todos } = req.body;
     
     const questBody: Partial<IQuest> = {
-      questline_id: questLine,
+      questline_id,
       title,
       description,
       timecap,
