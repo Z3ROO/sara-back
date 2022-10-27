@@ -22,19 +22,21 @@ function routeHandlerWrapper(handler: (req:any, res: any, next: any) => any) {
         route.status = 200
       
       if (!route?.message)
-        route.message = null;
+        route.message = '';
 
       if (!route?.body)
         route.body = null;
       
-      if (!next) {
+      if (route.next)
+        next();
+      else
         res.status(route.status)
         .json({
           status: route.status,
           message: route.message,
           body: route.body
         });
-      }
+      
     }
     catch(err) {
       console.error(err);
