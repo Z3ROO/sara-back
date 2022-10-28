@@ -5,5 +5,8 @@ module.exports = {
   testEnvironment: 'node',
   silent: false,
   noStackTrace: true,
-  verbose: true
+  verbose: true,
+  setupFiles: [
+    './src/infra/database/mongodb.ts'
+  ]
 };

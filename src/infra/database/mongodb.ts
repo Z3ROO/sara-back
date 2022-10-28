@@ -8,16 +8,19 @@ const state: {connection:null|MongoClient} = {
   connection: null
 }
 
-export function initMongoDB(cb:() => void) {
-  client.connect().then((connection) => {
-    console.log('Mongo Database connected successfully.');
-    if (state.connection)
-      cb();
-    else {
-      state.connection = connection;
-      cb();
-    }
-  })
+
+
+export async function initMongoDB(cb?:() => void) {
+  if (state.connection)
+    return cb ? cb() : undefined;
+  
+  const connection = await client.connect();
+  console.log('Mongo Database connected successfully.');
+  state.connection = connection;
+
+  if (cb)
+    cb();
 }
 
-export const connection = () => state.connection
+
+export const db = (dbname:string) => state.connection.db(dbname);

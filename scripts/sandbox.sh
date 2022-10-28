@@ -10,4 +10,4 @@ export SERVER_PORT=3001
 
 #source ./scripts/prepare-dev.sh
 
-nodemon src/infra/http-server/index.ts
+nodemon src/index.ts
