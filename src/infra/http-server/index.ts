@@ -1,17 +1,16 @@
 import express from 'express';
 import routes from '../../api-http-presenter';
 import { connection, initMongoDB } from '../database/mongodb';
-import { dbCheck } from '../database/postgresql';
 
 export const app = applyRoutes(express(), routes);
 
-export const initServer = () => dbCheck(() => {
+export const initServer = () => {
   app.listen(
     process.env.SERVER_PORT, () => {
       console.log("Servidor conectado à porta "+process.env.SERVER_PORT)
     }
   )
-});
+};
 
 function routeHandlerWrapper(handler: (req:any, res: any, next: any) => any) {
   return async (req: any, res: any, next: any) => {
