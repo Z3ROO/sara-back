@@ -35,9 +35,10 @@ function routeHandlerWrapper(handler: (req:any, res: any, next: any) => any) {
     }
     catch(err) {
       console.error(err);
-      res.status(500).json({
-        status: '500',
-        message: 'Default message, to be fully implemented',
+      const status = err.status ? err.status : 500;
+      res.status(status).json({
+        status,
+        message: err.message,
         body:null
       })
     }
