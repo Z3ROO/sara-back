@@ -1,5 +1,7 @@
 import { IRecords } from "../../features/interfaces/interfaces";
 import { Records } from "../../features/Records";
+import { isObjectId } from "../../infra/database/mongodb";
+import { BadRequest } from "../../util/errors/HttpStatusCode";
 import { checkForMissingProperties } from "./utils";
 
 
@@ -18,6 +20,9 @@ export default [
     method: 'get', path: '/records/up/:record_id',
     handler: async function updateRecordLevel(req: any) {
       const { record_id } = req.params;
+
+      if (!isObjectId(record_id))
+        throw new BadRequest('Invalid Id');
   
       await Records.updateRecordLevel(record_id, 1);
   

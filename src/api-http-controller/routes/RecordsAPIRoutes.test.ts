@@ -55,7 +55,7 @@ describe('Records Route', () => {
   });
 
   describe('/records/up/:record_id', () => {
-    test('Should responds with 202 status code uppon correct record_id', async () => {
+    test('Should responds with 202 status code uppon valid record_id', async () => {
       const { records } = await RecordsRepo.findAllRecords();
       const _id = records[0]._id;
     
@@ -64,10 +64,10 @@ describe('Records Route', () => {
       expect(response.body.status).toBe(202);
     });
 
-    test('Should responds with 400 status code uppon incorrect record_id', async () => {    
+    test('Should responds with 400 status code uppon invalid record_id', async () => {    
       const response = await request(app).get(`/records/up/invalid_id`);
       
-      expect(response.body.message).toBe('');
+      expect(response.body.message).toBe('Bad Request: Invalid Id');
       expect(response.statusCode).toBe(400);
       expect(response.body.status).toBe(400);
     });
@@ -106,7 +106,7 @@ describe('Records Route', () => {
       
       expect(response.statusCode).toBe(400);
       expect(response.body.status).toBe(400);
-      expect(response.body.message).toBe('');
+      expect(response.body.message).toBe('Bad Request: Property "categories" is missing');
     });
   })
 })
