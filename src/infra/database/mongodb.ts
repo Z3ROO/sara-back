@@ -22,5 +22,7 @@ export async function initMongoDB(cb?:() => void) {
     cb();
 }
 
+export const closeDb = () => state.connection.close();
+
 
 export const db = (dbname:string) => state.connection.db(dbname);

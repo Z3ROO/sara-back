@@ -31,13 +31,13 @@ export default [
     method: 'post', path: '/records/new',
     handler: async function createNewRecord(req: any) {
       const  {
-        title, description, metric, categories, questLine,
+        title, description, metric, categories, questline_id,
         waitTime,
         stageAmount,
       } = req.body
   
       const record: Partial<IRecords> = {
-        questline_id: questLine,
+        questline_id,
         title,
         description,
         metric,
