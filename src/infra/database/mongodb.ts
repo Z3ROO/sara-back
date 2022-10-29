@@ -8,6 +8,7 @@ const state: {connection:null|MongoClient} = {
   connection: null
 }
 
+export const isObjectId = (_id: string) => new RegExp("^[0-9a-fA-F]{24}$").test(_id)
 
 
 export async function initMongoDB(cb?:() => void) {
