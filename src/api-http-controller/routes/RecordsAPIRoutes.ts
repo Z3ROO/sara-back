@@ -28,7 +28,7 @@ export default [
   
       return {
         status: 202,
-        message: 'updated'
+        message: 'Record level updated'
       };
     }
   },
@@ -40,6 +40,9 @@ export default [
         waitTime,
         stageAmount,
       } = req.body
+
+      if (!isObjectId(questline_id))
+        throw new BadRequest('Invalid questline_id');
   
       const record: Partial<IRecords> = {
         questline_id,
@@ -59,7 +62,7 @@ export default [
   
       return {
         status: 201,
-        message: 'created'
+        message: 'Record successfully created'
       }
     }
   }
