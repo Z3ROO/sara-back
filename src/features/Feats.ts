@@ -41,19 +41,6 @@ export class Feats {
   }
 
   static async createNewFeat(properties: Partial<IFeats>) {
-    const {
-      questline_id,
-      title,
-      description,
-      acceptance,
-      todos,
-      categories,
-      tier,
-      completed,
-      xp,
-      finished_at,
-    } = properties;
-    
     await FeatsRepo.insertOneFeat(properties);
   }
 

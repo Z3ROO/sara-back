@@ -1,5 +1,8 @@
+import { Request } from "express";
 import { Feats } from "../../features/Feats";
 import { IFeats } from "../../features/interfaces/interfaces";
+import { isObjectId } from "../../infra/database/mongodb";
+import { BadRequest } from "../../util/errors/HttpStatusCode";
 import { checkForMissingProperties } from "./utils";
 
 export default [
@@ -14,21 +17,24 @@ export default [
     }
   },
   {
-    method: 'get', path: '/feats/complete/:featId',
+    method: 'get', path: '/feats/complete/:feat_id',
     handler: async function completeFeat(req: any, res: any) {
-      const { featId } = req.body;
-  
-      await Feats.completeFeat(featId);
+      const { feat_id } = req.params;
+      
+      if (!isObjectId(feat_id))
+        throw new BadRequest(`Invalid id`);
+
+      await Feats.completeFeat(feat_id);
   
       return {
         status: 202,
-        message: 'Feat updated'
+        message: 'Feat completed'
       };
     }
   },
   {
     method: 'post', path: '/feats/new',
-    handler: async function createNewFeat(req: any, res: any) {
+    handler: async function createNewFeat(req: Request, res: any) {
       const  {questline_id, title, description, categories, todos, tier} = req.body
   
       const feat: Partial<IFeats> = {
@@ -40,7 +46,10 @@ export default [
         tier
       }
 
-      checkForMissingProperties(feat)
+      checkForMissingProperties(feat);
+      
+      if (!isObjectId(questline_id))
+        throw new BadRequest(`Invalid questline_id`);
   
       await Feats.createNewFeat(feat);
   

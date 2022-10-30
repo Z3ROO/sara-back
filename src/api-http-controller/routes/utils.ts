@@ -6,7 +6,7 @@ export function checkForMissingProperties(object:any) {
       throw new BadRequest(`Property "${key}" is missing`);
     }
     
-    if (object[key].constructor.name === 'Object')
+    if (object[key] && object[key].constructor.name === 'Object')
       checkForMissingProperties(object[key])
   })
 }

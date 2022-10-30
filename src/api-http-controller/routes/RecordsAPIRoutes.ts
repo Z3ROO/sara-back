@@ -62,7 +62,7 @@ export default [
   
       return {
         status: 201,
-        message: 'Record successfully created'
+        message: 'Record created'
       }
     }
   }

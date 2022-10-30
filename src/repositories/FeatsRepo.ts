@@ -40,8 +40,8 @@ class FeatsRepo extends NoSQLRepository<IFeats>{
     return { records };
   }
 
-  async insertOneFeat(properties: Partial<IFeats>) {
-    const {
+  async insertOneFeat(properties: any) {
+    let {
       questline_id,
       title,
       description,
@@ -53,6 +53,8 @@ class FeatsRepo extends NoSQLRepository<IFeats>{
       xp,
       finished_at,
     } = properties;
+  
+    todos = todos ? todos.map((todo:string) => ({description: todo, completed: false, finished_at: null})) : null;
     
     await this.collection().insertOne({
       questline_id,
@@ -68,7 +70,7 @@ class FeatsRepo extends NoSQLRepository<IFeats>{
       completed: false,
       xp: tier*50,
       finished_at: null
-    })
+    });
   }
 
   async updateOneFeat(identifier: uniqueIdentifier, properties: Partial<IFeats>) {
