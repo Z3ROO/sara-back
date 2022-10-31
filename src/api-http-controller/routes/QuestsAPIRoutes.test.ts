@@ -5,6 +5,13 @@ import QuestLineRepo from '../../repositories/QuestLineRepo';
 import QuestRepo from '../../repositories/QuestRepo';
 
 describe('Quests HTTP API Routes', () => {
+  const dummyFinishedQuestline:any = {
+    title: 'Finished questline',
+    description: 'Finished questline',
+    type: 'main',
+    timecap: 30*24*60*60*1000
+  }
+
   const dummyMainQuestline:any = {
     title: 'Main questline',
     description: 'Main questline',
@@ -34,6 +41,9 @@ describe('Quests HTTP API Routes', () => {
   beforeEach(async () => {
     await wipeCollections();
     
+    await QuestLineRepo.createNewQuestLine(dummyFinishedQuestline);
+    await QuestLineRepo.finishMainQuestLine();
+
     await QuestLineRepo.createNewQuestLine(dummyMainQuestline);
     await QuestLineRepo.createNewQuestLine(dummyPracticeQuestline);
 
@@ -41,7 +51,7 @@ describe('Quests HTTP API Routes', () => {
 
     await QuestRepo.insertNewQuest({
       ...dummyQuest,
-      questline_id: records[0]._id.toString()
+      questline_id: records[0]._id.toHexString()
     });
   });
 
@@ -63,7 +73,7 @@ describe('Quests HTTP API Routes', () => {
 
   describe('/quests/questline/:questline_id', () => {
     test('Should respond with 200 status code and a questline uppon valid questline_id', async () => {
-      const _id = (await QuestLineRepo.findMainQuestLine()).record._id.toString();
+      const _id = (await QuestLineRepo.findMainQuestLine()).record._id.toHexString();
       const response = await request(app).get(`/quests/questline/${_id}`);
 
       expect(response.status).toBe(200);
@@ -89,8 +99,8 @@ describe('Quests HTTP API Routes', () => {
   describe('/quests/questline/finish', () => {
     test('Should return 202 status code and correct message if main questline active', async () => {
       const { record } = await QuestRepo.findMainQuest();
-      await QuestRepo.finishQuestTodo(record._id.toString(), record.todos[0].description);
-      await QuestRepo.finishQuest(record._id.toString(), 1);
+      await QuestRepo.finishQuestTodo(record._id.toHexString(), record.todos[0].description);
+      await QuestRepo.finishQuest(record._id.toHexString(), 1);
       const response = await request(app).get(`/quests/questline/finish`);
 
       expect(response.status).toBe(202);
@@ -119,197 +129,313 @@ describe('Quests HTTP API Routes', () => {
     });
   })
 
-  // describe('/quests/questline/all-finished', () => {
-  //   test('Should respond with 200 status code and an array of finished questlines', async () => {
-  //     const response = await request(app).get('/quests/questline/all-finished');
+  describe('/quests/questline/all-finished', () => {
+    test('Should respond with 200 status code and an array of finished questlines', async () => {
+      const response = await request(app).get('/quests/questline/all-finished');
       
-  //     expect(response.status).toBe(200);
-  //     expect(response.body.status).toBe(200);
-  //     expect(response.body.message).toBe('');
-  //     expect(Array.isArray(response.body.body)).toBe(true);
-  //     response.body.body.forEach(questline => expect(questline.state).toBe('finished'));
-  //   });
-  // });
+      expect(response.status).toBe(200);
+      expect(response.body.status).toBe(200);
+      expect(response.body.message).toBe('');
+      expect(Array.isArray(response.body.body)).toBe(true);
+      response.body.body.forEach(questline => expect(questline.state).toBe('finished'));
+    });
+  });
 
-  // describe('/quests/questline/new', () => {
-  //   test('Should respond with 201 status code and correct message uppon correct properties provided', async () => {
-  //     const reqBody = {}
-  //     const response = await request(app).post('/quests/questline/new').send(reqBody);
+  describe('/quests/questline/new', () => {
+    test('Should respond with 201 status code and correct message uppon correct properties provided', async () => {
+      const reqBody = {
+        title: 'Practice questline 2',
+        description: 'Practice questline 2',
+        type: 'practice',
+        timecap: null
+      }
+      const response = await request(app).post('/quests/questline/new').send(reqBody);
 
-  //     expect(response.status).toBe(201);
-  //     expect(response.body.status).toBe(201);
-  //     expect(response.body.message).toBe('Questline created');
-  //     expect(response.body.body).toBe(null);
-  //   })
+      expect(response.status).toBe(201);
+      expect(response.body.status).toBe(201);
+      expect(response.body.message).toBe('Questline created');
+      expect(response.body.body).toBe(null);
+    });
 
-  //   test('Should respond with 400 status code and correct message uppon incorrect properties provided', async () => {
-  //     const reqBody = {}
-  //     const response = await request(app).post('/quests/questline/new').send(reqBody);
+    test('Should respond with 400 status code and correct message uppon incorrect properties provided', async () => {
+      const reqBody = {
+        title: 'Practice questline 2',
+        description: 'Practice questline 2',
+        type: 'practice',
+        //timecap: null
+      }
 
-  //     expect(response.status).toBe(400);
-  //     expect(response.body.status).toBe(400);
-  //     expect(response.body.message).toBe('Bad Request: Property "" is missing');
-  //     expect(response.body.body).toBe(null);
-  //   })
+      const response = await request(app).post('/quests/questline/new').send(reqBody);
 
-  // })
+      expect(response.status).toBe(400);
+      expect(response.body.status).toBe(400);
+      expect(response.body.message).toBe('Bad Request: Property "timecap" is missing');
+      expect(response.body.body).toBe(null);
+    });
+  });
 
-  // describe('/quests/activeQuest', () => {
-  //   test('Should responds 200 status code and a quest if any active', async () => {
-  //     const response = await request(app).get('/quests/active-quest');
+  describe('/quests/activeQuest', () => {
+    test('Should responds 200 status code and a quest if any active', async () => {
+      const response = await request(app).get('/quests/active-quest');
+      const expectedQuest = {
+        ...dummyQuest,
+        todos: dummyQuest.todos.map(todo => ({description: todo, state: 'active', finished_at: null}))
+      }
 
-  //     expect(response.status).toBe(200);
-  //     expect(response.body.status).toBe(200);
-  //     expect(response.body.message).toBe('');
-  //     expect(response.body.body).toBe(null);
-  //   });
-  // });
+      expect(response.status).toBe(200);
+      expect(response.body.status).toBe(200);
+      expect(response.body.message).toBe('');
+      expect(response.body.body).toMatchObject(expectedQuest);
+    });
+  });
 
-  // describe('/quests/quest/new', () => {
-  //   test('Should respond with 201 status code and correct message uppon correct properties provided', async () => {
-  //     const reqBody = {}
-  //     const response = await request(app).post('/quests/active-quest').send(reqBody);
+  describe('/quests/quest/new', () => {
+    test('Should respond with 201 status code and correct message uppon correct properties provided', async () => {
+      const { record } = await QuestRepo.findMainQuest();
+      await QuestRepo.finishQuestTodo(record._id.toHexString(), record.todos[0].description);
+      await QuestRepo.finishQuest(record._id.toHexString(), 1);
+      const questline_id = (await QuestLineRepo.findMainQuestLine()).record._id;
 
-  //     expect(response.status).toBe(201);
-  //     expect(response.body.status).toBe(201);
-  //     expect(response.body.message).toBe('Quest created');
-  //     expect(response.body.body).toBe(null);
-  //   });
+      const reqBody = {
+        questline_id,
+        title: 'Quest 2',
+        description: 'Quest 2',
+        type: 'main',
+        todos: ['to-do 1'],
+        timecap: 4*60*60*1000
+      };
 
-  //   test('Should respond with 400 status code and correct message uppon incorrect properties provided', async () => {
-  //     const reqBody = {}
-  //     const response = await request(app).post('/quests/active-quest').send(reqBody);
+      const response = await request(app).post('/quests/quest/new').send(reqBody);
 
-  //     expect(response.status).toBe(400);
-  //     expect(response.body.status).toBe(400);
-  //     expect(response.body.message).toBe('Bad Request: Property "" is missing');
-  //     expect(response.body.body).toBe(null);
-  //   });
+      expect(response.status).toBe(201);
+      expect(response.body.status).toBe(201);
+      expect(response.body.message).toBe('Quest created');
+      expect(response.body.body).toBe(null);
+    });
 
-  //   test('Should respond with 400 status code and correct message uppon correct properties provided', async () => {
-  //     const reqBody = {}
-  //     const response = await request(app).post('/quests/active-quest').send(reqBody);
+    test('Should respond with 400 status code if Questline already finished', async () => {
+      const { record } = await QuestRepo.findMainQuest();
+      await QuestRepo.finishQuestTodo(record._id.toHexString(), record.todos[0].description);
+      await QuestRepo.finishQuest(record._id.toHexString(), 1);
+      const questline_id = (await QuestLineRepo.findMainQuestLine()).record._id;
+      await QuestLineRepo.finishMainQuestLine();
 
-  //     expect(response.status).toBe(400);
-  //     expect(response.body.status).toBe(400);
-  //     expect(response.body.message).toBe('Bad Request: Invalid questline_id');
-  //     expect(response.body.body).toBe(null);
-  //   });
-  // });
+      const reqBody = {
+        questline_id,
+        title: 'Quest 2',
+        description: 'Quest 2',
+        type: 'main',
+        todos: ['to-do 1'],
+        timecap: 4*60*60*1000
+      };
 
-  // describe('/quests/quest/handle-todo', () => {
-  //   test('Should respond with 202 status code and correct message uppon correct properties provided', async () => {
-  //     const reqBody = {
-  //       action: 'finished'
-  //     }
-  //     const response = await request(app).post('quests/quest/handle-todo').send(reqBody);
+      const response = await request(app).post('/quests/quest/new').send(reqBody);
 
-  //     expect(response.status).toBe(202);
-  //     expect(response.body.status).toBe(202);
-  //     expect(response.body.message).toBe(`To-do ${reqBody.action}`);
-  //     expect(response.body.body).toBe(null);
-  //   });
+      expect(response.status).toBe(400);
+      expect(response.body.status).toBe(400);
+      expect(response.body.message).toBe('Bad Request: Questline already finished or invalidated');
+      expect(response.body.body).toBe(null);
+    });
 
-  //   test('Should respond with 400 status code and correct message uppon already finished to-do', async () => {
-  //     const reqBody = {
-  //       action: 'finished'
-  //     }
-  //     const response = await request(app).post('quests/quest/handle-todo').send(reqBody);
+    test('Should respond with 400 status code if Questline no found', async () => {
+      const { record } = await QuestRepo.findMainQuest();
+      await QuestRepo.finishQuestTodo(record._id.toHexString(), record.todos[0].description);
+      await QuestRepo.finishQuest(record._id.toHexString(), 1);
 
-  //     expect(response.status).toBe(400);
-  //     expect(response.body.status).toBe(400);
-  //     expect(response.body.message).toBe(`Bad Request: To-do already handled`);
-  //     expect(response.body.body).toBe(null);
-  //   });
+      const reqBody = {
+        questline_id: '123456789123456789123456',
+        title: 'Quest 2',
+        description: 'Quest 2',
+        type: 'main',
+        todos: ['to-do 1'],
+        timecap: 4*60*60*1000
+      };
 
-  //   test('Should respond with 400 status code and correct message uppon incorrect properties provided', async () => {
-  //     const reqBody = {
-  //       action: 'finished'
-  //     };
-  //     const response = await request(app).post('quests/quest/handle-todo').send(reqBody);
+      const response = await request(app).post('/quests/quest/new').send(reqBody);
 
-  //     expect(response.status).toBe(400);
-  //     expect(response.body.status).toBe(400);
-  //     expect(response.body.message).toBe(`Bad Request: Property "" is missing`);
-  //     expect(response.body.body).toBe(null);
-  //   });
+      expect(response.status).toBe(400);
+      expect(response.body.status).toBe(400);
+      expect(response.body.message).toBe('Bad Request: Questline not found, verify questline_id property');
+      expect(response.body.body).toBe(null);
+    });
+    
+    test('Should respond with 400 status code and correct message uppon incorrect properties provided', async () => {
+      const reqBody = {
+        //questline_id: undefined,
+        title: 'Quest 2',
+        description: 'Quest 2',
+        type: 'main',
+        todos: ['to-do 1'],
+        timecap: 4*60*60*1000
+      };
+      const response = await request(app).post('/quests/quest/new').send(reqBody);
 
-  //   test('Should respond with 400 status code and correct message uppon invalid quest_id', async () => {
-  //     const reqBody = {
-  //       action: 'finished'
-  //     }
-  //     const response = await request(app).post('quests/quest/handle-todo').send(reqBody);
+      expect(response.status).toBe(400);
+      expect(response.body.status).toBe(400);
+      expect(response.body.message).toBe('Bad Request: Property "questline_id" is missing');
+      expect(response.body.body).toBe(null);
+    });
 
-  //     expect(response.status).toBe(400);
-  //     expect(response.body.status).toBe(400);
-  //     expect(response.body.message).toBe(`Bad Request: Invalid quest_id`);
-  //     expect(response.body.body).toBe(null);
-  //   });
+    test('Should respond with 400 status code and correct message uppon correct properties provided', async () => {
+      const reqBody = {
+        questline_id: 'invalid_id',
+        title: 'Quest 2',
+        description: 'Quest 2',
+        type: 'main',
+        todos: ['to-do 1'],
+        timecap: 4*60*60*1000
+      };
+      const response = await request(app).post('/quests/quest/new').send(reqBody);
 
-  //   test('Should respond with 400 status code and correct message uppon invalid todoDescription', async () => {
-  //     const reqBody = {
-  //       action: 'finished'
-  //     }
-  //     const response = await request(app).post('quests/quest/handle-todo').send(reqBody);
+      expect(response.status).toBe(400);
+      expect(response.body.status).toBe(400);
+      expect(response.body.message).toBe('Bad Request: Invalid questline_id');
+      expect(response.body.body).toBe(null);
+    });
+  });
 
-  //     expect(response.status).toBe(400);
-  //     expect(response.body.status).toBe(400);
-  //     expect(response.body.message).toBe(`Bad Request: Invalid todoDescription`);
-  //     expect(response.body.body).toBe(null);
-  //   });
-  // });
+  describe('/quests/quest/handle-todo', () => {
+    test('Should respond with 202 status code and correct message uppon correct properties provided', async () => {
+      const quest_id = (await QuestRepo.findMainQuest()).record._id.toHexString();
+      const reqBody = {
+        quest_id,
+        todoDescription: dummyQuest.todos[0],
+        action: 'finish'
+      }
+      const response = await request(app).post('/quests/quest/handle-todo').send(reqBody);
 
-  // describe('/quests/quest/finish', () => {
-  //   test('Should respond with 202 status code and correct message uppon correct properties', async () => {
-  //     const reqBody = {};
-  //     const response = await request(app).post('/quests/quest/finish').send(reqBody);
+      expect(response.status).toBe(202);
+      expect(response.body.status).toBe(202);
+      expect(response.body.message).toBe(`To-do ${reqBody.action}`);
+      expect(response.body.body).toBe(null);
+    });
 
-  //     expect(response.status).toBe(202);
-  //     expect(response.body.status).toBe(202);
-  //     expect(response.body.message).toBe(`Quest finished`);
-  //     expect(response.body.body).toBe(null);
-  //   });
+    test('Should respond with 400 status code and correct message uppon already finished to-do', async () => {
+      const quest_id = (await QuestRepo.findMainQuest()).record._id.toHexString();
+      await QuestRepo.finishQuestTodo(quest_id, dummyQuest.todos[0]);
+      const reqBody = {
+        quest_id,
+        todoDescription: dummyQuest.todos[0],
+        action: 'finish'
+      }
+      const response = await request(app).post('/quests/quest/handle-todo').send(reqBody);
 
-  //   test('Should respond with 400 status code and correct message uppon incorrect properties', async () => {
-  //     const reqBody = {};
-  //     const response = await request(app).post('/quests/quest/finish').send(reqBody);
+      expect(response.status).toBe(400);
+      expect(response.body.status).toBe(400);
+      expect(response.body.message).toBe(`Bad Request: To-do already handled`);
+      expect(response.body.body).toBe(null);
+    });
 
-  //     expect(response.status).toBe(400);
-  //     expect(response.body.status).toBe(400);
-  //     expect(response.body.message).toBe(`Bad Request: Property "" is missing`);
-  //     expect(response.body.body).toBe(null);
-  //   });
+    test('Should respond with 400 status code and correct message uppon incorrect properties provided', async () => {
+      const reqBody = {
+        //quest_id: '',
+        action: 'finish',
+        todoDescription: dummyQuest.todos[0]
+      };
+      const response = await request(app).post('/quests/quest/handle-todo').send(reqBody);
 
-  //   test('Should respond with 400 status code and correct message uppon invalid quest_id', async () => {
-  //     const reqBody = {};
-  //     const response = await request(app).post('/quests/quest/finish').send(reqBody);
+      expect(response.status).toBe(400);
+      expect(response.body.status).toBe(400);
+      expect(response.body.message).toBe(`Bad Request: Property "quest_id" is missing`);
+      expect(response.body.body).toBe(null);
+    });
 
-  //     expect(response.status).toBe(400);
-  //     expect(response.body.status).toBe(400);
-  //     expect(response.body.message).toBe(`Bad Request: Invalid quest_id`);
-  //     expect(response.body.body).toBe(null);
-  //   });
-  // });
+    test('Should respond with 400 status code and correct message uppon invalid quest_id', async () => {
+      const reqBody = {
+        quest_id: 'invalid_id',
+        action: 'finish',
+        todoDescription: dummyQuest.todos[0]
+      };
+      const response = await request(app).post('/quests/quest/handle-todo').send(reqBody);
 
-  // describe('/quests/quest/distraction', () => {
-  //   test('Should respond with 202 and correct message if active quest', async () => {
-  //     const response = await request(app).get('/quests/quest/distraction');
+      expect(response.status).toBe(400);
+      expect(response.body.status).toBe(400);
+      expect(response.body.message).toBe(`Bad Request: Invalid quest_id`);
+      expect(response.body.body).toBe(null);
+    });
 
-  //     expect(response.status).toBe(202);
-  //     expect(response.body.status).toBe(202);
-  //     expect(response.body.message).toBe(`Distraction score increased`);
-  //     expect(response.body.body).toBe(null);
-  //   });
+    test('Should respond with 400 status code and correct message uppon invalid todoDescription', async () => {
+      const quest_id = (await QuestRepo.findMainQuest()).record._id.toHexString();
+      const reqBody = {
+        quest_id,
+        action: 'finish',
+        todoDescription: 'invalid_todo'
+      }
+      const response = await request(app).post('/quests/quest/handle-todo').send(reqBody);
 
-  //   test('Should respond with 400 and correct message if no active quest', async () => {
-  //     const response = await request(app).get('/quests/quest/distraction');
+      expect(response.status).toBe(400);
+      expect(response.body.status).toBe(400);
+      expect(response.body.message).toBe(`Bad Request: To-do not found, this to-do or quest may not exist`);
+      expect(response.body.body).toBe(null);
+    });
+  });
 
-  //     expect(response.status).toBe(400);
-  //     expect(response.body.status).toBe(400);
-  //     expect(response.body.message).toBe(`Bad Request: No active quest found`);
-  //     expect(response.body.body).toBe(null);
-  //   });
-  // })
+  describe('/quests/quest/finish', () => {
+    test('Should respond with 202 status code and correct message uppon correct properties', async () => {
+      const quest_id = (await QuestRepo.findMainQuest()).record._id.toHexString();
+      await QuestRepo.finishQuestTodo(quest_id, dummyQuest.todos[0]);
+      const reqBody = {
+        quest_id,
+        focusScore: 10
+      };
+      const response = await request(app).post('/quests/quest/finish').send(reqBody);
+
+      expect(response.status).toBe(202);
+      expect(response.body.status).toBe(202);
+      expect(response.body.message).toBe(`Quest finished`);
+      expect(response.body.body).toBe(null);
+    });
+
+    test('Should respond with 400 status code and correct message uppon incorrect properties', async () => {
+      const reqBody = {
+        //quest_id,
+        focusScore: 10
+      };
+      const response = await request(app).post('/quests/quest/finish').send(reqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.body.status).toBe(400);
+      expect(response.body.message).toBe(`Bad Request: Property "quest_id" is missing`);
+      expect(response.body.body).toBe(null);
+    });
+
+    test('Should respond with 400 status code and correct message uppon invalid quest_id', async () => {
+      const reqBody = {
+        quest_id: 'invalid_id',
+        focusScore: 10
+      };
+      const response = await request(app).post('/quests/quest/finish').send(reqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.body.status).toBe(400);
+      expect(response.body.message).toBe(`Bad Request: Invalid quest_id`);
+      expect(response.body.body).toBe(null);
+    });
+  });
+
+  describe('/quests/quest/distraction', () => {
+    test('Should respond with 202 and correct message if active quest', async () => {
+      const response = await request(app).get('/quests/quest/distraction');
+
+      expect(response.status).toBe(202);
+      expect(response.body.status).toBe(202);
+      expect(response.body.message).toBe(`Distraction score increased`);
+      expect(response.body.body).toBe(null);
+    });
+
+    test('Should respond with 400 and correct message if no active quest', async () => {
+      const { record } = await QuestRepo.findMainQuest();
+      await QuestRepo.finishQuestTodo(record._id.toHexString(), record.todos[0].description);
+      await QuestRepo.finishQuest(record._id.toHexString(), 1);
+
+      const response = await request(app).get('/quests/quest/distraction');
+
+      expect(response.status).toBe(400);
+      expect(response.body.status).toBe(400);
+      expect(response.body.message).toBe(`Bad Request: No active quest found`);
+      expect(response.body.body).toBe(null);
+    });
+  })
 });
 
 

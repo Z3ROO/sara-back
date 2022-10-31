@@ -55,7 +55,7 @@ class QuestLineRepo extends NoSQLRepository<IQuestLine>{
       const mainQuestline = await this.findMainQuestLine();
 
       if (mainQuestline.record)
-        throw new Error('Main questline already');
+        throw new Error('Main questline already exist');
     }
 
     this.collection().insertOne({

@@ -1,5 +1,7 @@
 import QuestRepo from "../repositories/QuestRepo";
+import { BadRequest } from "../util/errors/HttpStatusCode";
 import { IQuest } from "./interfaces/interfaces";
+import { QuestLine } from "./Questline";
 
 export class Quest {
   static async getActiveMainQuest() {
@@ -39,22 +41,35 @@ export class Quest {
   }
 
   static async handleQuestTodo(questIdentifier: string, todoIdentifier: string, action: 'invalidate'|'finish') {
+    const todoStatus = await QuestRepo.questTodoStatus(questIdentifier, todoIdentifier);
+
+    if (todoStatus == null)
+      throw new BadRequest('To-do not found, this to-do or quest may not exist');
+
+    if (todoStatus !== 'active')
+      throw new BadRequest('To-do already handled');
+
     if (action === 'invalidate')
       await QuestRepo.invalidateQuestTodo(questIdentifier, todoIdentifier);
     else if (action === 'finish')
       await QuestRepo.finishQuestTodo(questIdentifier, todoIdentifier);
+      
     return;
   }
 
   static async createNewQuest(properties: Partial<IQuest>) {
+    const { questline_id } = properties;
+
+    const isQuestlineValid = await QuestLine.getOneActiveQuestLine(questline_id);
+
     await QuestRepo.insertNewQuest(properties);
   }
 
   static async insertDistractionPoint() {
     const activeQuest = await QuestRepo.findMainQuest();
 
-    if (!activeQuest)
-      throw new Error("No active main quest found. An active Quest must exist to insert distraction points.")
+    if (activeQuest.record == null)
+      throw new BadRequest("No active quest found");
 
     await QuestRepo.insertDistractionPoint(activeQuest.record._id.toString());
   }

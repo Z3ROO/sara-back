@@ -48,21 +48,25 @@ export default class QuestsAPIHandlers {
       body: questlines
     };
   }
+
   //[POST]/quests/questline/new
   static async createNewQuestLine(req: any, res: any) {
-    const { title, description, duration, type } = req.body;
+    const { title, description, timecap, type } = req.body;
     
     const questline: Partial<IQuestLine> = {
       title,
       description,
       type,
-      timecap: duration
+      timecap
     }
     
     checkForMissingProperties(questline);
     await QuestLine.createNewQuestLine(questline);
 
-    return;
+    return {
+      status: 201,
+      message: 'Questline created'
+    };
   }
 
   //[GET]/quests/active-quest
@@ -86,8 +90,11 @@ export default class QuestsAPIHandlers {
       type,
       todos
     }
-
+    
     checkForMissingProperties(questBody);
+
+    if (!isObjectId(questline_id))
+      throw new BadRequest('Invalid questline_id')
 
     await Quest.createNewQuest(questBody);
 
@@ -111,6 +118,9 @@ export default class QuestsAPIHandlers {
       action 
     });
 
+    if (!isObjectId(quest_id))
+      throw new BadRequest('Invalid quest_id')
+
     await Quest.handleQuestTodo(quest_id, todoDescription, action);
     
     return {
@@ -124,6 +134,9 @@ export default class QuestsAPIHandlers {
     const { quest_id, focusScore } = req.body;
     
     checkForMissingProperties({ quest_id, focusScore });
+
+    if (!isObjectId(quest_id))
+      throw new BadRequest('Invalid quest_id');
 
     await Quest.finishQuest(quest_id, focusScore);
     

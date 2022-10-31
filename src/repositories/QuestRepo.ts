@@ -123,6 +123,16 @@ class QuestRepo extends NoSQLRepository<IQuest>{
       );
   }
 
+  async questTodoStatus(questIdentifier: string, todoIdentifier: string) {
+    const quest = await this.collection().findOne({_id: new ObjectId(questIdentifier)});
+    const todo = quest.todos.find(todo => (todo.description === todoIdentifier))
+    
+    if (todo)
+      return todo.state;
+    
+    return null;
+  }
+  
   async invalidateQuestTodo(questIdentifier: string, todoIdentifier: string,) {
     await this.collection().findOneAndUpdate({_id: new ObjectId(questIdentifier)}, {
       $set: {
@@ -132,7 +142,7 @@ class QuestRepo extends NoSQLRepository<IQuest>{
     },
     {
       arrayFilters: [ { "tds.description": todoIdentifier } ]
-    })
+    });
   }
 
   async finishQuestTodo(questIdentifier: string, todoIdentifier: string,) {
@@ -144,7 +154,7 @@ class QuestRepo extends NoSQLRepository<IQuest>{
     },
     {
       arrayFilters: [ { "tds.description": todoIdentifier } ]
-    })
+    });
   }
 }
 

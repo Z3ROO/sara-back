@@ -29,6 +29,18 @@ export class QuestLine {
     return record;
   }
 
+  static async getOneActiveQuestLine(identifier: string) {
+    const { record } = await QuestLineRepo.findOneQuestLine(identifier);
+
+    if (record && record.state !== 'active')
+      throw new BadRequest('Questline already finished or invalidated');
+
+    if (!record)
+      throw new BadRequest('Questline not found, verify questline_id property');
+
+    return record;
+  }
+
   static async getFineshedQuestLinesOfOneDay(date: Date|string) {
     if (typeof date === 'string')
       date = new Date(date);

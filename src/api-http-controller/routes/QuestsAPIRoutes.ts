@@ -30,7 +30,7 @@ export default [
     handler: QuestsAPIHandlers.createNewQuest
   },
   {
-    method: 'post', path: '/quests/quest/todo',
+    method: 'post', path: '/quests/quest/handle-todo',
     handler: QuestsAPIHandlers.handleQuestTodo
   },
   {
