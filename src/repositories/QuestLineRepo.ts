@@ -1,8 +1,8 @@
-import Repository, { NoSQLRepository } from "./RepoResultHandler"
+import { NoSQLRepository } from "./RepoResultHandler"
 import { RepositoryError } from "./../util/errors/RepositoryError";
-import { randomUUID } from 'crypto';
 import { IQuestLine } from "./../features/interfaces/interfaces";
 import { ObjectId } from "mongodb";
+import { BadRequest } from "../util/errors/HttpStatusCode";
 
 class QuestLineRepo extends NoSQLRepository<IQuestLine>{
   async findMainQuestLine(){
@@ -63,7 +63,7 @@ class QuestLineRepo extends NoSQLRepository<IQuestLine>{
       description,
       type,
       state: 'active',
-      timecap,
+      timecap: type === 'main' ? timecap : null,
       created_at: new Date(),
       finished_at: null,
       level: type === 'main' ? null : 0,
@@ -73,11 +73,13 @@ class QuestLineRepo extends NoSQLRepository<IQuestLine>{
   }
 
   async finishMainQuestLine() {
-    await this.collection().updateOne({type: 'main', state: 'active'}, {finished_at: new Date(), state:'finished'});
+    const result = await this.collection().updateOne({type: 'main', state: 'active'}, {$set: {finished_at: new Date(), state:'finished'}});
+    
+    return result.modifiedCount > 0
   }
   
   async invalidateQuestLine(identifier: string) {
-    await this.collection().updateOne({_id: new ObjectId(identifier)}, {finished_at: new Date(), state:'invalidated'});
+    await this.collection().updateOne({_id: new ObjectId(identifier)}, {$set: {finished_at: new Date(), state:'invalidated'}});
   }
 
   async deleteQuestline(identifier: string) {

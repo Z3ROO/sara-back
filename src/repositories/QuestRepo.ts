@@ -49,13 +49,14 @@ class QuestRepo extends NoSQLRepository<IQuest>{
     return { records };
   }
 
-  async insertNewQuest(properties: Partial<IQuest>) {
+  async insertNewQuest(properties: any) {
     const { 
       questline_id,
       mission_id,
       title,
       description,
       type,
+      state,
       todos,
       timecap,
       xp
@@ -81,13 +82,13 @@ class QuestRepo extends NoSQLRepository<IQuest>{
       description,
       type,
       state: type === 'main' ? 'active' : 'deferred',
-      todos,
+      todos: todos.map((todo: string) => ({description: todo, state: 'active', finished_at: null})),
       timecap,
       focus_score: 0,
       distraction_score: 0,
       created_at: new Date(),
       finished_at: null,
-      xp
+      xp: 50
     });
   }
 

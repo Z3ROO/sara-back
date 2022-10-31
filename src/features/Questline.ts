@@ -1,4 +1,6 @@
 import QuestLineRepo from "../repositories/QuestLineRepo";
+import QuestRepo from "../repositories/QuestRepo";
+import { BadRequest } from "../util/errors/HttpStatusCode";
 import { IQuestLine } from "./interfaces/interfaces";
 
 export class QuestLine {
@@ -43,6 +45,16 @@ export class QuestLine {
   }
 
   static async finishMainQuestLine() {
-    return QuestLineRepo.finishMainQuestLine();
+    const { record } = await QuestRepo.findMainQuest();
+    
+    if (record)
+      throw new BadRequest('Can\'t finish, a quest is currently active');
+
+    const result = await QuestLineRepo.finishMainQuestLine();
+
+    if (!result)
+      throw new BadRequest('No active Main Questline to be finished');
+    
+    return;
   }
 }

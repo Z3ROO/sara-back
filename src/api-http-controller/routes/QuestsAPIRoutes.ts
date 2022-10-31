@@ -18,7 +18,11 @@ export default [
     handler: QuestsAPIHandlers.getListOfActiveQuestLines
   },
   {
-    method: 'get', path: '/quests/questline/:id',
+    method: 'get', path: '/quests/questline/finish',
+    handler: QuestsAPIHandlers.finishMainQuestLine
+  },
+  {
+    method: 'get', path: '/quests/questline/:questline_id',
     handler: QuestsAPIHandlers.getQuestLineInfo
   },
   {
@@ -36,9 +40,5 @@ export default [
   {
     method: 'get', path: '/quests/quest/distraction',
     handler: QuestsAPIHandlers.increaseDistractionScore
-  },
-  {
-    method: 'get', path: '/quests/questline/finish',
-    handler: QuestsAPIHandlers.finishMainQuestLine
   }
 ]
