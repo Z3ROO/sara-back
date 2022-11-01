@@ -1,8 +1,8 @@
 import request from 'supertest';
-import { closeDb, db, initMongoDB } from '../../infra/database/mongodb';
-import { app } from '../../infra/http-server';
-import QuestlineRepo from '../../repositories/QuestlineRepo';
-import QuestRepo from '../../repositories/QuestRepo';
+import { closeDb, db, initMongoDB } from '../../../infra/database/mongodb';
+import { app } from '../../../infra/http-server';
+import QuestlineRepo from '../../../repositories/QuestlineRepo';
+import QuestRepo from '../../../repositories/QuestRepo';
 
 describe('Quests HTTP API Routes', () => {
   const dummyFinishedQuestline:any = {

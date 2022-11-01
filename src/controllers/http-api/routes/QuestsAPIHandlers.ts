@@ -1,8 +1,8 @@
-import { IQuest, IQuestline } from "../../features/interfaces/interfaces";
-import { Quest } from "../../features/Quest";
-import { Questline } from "../../features/Questline";
-import { isObjectId } from "../../infra/database/mongodb";
-import { BadRequest } from "../../util/errors/HttpStatusCode";
+import { IQuest, IQuestline } from "../../../features/interfaces/interfaces";
+import { Quest } from "../../../features/Quest";
+import { Questline } from "../../../features/Questline";
+import { isObjectId } from "../../../infra/database/mongodb";
+import { BadRequest } from "../../../util/errors/HttpStatusCode";
 import { checkForMissingProperties } from "./utils";
 
 export default class QuestsAPIHandlers {

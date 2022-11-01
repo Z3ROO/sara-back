@@ -1,7 +1,7 @@
-import { IRecords } from "../../features/interfaces/interfaces";
-import { Records } from "../../features/Records";
-import { isObjectId } from "../../infra/database/mongodb";
-import { BadRequest } from "../../util/errors/HttpStatusCode";
+import { IRecords } from "../../../features/interfaces/interfaces";
+import { Records } from "../../../features/Records";
+import { isObjectId } from "../../../infra/database/mongodb";
+import { BadRequest } from "../../../util/errors/HttpStatusCode";
 import { checkForMissingProperties } from "./utils";
 
 

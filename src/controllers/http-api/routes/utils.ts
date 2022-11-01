@@ -1,4 +1,4 @@
-import { BadRequest } from "../../util/errors/HttpStatusCode";
+import { BadRequest } from "../../../util/errors/HttpStatusCode";
 
 export function checkForMissingProperties(object:any) {
   Object.keys(object).forEach(key => {

@@ -1,4 +1,4 @@
-import { Leveling } from "../../features/Leveling";
+import { Leveling } from "../../../features/Leveling";
 
 export default [
   {

@@ -1,8 +1,8 @@
 import request from 'supertest';
-import { IFeats } from '../../features/interfaces/interfaces';
-import { closeDb, db, initMongoDB } from '../../infra/database/mongodb';
-import { app } from '../../infra/http-server';
-import FeatsRepo from '../../repositories/FeatsRepo';
+import { IFeats } from '../../../features/interfaces/interfaces';
+import { closeDb, db, initMongoDB } from '../../../infra/database/mongodb';
+import { app } from '../../../infra/http-server';
+import FeatsRepo from '../../../repositories/FeatsRepo';
 
 describe('Feats HTTP API Routes', () => {
   const dummyFeat: Partial<IFeats> = {
