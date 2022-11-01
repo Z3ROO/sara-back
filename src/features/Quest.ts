@@ -1,14 +1,14 @@
 import QuestRepo from "../repositories/QuestRepo";
 import { BadRequest } from "../util/errors/HttpStatusCode";
-import { IQuest } from "./interfaces/interfaces";
+import { INewQuest, IQuest } from "./interfaces/interfaces";
 import { Questline } from "./Questline";
 
 export class Quest {
   static async getActiveMainQuest() {
-    const quest = await QuestRepo.findMainQuest();
+    const quest = await QuestRepo.findActiveMainQuest();
 
     if (!quest)
-      return null
+      throw new BadRequest("No active quest found");
     
     return quest
   }
@@ -57,19 +57,17 @@ export class Quest {
     return;
   }
 
-  static async createNewQuest(properties: Partial<IQuest>) {
-    const { questline_id } = properties;
+  static async createNewQuest(properties: INewQuest) {
+    const {_id} = await Questline.getActiveQuestline(); /* throws if none */
 
-    const isQuestlineValid = await Questline.getOneActiveQuestline(questline_id);
+    if (_id.toHexString() !== properties.questline_id)
+      throw new BadRequest('Issued questline_id does not match with current Questline');
 
     await QuestRepo.insertNewQuest(properties);
   }
 
   static async insertDistractionPoint() {
-    const activeQuest = await QuestRepo.findMainQuest();
-
-    if (activeQuest == null)
-      throw new BadRequest("No active quest found");
+    const activeQuest = await this.getActiveMainQuest();
 
     await QuestRepo.insertDistractionPoint(activeQuest._id.toString());
   }

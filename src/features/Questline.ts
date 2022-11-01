@@ -1,22 +1,16 @@
 import QuestlineRepo from "../repositories/QuestlineRepo";
 import QuestRepo from "../repositories/QuestRepo";
 import { BadRequest } from "../util/errors/HttpStatusCode";
-import { IQuestline } from "./interfaces/interfaces";
+import { INewQuestline, IQuestline } from "./interfaces/interfaces";
 
 export class Questline {
-  static async getMainQuestline() {
-    const questline = await QuestlineRepo.findMainQuestline();
+  static async getActiveQuestline() {
+    const questline = await QuestlineRepo.findActiveQuestline();
 
     if (!questline)
-      return null
+      throw new BadRequest('No active questline found');
 
     return questline
-  }
-
-  static async getAllActiveQuestlines() {
-    const questlines = await QuestlineRepo.findAllActiveQuestlines();
-
-    return questlines;
   }
 
   static async getAllFineshedQuestlines() {
@@ -26,18 +20,6 @@ export class Questline {
 
   static async getOneQuestline(identifier: string) {
     const questline = await QuestlineRepo.findOneQuestline(identifier);
-    return questline;
-  }
-
-  static async getOneActiveQuestline(identifier: string) {
-    const questline = await QuestlineRepo.findOneQuestline(identifier);
-
-    if (questline && questline.state !== 'active')
-      throw new BadRequest('Questline already finished or invalidated');
-
-    if (!questline)
-      throw new BadRequest('Questline not found, verify questline_id property');
-
     return questline;
   }
 
@@ -52,17 +34,17 @@ export class Questline {
     return questlines
   }
 
-  static async createNewQuestline(questline: Partial<IQuestline>) {
+  static async createNewQuestline(questline: INewQuestline) {
     return QuestlineRepo.createNewQuestline(questline);
   }
 
-  static async finishMainQuestline() {
-    const questline = await QuestRepo.findMainQuest();
+  static async terminateActiveQuestline(action: 'finished'|'invalidated') {
+    const questline = await QuestRepo.findActiveMainQuest();
     
     if (questline)
       throw new BadRequest('Can\'t finish, a quest is currently active');
 
-    const result = await QuestlineRepo.finishMainQuestline();
+    const result = await QuestlineRepo.terminateActiveQuestline(action);
 
     if (!result)
       throw new BadRequest('No active Main Questline to be finished');

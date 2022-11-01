@@ -1,4 +1,4 @@
-import { IFeats } from "./../features/interfaces/interfaces";
+import { IFeats, INewFeat, ITodo } from "./../features/interfaces/interfaces";
 import { RepositoryError } from "./../util/errors/RepositoryError"
 import { NoSQLRepository } from "./RepoResultHandler"
 import { ObjectId } from 'mongodb'
@@ -27,8 +27,8 @@ class FeatsRepo extends NoSQLRepository<IFeats>{
     return feats;
   }
 
-  async findFeatsByQuestline(questline: string) {
-    const feats = await this.collection().find({questline_id: questline}).toArray();
+  async findFeatsByQuestline(questline_id: string) {
+    const feats = await this.collection().find({questline_id}).toArray();
 
     return feats;
   }
@@ -40,31 +40,29 @@ class FeatsRepo extends NoSQLRepository<IFeats>{
     return feats;
   }
 
-  async insertOneFeat(properties: any) {
+  async insertOneFeat(properties: INewFeat) {
     let {
       questline_id,
+      skill_id,
       title,
       description,
-      acceptance,
       todos,
       categories,
-      tier,
-      completed,
-      xp,
-      finished_at,
+      tier
     } = properties;
   
-    todos = todos ? todos.map((todo:string) => ({description: todo, completed: false, finished_at: null})) : null;
+    const parsedTodos: ITodo[]|null = todos ? todos.map((todo) => ({description: todo, state: 'active', finished_at: null})) : null;
     
     await this.collection().insertOne({
-      questline_id,
+      questline_id: questline_id ? questline_id : null,
+      skill_id: skill_id ? skill_id : null,
       title,
       description,
       acceptance: {
         stage: 'created',
         date: [new Date()]
       },
-      todos: todos ? todos : null,
+      todos: parsedTodos,
       categories,
       tier,
       completed: false,

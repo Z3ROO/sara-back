@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { Feats } from "../../../features/Feats";
-import { IFeats } from "../../../features/interfaces/interfaces";
+import { IFeats, INewFeat } from "../../../features/interfaces/interfaces";
 import { isObjectId } from "../../../infra/database/mongodb";
 import { BadRequest } from "../../../util/errors/HttpStatusCode";
 import { checkForMissingProperties } from "./utils";
@@ -35,10 +35,11 @@ export default [
   {
     method: 'post', path: '/feats/new',
     handler: async function createNewFeat(req: Request, res: any) {
-      const  {questline_id, title, description, categories, todos, tier} = req.body
+      const  {questline_id, skill_id, title, description, categories, todos, tier} = req.body
   
-      const feat: Partial<IFeats> = {
+      const feat: INewFeat = {
         questline_id: questline_id || null,
+        skill_id: skill_id || null,
         title,
         description,
         todos: todos||null,

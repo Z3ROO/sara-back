@@ -1,5 +1,5 @@
 import FeatsRepo from "../repositories/FeatsRepo";
-import { IFeats, IRecords } from "./interfaces/interfaces";
+import { IFeats, INewFeat, IRecords } from "./interfaces/interfaces";
 
 export class Feats {
   static async getAllFeats() {
@@ -40,7 +40,7 @@ export class Feats {
     await FeatsRepo.updateOneFeat({_id: identifier}, properties)
   }
 
-  static async createNewFeat(properties: Partial<IFeats>) {
+  static async createNewFeat(properties: INewFeat) {
     await FeatsRepo.insertOneFeat(properties);
   }
 

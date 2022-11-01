@@ -1,4 +1,4 @@
-import { IQuest, IQuestline } from "../../../features/interfaces/interfaces";
+import { INewQuest, INewQuestline, IQuest, IQuestline } from "../../../features/interfaces/interfaces";
 import { Quest } from "../../../features/Quest";
 import { Questline } from "../../../features/Questline";
 import { isObjectId } from "../../../infra/database/mongodb";
@@ -9,10 +9,10 @@ export default class QuestsAPIHandlers {
 
   //[GET]/quests/questline/
   static async getListOfActiveQuestlines(req: any) {
-    const questlines = await Questline.getAllActiveQuestlines();
+    const questline = await Questline.getActiveQuestline();
 
     return {
-      body: questlines
+      body: questline
     };
   }
 
@@ -32,7 +32,7 @@ export default class QuestsAPIHandlers {
 
   //[GET]/quests/questline/finish
   static async finishMainQuestline(req: any, res: any) {
-    await Questline.finishMainQuestline();
+    await Questline.terminateActiveQuestline('finished');
     
     return {
       status: 202,
@@ -51,12 +51,11 @@ export default class QuestsAPIHandlers {
 
   //[POST]/quests/questline/new
   static async createNewQuestline(req: any, res: any) {
-    const { title, description, timecap, type } = req.body;
+    const { title, description, timecap } = req.body;
     
-    const questline: Partial<IQuestline> = {
+    const questline: INewQuestline = {
       title,
       description,
-      type,
       timecap
     }
     
@@ -82,7 +81,9 @@ export default class QuestsAPIHandlers {
   static async createNewQuest(req: any) {
     const { questline_id, title, description, timecap, type, todos } = req.body;
     
-    const questBody: Partial<IQuest> = {
+    const questBody: INewQuest = {
+      // skill_id,
+      // mission_id,
       questline_id,
       title,
       description,

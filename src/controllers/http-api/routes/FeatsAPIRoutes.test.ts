@@ -1,11 +1,11 @@
 import request from 'supertest';
-import { IFeats } from '../../../features/interfaces/interfaces';
+import { IFeats, INewFeat } from '../../../features/interfaces/interfaces';
 import { closeDb, db, initMongoDB } from '../../../infra/database/mongodb';
 import { app } from '../../../infra/http-server';
 import FeatsRepo from '../../../repositories/FeatsRepo';
 
 describe('Feats HTTP API Routes', () => {
-  const dummyFeat: Partial<IFeats> = {
+  const dummyFeat: INewFeat = {
     questline_id: '123456789123456789123456',
     title: 'Feat 01',
     description: 'Feat 01',
@@ -52,8 +52,8 @@ describe('Feats HTTP API Routes', () => {
 
   describe('/feats/complete/:feat_id', () => {
     test('Should respond with 202 status code and correct message uppon valid feat_id', async () => {
-      const { record } = await FeatsRepo.findOneFeat({title: dummyFeat.title});
-      const response = await request(app).get(`/feats/complete/${record._id}`);
+      const feat = await FeatsRepo.findOneFeat({title: dummyFeat.title});
+      const response = await request(app).get(`/feats/complete/${feat._id}`);
 
       expect(response.status).toBe(202);
       expect(response.body.status).toBe(202);

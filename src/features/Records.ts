@@ -1,5 +1,5 @@
 import RecordsRepo from "../repositories/RecordsRepo";
-import { IRecords } from "./interfaces/interfaces";
+import { INewRecord, IRecords } from "./interfaces/interfaces";
 import { proceedAcceptanceLevel } from "./Feats";
 
 export class Records {
@@ -40,20 +40,7 @@ export class Records {
     await RecordsRepo.updateRecordLevel({_id: identifier}, direction);
   }
 
-  static async createNewRecord(properties: Partial<IRecords>) {
-    const {
-      questline_id,
-      title,
-      description,
-      acceptance,
-      metric,
-      status,
-      categories,
-      level,
-      history,
-      xp
-    } = properties;
-    
+  static async createNewRecord(properties: INewRecord) {    
     await RecordsRepo.insertOneRecord(properties);
   }
 

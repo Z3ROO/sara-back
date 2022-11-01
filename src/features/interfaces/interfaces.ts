@@ -3,59 +3,84 @@ type levelHistory = {direction:-1|0|1, date: Date}[]
 export interface IQuestline {
   title: string
   description: string
-  type: 'main'|'practice'
   state: 'active'|'finished'|'invalidated'
   timecap: number|string
   created_at: Date
   finished_at: Date|null
-  level: number|null
-  history: levelHistory|null
   xp: number|null
 }
 
+export interface INewQuestline {
+  title: string
+  description: string
+  timecap: number
+}
+
 export interface IQuest {
-  questline_id: string
+  questline_id: string|null
+  skill_id: string|null
   mission_id: string|null
   title: string
   description: string
-  type: 'main'|'side'|'mission'
+  type: 'main'|'side'|'mission'|'practice'
   state: 'active'|'deferred'|'finished'|'invalidated'
-  todos: {
-    description: string
-    state: 'invalidated'|'finished'|'active'
-    finished_at: Date|null
-  }[]
+  todos: ITodo[]
   timecap: number|string
   focus_score: number|null
   distraction_score: number|null
   created_at: Date
   finished_at: Date|null
-  xp: number
+  xp: number|null
+}
+
+export type ITodo = {
+  description: string
+  state: 'invalidated'|'finished'|'active'
+  finished_at: Date|null
+};
+
+export interface INewQuest {
+  questline_id?: string
+  skill_id?: string
+  mission_id?: string
+  title: string
+  description: string
+  type: 'main'|'side'|'mission'|'practice'
+  todos: string[],
+  timecap: number|string
 }
 
 export interface IFeats {
   questline_id: string|null
+  skill_id: string|null
   title: string
   description: string
   acceptance: {
     stage: 'created'|'reviewed'|'ready',
     date: Date[]
   }
-  todos: {
-    description: string
-    complete: boolean
-    finished_at: Date|null
-  }[]|null
+  todos: ITodo[]|null
   categories: string[]
   tier: number
   completed: boolean
-  xp: number
+  xp: number|null
   finished_at: Date|null
+}
+
+export interface INewFeat {
+  questline_id?: string|null
+  skill_id?: string|null
+  title: string
+  description: string
+  todos: string[]
+  categories: string[]
+  tier: number
 }
 
 
 export interface IRecords {
   questline_id: string|null
+  skill_id: string|null
   title: string
   description: string
   acceptance: {
@@ -66,13 +91,26 @@ export interface IRecords {
   status: {
     waitTime: number
     stageAmount: number
-    stage?: number|null
-    last_commitment?: Date|null
+    stage: number|null
+    last_commitment: Date|null
   }
   categories: string[]
   level: number
   history: levelHistory
-  xp: number
+  xp: number|null
+}
+
+export interface INewRecord {
+  questline_id?: string|null
+  skill_id?: string|null
+  title: string
+  description: string
+  metric: 'unit'|'time'|'distance'
+  status: {
+    waitTime: number
+    stageAmount: number
+  }
+  categories: string[]
 }
 
 export interface IPills {
@@ -81,18 +119,6 @@ export interface IPills {
   times_taken: number|null
   last_taken: Date|null
 }
-
-export interface IPassiveSkill {
-  id?: string
-  title: string
-  description: string
-  type?: 'passive'
-  history: levelHistory
-  boost: number
-  stage?: number
-  state?: 'active'|'sleep'|'complete'
-}
-
 
 export interface IStats {
   player: string

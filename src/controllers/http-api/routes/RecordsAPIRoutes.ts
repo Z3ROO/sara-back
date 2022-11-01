@@ -1,4 +1,4 @@
-import { IRecords } from "../../../features/interfaces/interfaces";
+import { INewRecord, IRecords } from "../../../features/interfaces/interfaces";
 import { Records } from "../../../features/Records";
 import { isObjectId } from "../../../infra/database/mongodb";
 import { BadRequest } from "../../../util/errors/HttpStatusCode";
@@ -44,7 +44,7 @@ export default [
       if (!isObjectId(questline_id))
         throw new BadRequest('Invalid questline_id');
   
-      const record: Partial<IRecords> = {
+      const record: INewRecord = {
         questline_id,
         title,
         description,

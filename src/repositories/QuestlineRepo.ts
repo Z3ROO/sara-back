@@ -1,17 +1,13 @@
 import { NoSQLRepository } from "./RepoResultHandler"
-import { RepositoryError } from "../util/errors/RepositoryError";
-import { IQuestline } from "../features/interfaces/interfaces";
+import { INewQuestline, IQuestline } from "../features/interfaces/interfaces";
 import { ObjectId } from "mongodb";
+import { BadRequest } from "../util/errors/HttpStatusCode";
 
 class QuestlineRepo extends NoSQLRepository<IQuestline>{
-  async findMainQuestline(){
-    const questline = await this.collection().findOne({type: 'main', state: 'active'});
-    return questline;
-  }
   
-  async findAllActiveQuestlines(){
-    const questlines = await this.collection().find({state: 'active'}).toArray();
-    return questlines;
+  async findActiveQuestline(){
+    const questline = await this.collection().findOne({state: 'active'});
+    return questline;
   }
 
   async findAllFinishedQuestlines(){
@@ -31,54 +27,33 @@ class QuestlineRepo extends NoSQLRepository<IQuestline>{
     return questlines;
   }
 
-  async createNewQuestline(questProperties: Partial<IQuestline>) {
+  async createNewQuestline(questProperties: INewQuestline) {
     const { 
       title,
       description,
-      type,
-      state,
-      timecap,
-      created_at,
-      finished_at,
-      level,
-      history,
-      xp
+      timecap
     } = questProperties;
     
-    const isTypeValid = ['main', 'practice'].includes(type);
+    const mainQuestline = await this.findActiveQuestline();
 
-    if (!isTypeValid)
-      throw new RepositoryError('An invalid questline_type was issued');
-    
-    if (type === 'main') {
-      const mainQuestline = await this.findMainQuestline();
-
-      if (mainQuestline)
-        throw new Error('Main questline already exist');
-    }
+    if (mainQuestline)
+      throw new BadRequest('An active main questline already exist');
 
     this.collection().insertOne({
       title,
       description,
-      type,
       state: 'active',
-      timecap: type === 'main' ? timecap : null,
+      timecap: timecap,
       created_at: new Date(),
       finished_at: null,
-      level: type === 'main' ? null : 0,
-      history: type === 'main' ? null : [],
-      xp: type === 'main' ? 1000 : null
+      xp: null
     });
   }
 
-  async finishMainQuestline() {
-    const result = await this.collection().updateOne({type: 'main', state: 'active'}, {$set: {finished_at: new Date(), state:'finished'}});
+  async terminateActiveQuestline(action: 'finished'|'invalidated') {
+    const result = await this.collection().updateOne({state: 'active'}, {$set: {finished_at: new Date(), state:action}});
     
     return result.modifiedCount > 0
-  }
-  
-  async invalidateQuestline(identifier: string) {
-    await this.collection().updateOne({_id: new ObjectId(identifier)}, {$set: {finished_at: new Date(), state:'invalidated'}});
   }
 
   async deleteQuestline(identifier: string) {

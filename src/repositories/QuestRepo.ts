@@ -1,10 +1,10 @@
 import { ObjectId } from "mongodb";
-import { IQuest } from "./../features/interfaces/interfaces";
+import { INewFeat, INewQuest, IQuest } from "./../features/interfaces/interfaces";
 import { RepositoryError } from "./../util/errors/RepositoryError"
 import Repository, { NoSQLRepository } from "./RepoResultHandler"
 
 class QuestRepo extends NoSQLRepository<IQuest>{
-  async findMainQuest() {
+  async findActiveMainQuest() {
     const quest = await this.collection().findOne({type: 'main', state:'active'});
     return quest;
   }
@@ -49,21 +49,20 @@ class QuestRepo extends NoSQLRepository<IQuest>{
     return quests;
   }
 
-  async insertNewQuest(properties: any) {
+  async insertNewQuest(properties: INewQuest) {
     const { 
       questline_id,
+      skill_id,
       mission_id,
       title,
       description,
       type,
-      state,
       todos,
-      timecap,
-      xp
+      timecap
     } = properties;
 
     if (type === 'main') {
-      const mainQuest = await this.findMainQuest();
+      const mainQuest = await this.findActiveMainQuest();
 
       if (mainQuest)
         throw new RepositoryError('An active main quest already exist.');
@@ -76,19 +75,20 @@ class QuestRepo extends NoSQLRepository<IQuest>{
     }
 
     await this.collection().insertOne({
-      questline_id,
+      questline_id: questline_id ? questline_id : null,
+      skill_id: skill_id ? skill_id : null,
       mission_id: mission_id ? mission_id : null,
       title,
       description,
       type,
-      state: type === 'main' ? 'active' : 'deferred',
+      state: ['main','practice'].includes(type) ? 'active' : 'deferred',
       todos: todos.map((todo: string) => ({description: todo, state: 'active', finished_at: null})),
       timecap,
       focus_score: 0,
       distraction_score: 0,
       created_at: new Date(),
       finished_at: null,
-      xp: 50
+      xp: null
     });
   }
 

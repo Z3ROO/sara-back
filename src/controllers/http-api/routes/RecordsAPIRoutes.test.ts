@@ -2,10 +2,10 @@ import { app } from '../../../infra/http-server/index';
 import request from 'supertest';
 import { initMongoDB, db, closeDb } from '../../../infra/database/mongodb';
 import RecordsRepo from '../../../repositories/RecordsRepo';
-import { IRecords } from '../../../features/interfaces/interfaces';
+import { INewRecord, IRecords } from '../../../features/interfaces/interfaces';
 
 describe('Records HTTP API Routes', () => {
-  const dummyRecord: Partial<IRecords> = {
+  const dummyRecord: INewRecord = {
     questline_id: 'questlineid',
     title: 'Record 01',
     description: 'Record 01',
@@ -58,7 +58,7 @@ describe('Records HTTP API Routes', () => {
 
   describe('/records/up/:record_id', () => {
     test('Should responds with 202 status code and correct message uppon valid record_id', async () => {
-      const { records } = await RecordsRepo.findAllRecords();
+      const records = await RecordsRepo.findAllRecords();
       const _id = records[0]._id;
     
       const response = await request(app).get(`/records/up/${_id}`);

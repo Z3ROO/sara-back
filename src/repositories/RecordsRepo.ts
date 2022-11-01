@@ -1,4 +1,4 @@
-import { IRecords } from "./../features/interfaces/interfaces";
+import { INewRecord, IRecords } from "./../features/interfaces/interfaces";
 import { RepositoryError } from "./../util/errors/RepositoryError";
 import { NoSQLRepository } from "./RepoResultHandler";
 import { buildSearchString, uniqueIdentifier } from "./FeatsRepo";
@@ -42,22 +42,20 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
     return records;
   }
 
-  async insertOneRecord(properties: Partial<IRecords>) {
+  async insertOneRecord(properties: INewRecord) {
     const {
       questline_id,
+      skill_id,
       title,
       description,
-      acceptance,
       metric,
       status,
-      categories,
-      level,
-      history,
-      xp
+      categories
     } = properties;
 
     await this.collection().insertOne({
-      questline_id,
+      questline_id: questline_id ? questline_id : null,
+      skill_id: skill_id ? skill_id : null,
       title,
       description,
       acceptance: {
@@ -74,7 +72,7 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
       categories: categories ? categories : [],
       level: 0,
       history: [],
-      xp: 50
+      xp: null
     });
   }
 
