@@ -5,40 +5,40 @@ import { IQuestline } from "./interfaces/interfaces";
 
 export class Questline {
   static async getMainQuestline() {
-    const { record } = await QuestlineRepo.findMainQuestline();
+    const questline = await QuestlineRepo.findMainQuestline();
 
-    if (!record)
+    if (!questline)
       return null
 
-    return record
+    return questline
   }
 
   static async getAllActiveQuestlines() {
-    const { records } = await QuestlineRepo.findAllActiveQuestlines();
+    const questlines = await QuestlineRepo.findAllActiveQuestlines();
 
-    return records;
+    return questlines;
   }
 
   static async getAllFineshedQuestlines() {
-    const { records } = await QuestlineRepo.findAllFinishedQuestlines();
-    return records;
+    const questlines = await QuestlineRepo.findAllFinishedQuestlines();
+    return questlines;
   }
 
   static async getOneQuestline(identifier: string) {
-    const { record } = await QuestlineRepo.findOneQuestline(identifier);
-    return record;
+    const questline = await QuestlineRepo.findOneQuestline(identifier);
+    return questline;
   }
 
   static async getOneActiveQuestline(identifier: string) {
-    const { record } = await QuestlineRepo.findOneQuestline(identifier);
+    const questline = await QuestlineRepo.findOneQuestline(identifier);
 
-    if (record && record.state !== 'active')
+    if (questline && questline.state !== 'active')
       throw new BadRequest('Questline already finished or invalidated');
 
-    if (!record)
+    if (!questline)
       throw new BadRequest('Questline not found, verify questline_id property');
 
-    return record;
+    return questline;
   }
 
   static async getFineshedQuestlinesOfOneDay(date: Date|string) {
@@ -47,9 +47,9 @@ export class Questline {
 
     const begin = new Date(date.setHours(0,0,0));
     const end =  new Date(date.setHours(23,59,59));
-    const { records } = await QuestlineRepo.findFineshedQuestlineInDateRange({begin, end});
+    const questlines = await QuestlineRepo.findFineshedQuestlineInDateRange({begin, end});
 
-    return records
+    return questlines
   }
 
   static async createNewQuestline(questline: Partial<IQuestline>) {
@@ -57,9 +57,9 @@ export class Questline {
   }
 
   static async finishMainQuestline() {
-    const { record } = await QuestRepo.findMainQuest();
+    const questline = await QuestRepo.findMainQuest();
     
-    if (record)
+    if (questline)
       throw new BadRequest('Can\'t finish, a quest is currently active');
 
     const result = await QuestlineRepo.finishMainQuestline();

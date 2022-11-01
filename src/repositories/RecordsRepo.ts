@@ -1,4 +1,3 @@
-import { ObjectId } from "mongodb";
 import { IRecords } from "./../features/interfaces/interfaces";
 import { RepositoryError } from "./../util/errors/RepositoryError";
 import { NoSQLRepository } from "./RepoResultHandler";
@@ -9,7 +8,7 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
   async findAllRecords() {
     const records = await this.collection().find().toArray();
 
-    return { records }
+    return records
   }
 
   async findRecordsByCategory(categories: string[]) {
@@ -18,7 +17,7 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
       categories: {$all: categories}
     }).toArray();
 
-    return { records }
+    return records
   }
 
   async findRecordsByQuestline(questline: string) {
@@ -26,21 +25,21 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
       questline_id: questline
     }).toArray();
 
-    return { records }
+    return records
   }
 
   async findOneRecord(identifier: uniqueIdentifier) {
     const searchParams = buildSearchString(identifier);
     const record = await this.collection().findOne(searchParams);
 
-    return { record };
+    return record;
   }
 
   async findEveryRecordsHistoryInDateRange(range: {begin: Date, end: Date}) {
     const { begin, end } = range;
     const records = await this.collection().find({"history.date": { $gte: begin, $lt: end }}).toArray();
 
-    return { records };
+    return records;
   }
 
   async insertOneRecord(properties: Partial<IRecords>) {

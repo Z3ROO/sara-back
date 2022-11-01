@@ -4,7 +4,7 @@ import { proceedAcceptanceLevel } from "./Feats";
 
 export class Records {
   static async getAllRecords() {
-    const { records } = await RecordsRepo.findAllRecords();
+    const records = await RecordsRepo.findAllRecords();
 
     return records
   }
@@ -13,13 +13,13 @@ export class Records {
     if (typeof categories === 'string')
       categories = [categories];
 
-    const { records } = await RecordsRepo.findRecordsByCategory(categories);
+    const records = await RecordsRepo.findRecordsByCategory(categories);
 
     return records
   }
 
   static async getRecordsByQuestline(questline: string) {
-    const { records } = await RecordsRepo.findRecordsByQuestline(questline);
+    const records = await RecordsRepo.findRecordsByQuestline(questline);
 
     return records
   }
@@ -28,7 +28,7 @@ export class Records {
     const begin = new Date(date.setHours(0,0,0));
     const end = new Date(date.setHours(23,59,59));
     
-    const { records } = await RecordsRepo.findEveryRecordsHistoryInDateRange({begin, end});
+    const records = await RecordsRepo.findEveryRecordsHistoryInDateRange({begin, end});
 
     return records;
   }
@@ -58,7 +58,7 @@ export class Records {
   }
 
   static async proceedFeatAcceptanceLevel(identifier: string) {
-    const feat = (await RecordsRepo.findOneRecord({_id: identifier})).record;
+    const feat = await RecordsRepo.findOneRecord({_id: identifier});
     const stage = proceedAcceptanceLevel(feat);
 
     await RecordsRepo.proceedAcceptanceLevel({_id: identifier}, stage);

@@ -10,34 +10,34 @@ export type uniqueIdentifier = {title?: string, _id?: string}
 
 class FeatsRepo extends NoSQLRepository<IFeats>{
   async findAllFeats() {
-    const records = await this.collection().find().toArray();
-    return { records };
+    const feats = await this.collection().find().toArray();
+    return feats;
   }
 
   async findOneFeat(identifier: uniqueIdentifier) {
     const searchParams = buildSearchString(identifier);
 
-    const record = await this.collection().findOne(searchParams);
-    return { record };
+    const feat = await this.collection().findOne(searchParams);
+    return feat;
   }
 
   async findFeatsByCategory(categories: string[]) {
-    const records = await this.collection().find({categories: {$all: categories}}).toArray();
+    const feats = await this.collection().find({categories: {$all: categories}}).toArray();
 
-    return { records };
+    return feats;
   }
 
   async findFeatsByQuestline(questline: string) {
-    const records = await this.collection().find({questline_id: questline}).toArray();
+    const feats = await this.collection().find({questline_id: questline}).toArray();
 
-    return { records };
+    return feats;
   }
 
   async findAllCompleteFeatsInDateRange(range: {begin: Date, end: Date}) {
     const { begin, end } = range;
-    const records = await this.collection().find({finished_at: {$gte: begin, $lt: end}}).toArray();
+    const feats = await this.collection().find({finished_at: {$gte: begin, $lt: end}}).toArray();
     
-    return { records };
+    return feats;
   }
 
   async insertOneFeat(properties: any) {

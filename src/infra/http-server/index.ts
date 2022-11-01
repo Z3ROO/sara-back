@@ -6,7 +6,7 @@ export const app = applyRoutes(express(), routes);
 export const initServer = () => {
   app.listen(
     process.env.SERVER_PORT, () => {
-      console.log("Servidor conectado à porta "+process.env.SERVER_PORT)
+      console.log("Servidor conectado à porta "+process.env.SERVER_PORT);
     }
   )
 };

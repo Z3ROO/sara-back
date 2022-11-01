@@ -5,39 +5,39 @@ import { Questline } from "./Questline";
 
 export class Quest {
   static async getActiveMainQuest() {
-    const { record } = await QuestRepo.findMainQuest();
+    const quest = await QuestRepo.findMainQuest();
 
-    if (!record)
+    if (!quest)
       return null
     
-    return record
+    return quest
   }
 
   static async getActiveSideQuest() {
-    const { record } = await QuestRepo.findActiveSideQuest();
+    const quest = await QuestRepo.findActiveSideQuest();
 
-    if (!record)
+    if (!quest)
       return null;
 
-    return record;
+    return quest;
   }
 
   static async getAllUnfineshedSideQuest() {
-    const { records } = await QuestRepo.findAllUnfineshedSideQuests();
-    return records;
+    const quests = await QuestRepo.findAllUnfineshedSideQuests();
+    return quests;
   }
 
   static async getAllFinishedQuests() {
-    const { records } = await QuestRepo.findAllFinishedQuests();
-    return records;
+    const quests = await QuestRepo.findAllFinishedQuests();
+    return quests;
   }
   
   static async getEveryFinishedQuestOfOneDay(date: Date) {
     const begin = new Date(date.setHours(0,0,0));
     const end = new Date(date.setHours(23,59,59));
-    const { records } = await QuestRepo.findAllFinishedQuestsInDateRange({begin, end});
+    const quests = await QuestRepo.findAllFinishedQuestsInDateRange({begin, end});
 
-    return records;
+    return quests;
   }
 
   static async handleQuestTodo(questIdentifier: string, todoIdentifier: string, action: 'invalidate'|'finish') {
@@ -68,10 +68,10 @@ export class Quest {
   static async insertDistractionPoint() {
     const activeQuest = await QuestRepo.findMainQuest();
 
-    if (activeQuest.record == null)
+    if (activeQuest == null)
       throw new BadRequest("No active quest found");
 
-    await QuestRepo.insertDistractionPoint(activeQuest.record._id.toString());
+    await QuestRepo.insertDistractionPoint(activeQuest._id.toString());
   }
 
   static async finishQuest(identifier: string, focus_score: number) {

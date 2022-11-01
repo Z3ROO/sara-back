@@ -9,18 +9,18 @@ import { IPills } from "./interfaces/interfaces";
 
 export class Pills {
   static async getAllPills(){
-    const { records } = await PillsRepo.findAllPills();
+    const pills = await PillsRepo.findAllPills();
 
-    return records;
+    return pills;
   }
 
   static async getOnePill(identifier: uniqueIdentifier) {
-    const  { record } = await PillsRepo.findOnePills(identifier)
-    return record;
+    const  pill = await PillsRepo.findOnePills(identifier);
+    return pill;
   }
 
   static async createPill(properties: Partial<IPills>){
-    await PillsRepo.insertOnePill(properties)
+    await PillsRepo.insertOnePill(properties);
   }
 
   static async deletePill(identifier: uniqueIdentifier) {

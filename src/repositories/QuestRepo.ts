@@ -5,48 +5,48 @@ import Repository, { NoSQLRepository } from "./RepoResultHandler"
 
 class QuestRepo extends NoSQLRepository<IQuest>{
   async findMainQuest() {
-    const record = await this.collection().findOne({type: 'main', state:'active'});
-    return { record };
+    const quest = await this.collection().findOne({type: 'main', state:'active'});
+    return quest;
   }
 
   async findOneQuest(identifier: string) {
-    const record = await this.collection().findOne({_id: new ObjectId(identifier)});
-    return { record };
+    const quest = await this.collection().findOne({_id: new ObjectId(identifier)});
+    return quest;
   }
 
   async findActiveSideQuest() {
-    const record = await this.collection().find({type: 'side', state: 'active'}).toArray();
-    return { record };
+    const quest = await this.collection().find({type: 'side', state: 'active'}).toArray();
+    return quest;
   }
 
   async findAllUnfineshedSideQuests() {
-    const records = await this.collection().find({type: 'side', state: {$ne:'finished'}}).toArray();
-    return { records };
+    const quests = await this.collection().find({type: 'side', state: {$ne:'finished'}}).toArray();
+    return quests;
   }
 
   async findAllFinishedQuests() {
-    const records = await this.collection().find({$or: [ {state: 'finished'}, {state: 'invalidated'}]}).toArray();
-    return { records };
+    const quests = await this.collection().find({$or: [ {state: 'finished'}, {state: 'invalidated'}]}).toArray();
+    return quests;
   }
 
   async findAllFinishedMainQuests() {
-    const records = await this.collection().find({type: 'main', state: 'finished'}).toArray();
-    return { records };
+    const quests = await this.collection().find({type: 'main', state: 'finished'}).toArray();
+    return quests;
   }
 
   async findAllFinishedSideQuests() {
-    const records = await this.collection().find({type: 'side', state: 'finished'}).toArray();
-    return { records };
+    const quests = await this.collection().find({type: 'side', state: 'finished'}).toArray();
+    return quests;
   }
 
   async findAllFinishedQuestsInDateRange(range: {begin: Date, end: Date}) {
     const { begin, end } = range;
-    const records = await this.collection().find({
+    const quests = await this.collection().find({
       $or: [{state: 'finished'}, {state: 'invalidated'}],
       finished_at: { $gte: begin,  $lt: end}
     }).toArray();
 
-    return { records };
+    return quests;
   }
 
   async insertNewQuest(properties: any) {
@@ -65,13 +65,13 @@ class QuestRepo extends NoSQLRepository<IQuest>{
     if (type === 'main') {
       const mainQuest = await this.findMainQuest();
 
-      if (mainQuest.record)
+      if (mainQuest)
         throw new RepositoryError('An active main quest already exist.');
     }
     else if (type === 'side'){
       const sideQuests = await this.findAllUnfineshedSideQuests();
 
-      if (sideQuests.records.length >= 5)
+      if (sideQuests.length >= 5)
         throw new RepositoryError('Maximun amount of side quests pre-registered reached.');
     }
 
@@ -114,7 +114,7 @@ class QuestRepo extends NoSQLRepository<IQuest>{
   async activateSideQuest(identifier: string) {
     const activeSideQuest = await this.findActiveSideQuest();
 
-    if (activeSideQuest.record)
+    if (activeSideQuest)
       throw new RepositoryError('An active side quest already exists.')
 
     await this.collection().findOneAndUpdate(

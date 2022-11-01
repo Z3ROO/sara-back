@@ -3,32 +3,32 @@ import { IFeats, IRecords } from "./interfaces/interfaces";
 
 export class Feats {
   static async getAllFeats() {
-    const { records } = await FeatsRepo.findAllFeats();
+    const feats = await FeatsRepo.findAllFeats();
 
-    return records
+    return feats
   }
 
   static async getFeatsByCategory(categories: string|string[]) {
     if (typeof categories === 'string')
       categories = [categories];
 
-    const { records } = await FeatsRepo.findFeatsByCategory(categories)
+    const feats = await FeatsRepo.findFeatsByCategory(categories)
 
-    return records;
+    return feats;
   }
   
   static async getFeatsByQuestline(questline: string) {
-    const { records } = await FeatsRepo.findFeatsByQuestline(questline)
+    const feats = await FeatsRepo.findFeatsByQuestline(questline)
 
-    return records;
+    return feats;
   }
 
   static async getEveryCompleteFeatOfOneDay(date: Date) {
     const begin = new Date(date.setHours(0,0,0));
     const end = new Date(date.setHours(23,59,59));
-    const { records } = await FeatsRepo.findAllCompleteFeatsInDateRange({begin, end});
+    const feats = await FeatsRepo.findAllCompleteFeatsInDateRange({begin, end});
 
-    return records
+    return feats
   }
 
   static async completeFeat(identifier: string) {
@@ -45,7 +45,7 @@ export class Feats {
   }
 
   static async proceedFeatAcceptanceLevel(identifier: string) {
-    const feat = (await FeatsRepo.findOneFeat({_id: identifier})).record;
+    const feat = await FeatsRepo.findOneFeat({_id: identifier});
     const stage = proceedAcceptanceLevel(feat);
 
     await FeatsRepo.proceedAcceptanceLevel({_id: identifier}, stage);

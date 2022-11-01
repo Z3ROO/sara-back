@@ -5,30 +5,30 @@ import { ObjectId } from "mongodb";
 
 class QuestlineRepo extends NoSQLRepository<IQuestline>{
   async findMainQuestline(){
-    const record = await this.collection().findOne({type: 'main', state: 'active'});
-    return { record };
+    const questline = await this.collection().findOne({type: 'main', state: 'active'});
+    return questline;
   }
   
   async findAllActiveQuestlines(){
-    const records = await this.collection().find({state: 'active'}).toArray();
-    return { records };
+    const questlines = await this.collection().find({state: 'active'}).toArray();
+    return questlines;
   }
 
   async findAllFinishedQuestlines(){
-    const records = await this.collection().find({state: 'finished'}).toArray();
-    return { records };
+    const questlines = await this.collection().find({state: 'finished'}).toArray();
+    return questlines;
   }
   
   async findOneQuestline(identifier: string) {
-    const record = await this.collection().findOne({_id: new ObjectId(identifier)});
+    const questline = await this.collection().findOne({_id: new ObjectId(identifier)});
 
-    return { record };
+    return questline;
   }
 
   async findFineshedQuestlineInDateRange(range: {begin: Date, end: Date}) {
     const  { begin, end } = range;
-    const records = await this.collection().find({finished_at: {$gte: begin, $lt: end}}).toArray();
-    return { records };
+    const questlines = await this.collection().find({finished_at: {$gte: begin, $lt: end}}).toArray();
+    return questlines;
   }
 
   async createNewQuestline(questProperties: Partial<IQuestline>) {
@@ -53,7 +53,7 @@ class QuestlineRepo extends NoSQLRepository<IQuestline>{
     if (type === 'main') {
       const mainQuestline = await this.findMainQuestline();
 
-      if (mainQuestline.record)
+      if (mainQuestline)
         throw new Error('Main questline already exist');
     }
 
