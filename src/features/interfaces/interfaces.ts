@@ -1,6 +1,6 @@
 type levelHistory = {direction:-1|0|1, date: Date}[]
 
-export interface IQuestLine {
+export interface IQuestline {
   title: string
   description: string
   type: 'main'|'practice'

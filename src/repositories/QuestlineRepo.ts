@@ -1,38 +1,37 @@
 import { NoSQLRepository } from "./RepoResultHandler"
-import { RepositoryError } from "./../util/errors/RepositoryError";
-import { IQuestLine } from "./../features/interfaces/interfaces";
+import { RepositoryError } from "../util/errors/RepositoryError";
+import { IQuestline } from "../features/interfaces/interfaces";
 import { ObjectId } from "mongodb";
-import { BadRequest } from "../util/errors/HttpStatusCode";
 
-class QuestLineRepo extends NoSQLRepository<IQuestLine>{
-  async findMainQuestLine(){
+class QuestlineRepo extends NoSQLRepository<IQuestline>{
+  async findMainQuestline(){
     const record = await this.collection().findOne({type: 'main', state: 'active'});
     return { record };
   }
   
-  async findAllActiveQuestLines(){
+  async findAllActiveQuestlines(){
     const records = await this.collection().find({state: 'active'}).toArray();
     return { records };
   }
 
-  async findAllFinishedQuestLines(){
+  async findAllFinishedQuestlines(){
     const records = await this.collection().find({state: 'finished'}).toArray();
     return { records };
   }
   
-  async findOneQuestLine(identifier: string) {
+  async findOneQuestline(identifier: string) {
     const record = await this.collection().findOne({_id: new ObjectId(identifier)});
 
     return { record };
   }
 
-  async findFineshedQuestLineInDateRange(range: {begin: Date, end: Date}) {
+  async findFineshedQuestlineInDateRange(range: {begin: Date, end: Date}) {
     const  { begin, end } = range;
     const records = await this.collection().find({finished_at: {$gte: begin, $lt: end}}).toArray();
     return { records };
   }
 
-  async createNewQuestLine(questProperties: Partial<IQuestLine>) {
+  async createNewQuestline(questProperties: Partial<IQuestline>) {
     const { 
       title,
       description,
@@ -52,7 +51,7 @@ class QuestLineRepo extends NoSQLRepository<IQuestLine>{
       throw new RepositoryError('An invalid questline_type was issued');
     
     if (type === 'main') {
-      const mainQuestline = await this.findMainQuestLine();
+      const mainQuestline = await this.findMainQuestline();
 
       if (mainQuestline.record)
         throw new Error('Main questline already exist');
@@ -72,13 +71,13 @@ class QuestLineRepo extends NoSQLRepository<IQuestLine>{
     });
   }
 
-  async finishMainQuestLine() {
+  async finishMainQuestline() {
     const result = await this.collection().updateOne({type: 'main', state: 'active'}, {$set: {finished_at: new Date(), state:'finished'}});
     
     return result.modifiedCount > 0
   }
   
-  async invalidateQuestLine(identifier: string) {
+  async invalidateQuestline(identifier: string) {
     await this.collection().updateOne({_id: new ObjectId(identifier)}, {$set: {finished_at: new Date(), state:'invalidated'}});
   }
 
@@ -87,4 +86,4 @@ class QuestLineRepo extends NoSQLRepository<IQuestLine>{
   }
 }
 
-export default new QuestLineRepo('leveling', 'questlines');
+export default new QuestlineRepo('leveling', 'questlines');

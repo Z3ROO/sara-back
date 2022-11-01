@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { closeDb, db, initMongoDB } from '../../infra/database/mongodb';
 import { app } from '../../infra/http-server';
-import QuestLineRepo from '../../repositories/QuestLineRepo';
+import QuestlineRepo from '../../repositories/QuestlineRepo';
 import QuestRepo from '../../repositories/QuestRepo';
 
 describe('Quests HTTP API Routes', () => {
@@ -41,13 +41,13 @@ describe('Quests HTTP API Routes', () => {
   beforeEach(async () => {
     await wipeCollections();
     
-    await QuestLineRepo.createNewQuestLine(dummyFinishedQuestline);
-    await QuestLineRepo.finishMainQuestLine();
+    await QuestlineRepo.createNewQuestline(dummyFinishedQuestline);
+    await QuestlineRepo.finishMainQuestline();
 
-    await QuestLineRepo.createNewQuestLine(dummyMainQuestline);
-    await QuestLineRepo.createNewQuestLine(dummyPracticeQuestline);
+    await QuestlineRepo.createNewQuestline(dummyMainQuestline);
+    await QuestlineRepo.createNewQuestline(dummyPracticeQuestline);
 
-    const {records} = await QuestLineRepo.findAllActiveQuestLines();
+    const {records} = await QuestlineRepo.findAllActiveQuestlines();
 
     await QuestRepo.insertNewQuest({
       ...dummyQuest,
@@ -73,7 +73,7 @@ describe('Quests HTTP API Routes', () => {
 
   describe('/quests/questline/:questline_id', () => {
     test('Should respond with 200 status code and a questline uppon valid questline_id', async () => {
-      const _id = (await QuestLineRepo.findMainQuestLine()).record._id.toHexString();
+      const _id = (await QuestlineRepo.findMainQuestline()).record._id.toHexString();
       const response = await request(app).get(`/quests/questline/${_id}`);
 
       expect(response.status).toBe(200);
@@ -194,7 +194,7 @@ describe('Quests HTTP API Routes', () => {
       const { record } = await QuestRepo.findMainQuest();
       await QuestRepo.finishQuestTodo(record._id.toHexString(), record.todos[0].description);
       await QuestRepo.finishQuest(record._id.toHexString(), 1);
-      const questline_id = (await QuestLineRepo.findMainQuestLine()).record._id;
+      const questline_id = (await QuestlineRepo.findMainQuestline()).record._id;
 
       const reqBody = {
         questline_id,
@@ -217,8 +217,8 @@ describe('Quests HTTP API Routes', () => {
       const { record } = await QuestRepo.findMainQuest();
       await QuestRepo.finishQuestTodo(record._id.toHexString(), record.todos[0].description);
       await QuestRepo.finishQuest(record._id.toHexString(), 1);
-      const questline_id = (await QuestLineRepo.findMainQuestLine()).record._id;
-      await QuestLineRepo.finishMainQuestLine();
+      const questline_id = (await QuestlineRepo.findMainQuestline()).record._id;
+      await QuestlineRepo.finishMainQuestline();
 
       const reqBody = {
         questline_id,

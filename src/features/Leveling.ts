@@ -1,8 +1,8 @@
 import { UserRepo } from "../repositories/UserRepo";
 import { Feats } from "./Feats";
-import { IQuest, IQuestLine, IStats } from "./interfaces/interfaces";
+import { IQuest, IQuestline, IStats } from "./interfaces/interfaces";
 import { Quest } from "./Quest";
-import { QuestLine } from "./Questline";
+import { Questline } from "./Questline";
 import { Records } from "./Records";
 
 export class Leveling {
@@ -91,21 +91,21 @@ export class Leveling {
       this.updateFocusHashira(quest);
     }
 
-    const todaysFinishedQuestLines = await QuestLine.getFineshedQuestLinesOfOneDay(today);
+    const todaysFinishedQuestlines = await Questline.getFineshedQuestlinesOfOneDay(today);
 
     //what if invalidate 2 questlines in one day
-    for (let index = 0; index < todaysFinishedQuestLines.length; index++){
-      const boostXp = await this.calculateQuestBoostXp(todaysFinishedQuestLines[index]);
-      this.increaseXp(todaysFinishedQuestLines[index].xp + boostXp);
+    for (let index = 0; index < todaysFinishedQuestlines.length; index++){
+      const boostXp = await this.calculateQuestBoostXp(todaysFinishedQuestlines[index]);
+      this.increaseXp(todaysFinishedQuestlines[index].xp + boostXp);
       this.stats.todaysHistory.push({
         type: 'Quest Line',
         body: {
-          ...todaysFinishedQuestLines[index],
+          ...todaysFinishedQuestlines[index],
           boostXp
         }
       });
 
-      this.updatePlanningHashiraForQuestLine(todaysFinishedQuestLines[index]);
+      this.updatePlanningHashiraForQuestline(todaysFinishedQuestlines[index]);
     }
 
     if (today.toLocaleDateString() === new Date().toLocaleDateString()){
@@ -201,7 +201,7 @@ export class Leveling {
       return [level, 'Semi-Deus', nextLevelExpNecessary, lastLevelExpNecessary]
   }
 
-  private static async calculateQuestBoostXp(quest: IQuest|IQuestLine) {
+  private static async calculateQuestBoostXp(quest: IQuest|IQuestline) {
 
     const hashirasBoost = this.calculateHashirasBoost();
     const totalBoost = hashirasBoost;
@@ -262,15 +262,15 @@ export class Leveling {
     this.stats.hashiras.planning.todaysEarnings += planningScore;
   }
 
-  private static async updatePlanningHashiraForQuestLine(questLine: any) {
+  private static async updatePlanningHashiraForQuestline(questline: any) {
     let timecapScore: number, planningScore: number;
     const currentScore = this.stats.hashiras.planning.score;
     
-    if (questLine.state === 'invalidated')
+    if (questline.state === 'invalidated')
       planningScore = -30;
     else {
-      const questDuration = new Date(questLine.finished_at).getTime() - new Date(questLine.created_at).getTime();
-      const durationRateOverTimecap = Math.round(questDuration / questLine.timecap * 100);
+      const questDuration = new Date(questline.finished_at).getTime() - new Date(questline.created_at).getTime();
+      const durationRateOverTimecap = Math.round(questDuration / questline.timecap * 100);
 
       let timacapScoreReduction = durationRateOverTimecap > 100 ? durationRateOverTimecap - 100 : 100 - durationRateOverTimecap;
           timacapScoreReduction = Math.floor(timacapScoreReduction/10);

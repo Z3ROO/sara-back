@@ -7,23 +7,23 @@ export default [
   },  
   {
     method: 'post', path: '/quests/questline/new',
-    handler: QuestsAPIHandlers.createNewQuestLine
+    handler: QuestsAPIHandlers.createNewQuestline
   },  
   {
     method: 'get', path: '/quests/questline/all-finished',
-    handler: QuestsAPIHandlers.getAllFinishedQuestLines
+    handler: QuestsAPIHandlers.getAllFinishedQuestlines
   },
   {
     method: 'get', path: '/quests/questline',
-    handler: QuestsAPIHandlers.getListOfActiveQuestLines
+    handler: QuestsAPIHandlers.getListOfActiveQuestlines
   },
   {
     method: 'get', path: '/quests/questline/finish',
-    handler: QuestsAPIHandlers.finishMainQuestLine
+    handler: QuestsAPIHandlers.finishMainQuestline
   },
   {
     method: 'get', path: '/quests/questline/:questline_id',
-    handler: QuestsAPIHandlers.getQuestLineInfo
+    handler: QuestsAPIHandlers.getQuestlineInfo
   },
   {
     method: 'post', path: '/quests/quest/new',

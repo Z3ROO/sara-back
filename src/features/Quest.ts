@@ -1,7 +1,7 @@
 import QuestRepo from "../repositories/QuestRepo";
 import { BadRequest } from "../util/errors/HttpStatusCode";
 import { IQuest } from "./interfaces/interfaces";
-import { QuestLine } from "./Questline";
+import { Questline } from "./Questline";
 
 export class Quest {
   static async getActiveMainQuest() {
@@ -60,7 +60,7 @@ export class Quest {
   static async createNewQuest(properties: Partial<IQuest>) {
     const { questline_id } = properties;
 
-    const isQuestlineValid = await QuestLine.getOneActiveQuestLine(questline_id);
+    const isQuestlineValid = await Questline.getOneActiveQuestline(questline_id);
 
     await QuestRepo.insertNewQuest(properties);
   }

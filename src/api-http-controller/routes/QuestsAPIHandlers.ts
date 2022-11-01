@@ -1,6 +1,6 @@
-import { IQuest, IQuestLine } from "../../features/interfaces/interfaces";
+import { IQuest, IQuestline } from "../../features/interfaces/interfaces";
 import { Quest } from "../../features/Quest";
-import { QuestLine } from "../../features/Questline";
+import { Questline } from "../../features/Questline";
 import { isObjectId } from "../../infra/database/mongodb";
 import { BadRequest } from "../../util/errors/HttpStatusCode";
 import { checkForMissingProperties } from "./utils";
@@ -8,31 +8,31 @@ import { checkForMissingProperties } from "./utils";
 export default class QuestsAPIHandlers {
 
   //[GET]/quests/questline/
-  static async getListOfActiveQuestLines(req: any) {
-    const questLines = await QuestLine.getAllActiveQuestLines();
+  static async getListOfActiveQuestlines(req: any) {
+    const questlines = await Questline.getAllActiveQuestlines();
 
     return {
-      body: questLines
+      body: questlines
     };
   }
 
   //[GET]/quests/questline/:questline_id
-  static async getQuestLineInfo(req: any) {
+  static async getQuestlineInfo(req: any) {
     const { questline_id } = req.params;
 
     if (!isObjectId(questline_id))
       throw new BadRequest('Invalid questline_id')
 
-    const questLine = await QuestLine.getOneQuestLine(questline_id);
+    const questline = await Questline.getOneQuestline(questline_id);
 
     return {
-      body: questLine
+      body: questline
     };
   }  
 
   //[GET]/quests/questline/finish
-  static async finishMainQuestLine(req: any, res: any) {
-    await QuestLine.finishMainQuestLine();
+  static async finishMainQuestline(req: any, res: any) {
+    await Questline.finishMainQuestline();
     
     return {
       status: 202,
@@ -41,8 +41,8 @@ export default class QuestsAPIHandlers {
   }
 
   ///[GET]/quests/questline/all-finished
-  static async getAllFinishedQuestLines(req: any, res: any) {
-    const questlines = await QuestLine.getAllFineshedQuestLines();
+  static async getAllFinishedQuestlines(req: any, res: any) {
+    const questlines = await Questline.getAllFineshedQuestlines();
 
     return {
       body: questlines
@@ -50,10 +50,10 @@ export default class QuestsAPIHandlers {
   }
 
   //[POST]/quests/questline/new
-  static async createNewQuestLine(req: any, res: any) {
+  static async createNewQuestline(req: any, res: any) {
     const { title, description, timecap, type } = req.body;
     
-    const questline: Partial<IQuestLine> = {
+    const questline: Partial<IQuestline> = {
       title,
       description,
       type,
@@ -61,7 +61,7 @@ export default class QuestsAPIHandlers {
     }
     
     checkForMissingProperties(questline);
-    await QuestLine.createNewQuestLine(questline);
+    await Questline.createNewQuestline(questline);
 
     return {
       status: 201,
