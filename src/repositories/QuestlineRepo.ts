@@ -10,6 +10,11 @@ class QuestlineRepo extends NoSQLRepository<IQuestline>{
     return questline;
   }
 
+  async findAllQuestlines(){
+    const questlines = await this.collection().find().sort({created_at: -1}).toArray();
+    return questlines;
+  }
+
   async findAllFinishedQuestlines(){
     const questlines = await this.collection().find({state: 'finished'}).toArray();
     return questlines;

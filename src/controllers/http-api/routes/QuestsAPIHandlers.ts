@@ -2,10 +2,18 @@ import { INewQuest, INewQuestline, IQuest, IQuestline } from "../../../features/
 import { Quest } from "../../../features/Quest";
 import { Questline } from "../../../features/Questline";
 import { isObjectId } from "../../../infra/database/mongodb";
+import QuestRepo from "../../../repositories/QuestRepo";
 import { BadRequest } from "../../../util/errors/HttpStatusCode";
 import { checkForMissingProperties } from "./utils";
 
 export default class QuestsAPIHandlers {
+
+  //dev purposes
+  static async teyzada() {
+    return {
+      body: await QuestRepo.findAllFinishedQuests()
+    }
+  }
 
   //[GET]/quests/questline/
   static async getListOfActiveQuestlines(req: any) {
@@ -13,6 +21,15 @@ export default class QuestsAPIHandlers {
 
     return {
       body: questline
+    };
+  }
+
+  // ## TEST THIS ### /[GET]/quests/questline/all
+  static async getAllQuestlines(req: any, res: any) {
+    const questlines = await Questline.getAllQuestlines();
+
+    return {
+      body: questlines
     };
   }
 

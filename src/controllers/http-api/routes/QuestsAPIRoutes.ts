@@ -10,6 +10,10 @@ export default [
     handler: QuestsAPIHandlers.createNewQuestline
   },  
   {
+    method: 'get', path: '/quests/questline/all',
+    handler: QuestsAPIHandlers.getAllQuestlines
+  },  
+  {
     method: 'get', path: '/quests/questline/all-finished',
     handler: QuestsAPIHandlers.getAllFinishedQuestlines
   },
@@ -40,5 +44,9 @@ export default [
   {
     method: 'get', path: '/quests/quest/distraction',
     handler: QuestsAPIHandlers.increaseDistractionScore
+  },
+  {
+    method: 'get', path: '/tey',
+    handler: QuestsAPIHandlers.teyzada
   }
 ]

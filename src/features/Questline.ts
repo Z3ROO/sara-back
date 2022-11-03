@@ -13,6 +13,11 @@ export class Questline {
     return questline
   }
 
+  static async getAllQuestlines() {
+    const questlines = await QuestlineRepo.findAllQuestlines();
+    return questlines;
+  }
+
   static async getAllFineshedQuestlines() {
     const questlines = await QuestlineRepo.findAllFinishedQuestlines();
     return questlines;
