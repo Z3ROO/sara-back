@@ -314,10 +314,10 @@ export class Leveling {
     
     if (quest.state === 'invalidated')
       focusScore = -10;
-    else if (quest.distraction_score > 5)
-      focusScore = focusScore - (quest.distraction_score*2);
+    else if (quest.distraction_score.length > 5)
+      focusScore = focusScore - (quest.distraction_score.length*2);
     else
-      focusScore = focusScore - quest.distraction_score;
+      focusScore = focusScore - quest.distraction_score.length;
 
     const finalScore = focusScore + currentScore;
     const [level, title] = await this.calculateFocusHashiraLevel(finalScore);

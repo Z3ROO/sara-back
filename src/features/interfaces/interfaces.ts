@@ -27,7 +27,7 @@ export interface IQuest {
   todos: ITodo[]
   timecap: number|string
   focus_score: number|null
-  distraction_score: number|null
+  distraction_score: Date[]
   created_at: Date
   finished_at: Date|null
   xp: number|null

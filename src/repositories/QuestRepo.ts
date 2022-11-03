@@ -85,7 +85,7 @@ class QuestRepo extends NoSQLRepository<IQuest>{
       todos: todos.map((todo: string) => ({description: todo, state: 'active', finished_at: null})),
       timecap,
       focus_score: 0,
-      distraction_score: 0,
+      distraction_score: [],
       created_at: new Date(),
       finished_at: null,
       xp: null
@@ -103,7 +103,7 @@ class QuestRepo extends NoSQLRepository<IQuest>{
   async insertDistractionPoint(identifier: string) {
     await this.collection().findOneAndUpdate(
       {_id: new ObjectId(identifier)}, 
-      { $inc: {distraction_score: 1}}
+      { $push: {distraction_score: new Date()} }
     );
   }
 
