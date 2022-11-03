@@ -114,10 +114,17 @@ export interface INewRecord {
 }
 
 export interface IPills {
+  immune: boolean
   name: string
   description: string
-  times_taken: number|null
-  last_taken: Date|null
+  times_taken: number
+  next_shot: Date
+  history: Date[]
+}
+
+export interface INewPill {
+  name: string
+  description: string
 }
 
 export interface IStats {
