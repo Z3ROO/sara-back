@@ -8,7 +8,7 @@ import { INewPill, IPills } from "./interfaces/interfaces";
 //pills also has to pass though acceptance test
 
 export default class Pills {
-  static async getTodaysPills() {
+  static async getTakeablePills() {
     const pills = await PillsRepo.findAllTakeablePills();
 
     return pills;

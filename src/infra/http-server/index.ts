@@ -16,13 +16,13 @@ function routeHandlerWrapper(handler: (req:any, res: any, next: any) => any) {
     try {
       let route = await handler(req, res, next)||{};
       
-      if (!route?.status)
+      if (route?.status == null)
         route.status = 200;
       
-      if (!route?.message)
+      if (route?.message == null)
         route.message = '';
 
-      if (!route?.body)
+      if (route?.body == null)
         route.body = null;
       
       res.status(route.status)

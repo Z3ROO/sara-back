@@ -9,7 +9,7 @@ export default [
   {
     method: 'get', path: '/pills',
     handler: async () => {
-      const pills = await Pills.getTodaysPills();
+      const pills = await Pills.getTakeablePills();
 
       return {
         body: pills,

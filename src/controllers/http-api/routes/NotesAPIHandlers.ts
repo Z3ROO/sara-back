@@ -2,7 +2,7 @@ import { Dirent } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 
-const notesDir = path.join(__dirname, '../../../../notes/');
+const notesDir = path.join(__dirname, '../../../../../notes/');
 
 export default class NotesAPIHandlers {
   // get'/notes/tree-listing/:category'
@@ -48,7 +48,7 @@ export default class NotesAPIHandlers {
   static async getNote(req:any, res:any) {
     const pathToNote = path.join(notesDir,req.params[0]);
     const fileContent = await fs.readFile(pathToNote, 'utf-8');
-
+    
     return {
       body: fileContent
     };
