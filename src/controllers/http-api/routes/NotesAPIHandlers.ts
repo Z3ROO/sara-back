@@ -2,7 +2,7 @@ import { Dirent } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 
-const notesDir = path.join(__dirname, '../../../../../notes/');
+const notesDir = '/home/zero/sara/notes/';
 
 export default class NotesAPIHandlers {
   // get'/notes/tree-listing/:category'
@@ -40,7 +40,7 @@ export default class NotesAPIHandlers {
       node.content = await Promise.all(dirListing.map(async (val) => {
         return await NotesAPIHandlers.buildListing([...directory, val.name], val)
       }));
-    
+
     return node;
   }
 
