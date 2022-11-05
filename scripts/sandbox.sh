@@ -2,6 +2,8 @@
 
 export NODE_ENV=dev
 export SERVER_PORT=3001
+export DB_PORT=27017
+export FRONTEND_URL="http://localhost:3000"
 # export PGUSER="zero"
 # export PGHOST="localhost"
 # export PGDATABASE="sandbox"

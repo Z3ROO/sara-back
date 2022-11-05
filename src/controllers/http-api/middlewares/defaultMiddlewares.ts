@@ -1,4 +1,7 @@
 import express from 'express';
+import cors from 'cors';
+import process from 'process';
+
 
 export default [
   {
@@ -8,5 +11,9 @@ export default [
   {
     method: 'middleware',
     handler: express.urlencoded({ extended: true })
+  },
+  {
+    method: 'middleware',
+    handler: cors({origin:process.env.FRONTEND_URL})
   }
 ]
