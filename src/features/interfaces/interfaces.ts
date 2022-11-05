@@ -1,110 +1,130 @@
-export interface IQuestLine {
-  id?: string
+type levelHistory = {direction:-1|0|1, date: Date}[]
+
+export interface IQuestline {
   title: string
   description: string
-  type: 'main'|'practice'
-  state?: 'active'|'finished'|'invalidated'
+  state: 'active'|'finished'|'invalidated'
   timecap: number|string
-  created_at?: string
-  finished_at?: string
-  xp?: number
+  created_at: Date
+  finished_at: Date|null
+  xp: number|null
 }
 
-export interface IAchievement {
-  id?: string
-  questline_id: string
+export interface INewQuestline {
   title: string
   description: string
-  requirements: string
-  type: 'achievement'|'title'
-  completed?: boolean
-  boost: number
-  xp: number
-  finished_at?: string
+  timecap: number
 }
 
-export interface IUpdateAchievement {
+export interface IQuest {
+  questline_id: string|null
+  skill_id: string|null
+  mission_id: string|null
+  title: string
+  description: string
+  type: 'main'|'side'|'mission'|'practice'
+  state: 'active'|'deferred'|'finished'|'invalidated'
+  todos: ITodo[]
+  timecap: number|string
+  focus_score: number|null
+  distraction_score: Date[]
+  created_at: Date
+  finished_at: Date|null
+  xp: number|null
+}
+
+export type ITodo = {
+  description: string
+  state: 'invalidated'|'finished'|'active'
+  finished_at: Date|null
+};
+
+export interface INewQuest {
   questline_id?: string
-  title?: string
-  description?: string
-  requirements?: string
-  type?: 'achievement'|'title'
-  completed?: boolean
-  boost?: number
-  xp?: number
-  finished_at?: string
+  skill_id?: string
+  mission_id?: string
+  title: string
+  description: string
+  type: 'main'|'side'|'mission'|'practice'
+  todos: string[],
+  timecap: number|string
 }
 
 export interface IFeats {
-  id?: string
-  questline_id: string
+  questline_id: string|null
+  skill_id: string|null
   title: string
   description: string
-  categories: string
+  acceptance: {
+    stage: 'created'|'reviewed'|'ready',
+    date: Date[]
+  }
+  todos: ITodo[]|null
+  categories: string[]
   tier: number
-  completed?: boolean
-  xp?: number
-  finished_at?: string
+  completed: boolean
+  xp: number|null
+  finished_at: Date|null
+}
+
+export interface INewFeat {
+  questline_id?: string|null
+  skill_id?: string|null
+  title: string
+  description: string
+  todos: string[]
+  categories: string[]
+  tier: number
 }
 
 
 export interface IRecords {
-  id?: string
-  questline_id: string
+  questline_id: string|null
+  skill_id: string|null
   title: string
   description: string
-  qtd: number
-  categories: string
-  tier: number
-  level?: number
-  xp?: number
+  acceptance: {
+    stage: 'created'|'reviewed'|'ready',
+    date: Date[]
+  }
+  metric: 'unit'|'time'|'distance'
+  status: {
+    waitTime: number
+    stageAmount: number
+    stage: number|null
+    last_commitment: Date|null
+  }
+  categories: string[]
+  level: number
+  history: levelHistory
+  xp: number|null
 }
 
-export interface IPassiveSkill {
-  id?: string
+export interface INewRecord {
+  questline_id?: string|null
+  skill_id?: string|null
   title: string
   description: string
-  type?: 'passive'
-  boost: number
-  stage?: number
-  state?: 'active'|'sleep'|'complete'
+  metric: 'unit'|'time'|'distance'
+  status: {
+    waitTime: number
+    stageAmount: number
+  }
+  categories: string[]
 }
 
-export interface IUpdatePassiveSkill {
-  title?: string
-  description?: string
-  boost?: number
-  stage?: number
-  state?: 'active'|'sleep'|'complete'
-}
-
-interface IPassiveSkillsHistory {
-  passive_skill_id: string
-  change: 'up'|'down'|'same'
-  current_level: number
-  finished_at: string
-}
-
-export interface ISupplements {
-  id?: string
-  name:'Free Time'
-  qtd: number
-  consumed_at?: string
-}
-export interface IQuest {
-  id?: string
-  questline_id: string
-  mission_id?: string
-  title: string
+export interface IPills {
+  immune: boolean
+  name: string
   description: string
-  type: 'main'|'side'|'mission'|'record'
-  state?: 'active'|'deferred'|'finished'|'invalidated'
-  timecap: number|string
-  focus_score?: number
-  distraction_score?: number
-  created_at?: string
-  finished_at?: string
-  xp?: number
+  times_taken: number
+  next_shot: Date
+  history: Date[]
+}
+
+export interface INewPill {
+  name: string
+  description: string
 }
 
 export interface IStats {
@@ -151,21 +171,15 @@ export interface IHashiras {
   }
 }
 
-export interface IMission {
+export interface IAchievement {
   id?: string
   questline_id: string
   title: string
   description: string
-  todos: string
-  type: 'time'|'qtd'
-  state?: 'cleaned'|'to-do'|'finished'|'given-up'
-  attempts?: number
-  timecap: number
-  constraints: string //[0,1,0,1,0,1,0,(5|2022-10-07)]|254 
-  stage?: string //3|[25,78,36,54,68]
-  created_at?: string
-  start_at: string
-  last_sync?: string
-  last_update?: string
+  requirements: string
+  type: 'achievement'|'title'
+  completed?: boolean
+  boost: number
+  xp: number
   finished_at?: string
 }

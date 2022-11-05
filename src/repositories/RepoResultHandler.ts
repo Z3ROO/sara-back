@@ -1,4 +1,4 @@
-import { db } from "../infra/http-server";
+import { db } from "../infra/database/mongodb";
 import { RepositoryError, DatabaseError } from "../util/errors/RepositoryError";
 import { Collection } from 'mongodb';
 

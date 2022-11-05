@@ -2,12 +2,14 @@
 
 export NODE_ENV=dev
 export SERVER_PORT=3001
-export PGUSER="zero"
-export PGHOST="localhost"
-export PGDATABASE="sandbox"
-export PGPASSWORD="193746"
-export PGPORT=5432
+export DB_PORT=3002
+export FRONTEND_URL="http://localhost:3000"
+# export PGUSER="zero"
+# export PGHOST="localhost"
+# export PGDATABASE="sandbox"
+# export PGPASSWORD="193746"
+# export PGPORT=5432
 
-source ./scripts/prepare-dev.sh
+#source ./scripts/prepare-dev.sh
 
-nodemon src/infra/http-server/index.ts
+nodemon src/index.ts

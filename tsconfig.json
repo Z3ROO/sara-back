@@ -3,6 +3,15 @@
     "esModuleInterop": true,
     "target": "ES2017",
     "moduleResolution": "node",
-    "resolveJsonModule": true
-  }
+    "module": "CommonJS",
+    "resolveJsonModule": true,
+    "outDir": "./dist"
+  },
+  "include": [
+    "./**/*.ts"
+  ],
+  "exclude": [
+    "./**/*.test.ts",
+    "./**/*.spec.ts"
+  ]
 }
