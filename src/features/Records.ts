@@ -1,6 +1,6 @@
 import RecordsRepo from "../repositories/RecordsRepo";
 import { INewRecord, IRecords } from "./interfaces/interfaces";
-import { proceedAcceptanceLevel } from "./Feats";
+import { nextAcceptanceLevel } from "./Feats";
 
 export class Records {
   static async getAllRecords() {
@@ -46,7 +46,7 @@ export class Records {
 
   static async proceedFeatAcceptanceLevel(identifier: string) {
     const feat = await RecordsRepo.findOneRecord({_id: identifier});
-    const stage = proceedAcceptanceLevel(feat);
+    const stage = nextAcceptanceLevel(feat);
 
     await RecordsRepo.proceedAcceptanceLevel({_id: identifier}, stage);
   }

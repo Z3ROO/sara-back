@@ -72,7 +72,7 @@ export interface INewFeat {
   skill_id?: string|null
   title: string
   description: string
-  todos: string[]
+  todos: string[]|null
   categories: string[]
   tier: number
 }
