@@ -14,86 +14,53 @@ class FeatsRepo extends NoSQLRepository<IFeats>{
     return feats;
   }
 
-  async findOneFeat(identifier: uniqueIdentifier) {
-    const searchParams = buildSearchString(identifier);
-
-    const feat = await this.collection().findOne(searchParams);
+  async findOneFeat(feat_id: string) {
+    const _id = new ObjectId(feat_id);
+    const feat = await this.collection().findOne({_id});
     return feat;
   }
 
   async findFeatsByCategory(categories: string[]) {
     const feats = await this.collection().find({categories: {$all: categories}}).toArray();
-
     return feats;
   }
 
   async findFeatsByQuestline(questline_id: string) {
     const feats = await this.collection().find({questline_id}).toArray();
-
     return feats;
   }
 
   async findAllCompleteFeatsInDateRange(range: {begin: Date, end: Date}) {
     const { begin, end } = range;
-    const feats = await this.collection().find({finished_at: {$gte: begin, $lt: end}}).toArray();
-    
+    const feats = await this.collection().find({finished_at: {$gte: begin, $lt: end}}).toArray();    
     return feats;
   }
 
-  async insertOneFeat(properties: INewFeat) {
-    let {
-      questline_id,
-      skill_id,
-      title,
-      description,
-      todos,
-      categories,
-      tier
-    } = properties;
-  
-    const parsedTodos: ITodo[]|null = todos ? todos.map((todo) => ({description: todo, state: 'active', finished_at: null})) : null;
-    
-    await this.collection().insertOne({
-      questline_id: questline_id ? questline_id : null,
-      skill_id: skill_id ? skill_id : null,
-      title,
-      description,
-      acceptance: {
-        stage: 'created',
-        date: [new Date()]
-      },
-      todos: parsedTodos,
-      categories,
-      tier,
-      completed: false,
-      xp: tier*50,
-      finished_at: null
-    });
+  async insertOneFeat(properties: IFeats) {
+    await this.collection().insertOne(properties);
   }
 
-  async updateOneFeat(identifier: uniqueIdentifier, properties: Partial<IFeats>) {
-    const invalidProperty = Object.keys(properties).find( prop => !['questline_id', 'title', 'description','categories','tier', 'completed', 'xp', 'finished_at'].includes(prop))
+  async updateOneFeat(feat_id: string, properties: Partial<IFeats>) {
+    const invalidProperty = Object.keys(properties).find( prop => !['skill_id', 'questline_id', 'title', 'description','tier', 'completed', 'xp', 'finished_at'].includes(prop))
     if (invalidProperty)
       throw new RepositoryError('Invalid property issued: '+ invalidProperty);
       
-    const searchParams = buildSearchString(identifier);
-
-    await this.collection().findOneAndUpdate(searchParams, {$set: properties});
+    const _id = new ObjectId(feat_id);
+    await this.collection().findOneAndUpdate({_id}, {$set: properties});
+  }
+  
+  async deleteOneFeat(feat_id: string) {
+    const _id = new ObjectId(feat_id);
+    await this.collection().findOneAndDelete({_id});
   }
 
-  async proceedAcceptanceLevel(identifier: uniqueIdentifier, stage: 'reviewed'|'ready') {
-    const searchParams = buildSearchString(identifier);
-    await this.collection().findOneAndUpdate(searchParams, {
-      $set:{"acceptance.stage":stage},
+  async proceedAcceptanceLevel(feat_id: string, stage: 'reviewed'|'ready') {
+    const _id = new ObjectId(feat_id);
+    await this.collection().findOneAndUpdate({_id}, {
+      $set:{"acceptance.stage": stage},
       $push: {"acceptance.date": new Date()}
     });
   }
-
-  async deleteOneFeat(identifier: uniqueIdentifier) {
-    const searchParams = buildSearchString(identifier);    
-    await this.collection().findOneAndDelete(searchParams);
-  }
-
 }
 
 export function buildSearchString(identifier: uniqueIdentifier) {
@@ -109,4 +76,5 @@ export function buildSearchString(identifier: uniqueIdentifier) {
 
   return result;
 }
+
 export default new FeatsRepo(dbName, collectionName);

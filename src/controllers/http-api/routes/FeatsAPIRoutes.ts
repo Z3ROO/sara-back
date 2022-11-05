@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { Feats } from "../../../features/Feats";
-import { IFeats, INewFeat } from "../../../features/interfaces/interfaces";
+import { INewFeat } from "../../../features/interfaces/interfaces";
 import { isObjectId } from "../../../infra/database/mongodb";
 import { BadRequest } from "../../../util/errors/HttpStatusCode";
 import { checkForMissingProperties } from "./utils";
@@ -22,7 +22,7 @@ export default [
       const { feat_id } = req.params;
       
       if (!isObjectId(feat_id))
-        throw new BadRequest(`Invalid id`);
+        throw new BadRequest(`Invalid feat_id`);
 
       await Feats.completeFeat(feat_id);
   
@@ -43,7 +43,7 @@ export default [
         title,
         description,
         todos: todos||null,
-        categories: categories||null,
+        categories: categories||[],
         tier
       }
 

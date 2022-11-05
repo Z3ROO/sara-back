@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { Feats } from '../../../features/Feats';
 import { IFeats, INewFeat } from '../../../features/interfaces/interfaces';
 import { closeDb, db, initMongoDB } from '../../../infra/database/mongodb';
 import { app } from '../../../infra/http-server';
@@ -16,13 +17,17 @@ describe('Feats HTTP API Routes', () => {
 
   beforeAll(async () => {
     await initMongoDB();
-    FeatsRepo.insertOneFeat(dummyFeat);
+  });
+
+  beforeEach(async () => {
+    await db('leveling').collection('feats').deleteMany({});
+    Feats.createNewFeat(dummyFeat);
   });
 
   afterAll(async () => {
     await db('leveling').collection('feats').deleteMany({});
     await closeDb();
-  })
+  });
 
   describe('/feats', () => {
     test('Should respond with 200 status code', async () => {
@@ -52,7 +57,7 @@ describe('Feats HTTP API Routes', () => {
 
   describe('/feats/complete/:feat_id', () => {
     test('Should respond with 202 status code and correct message uppon valid feat_id', async () => {
-      const feat = await FeatsRepo.findOneFeat({title: dummyFeat.title});
+      const feat = (await FeatsRepo.findAllFeats())[0];
       const response = await request(app).get(`/feats/complete/${feat._id}`);
 
       expect(response.status).toBe(202);
@@ -65,7 +70,7 @@ describe('Feats HTTP API Routes', () => {
 
       expect(response.status).toBe(400);
       expect(response.body.status).toBe(400);
-      expect(response.body.message).toBe('Bad Request: Invalid id');
+      expect(response.body.message).toBe('Bad Request: Invalid feat_id');
     });
   })
 
