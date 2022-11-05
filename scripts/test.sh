@@ -2,7 +2,7 @@
 
 export NODE_ENV=dev
 export SERVER_PORT=3001
-export DB_PORT=1338
+export DB_PORT=3003
 # export PGUSER="zero"
 # export PGHOST="localhost"
 # export PGDATABASE="saratest"
