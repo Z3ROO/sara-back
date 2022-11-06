@@ -71,7 +71,7 @@ export class Feats {
     const feat = await FeatsRepo.findOneFeat(feat_id);
     const stage = nextAcceptanceLevel(feat);
 
-    await FeatsRepo.proceedAcceptanceLevel(feat_id, stage);
+    await FeatsRepo.updateAcceptanceLevel(feat_id, stage);
   }
 }
 

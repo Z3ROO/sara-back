@@ -3,10 +3,11 @@ import request from 'supertest';
 import { initMongoDB, db, closeDb } from '../../../infra/database/mongodb';
 import RecordsRepo from '../../../repositories/RecordsRepo';
 import { INewRecord, IRecords } from '../../../features/interfaces/interfaces';
+import { Records } from '../../../features/Records';
 
 describe('Records HTTP API Routes', () => {
   const dummyRecord: INewRecord = {
-    questline_id: 'questlineid',
+    questline_id: '123456789123456789123456',
     title: 'Record 01',
     description: 'Record 01',
     metric: 'unit',
@@ -19,7 +20,7 @@ describe('Records HTTP API Routes', () => {
 
   beforeAll(async () => {
     await initMongoDB();
-    RecordsRepo.insertOneRecord(dummyRecord);
+    Records.createNewRecord(dummyRecord);
   });
 
   afterAll(async () => {
@@ -29,7 +30,7 @@ describe('Records HTTP API Routes', () => {
 
   describe('/records', () => {
     test('Should respond 200', async () => {
-      const response = await request(app).get('/records').set('Accept', 'application/json');
+      const response = await request(app).get('/records');
 
       expect(response.statusCode).toBe(200);
       expect(response.body.status).toBe(200);
@@ -49,10 +50,10 @@ describe('Records HTTP API Routes', () => {
         },
         level: 0,
         history: [],
-        xp: 50
+        xp: null
       }
       const response = await request(app).get('/records');
-      expect(response.body.body[0]).toMatchObject(hidratedDummyRecord)
+      expect(response.body.body[0]).toMatchObject(hidratedDummyRecord);
     });
   });
 
@@ -72,7 +73,7 @@ describe('Records HTTP API Routes', () => {
       
       expect(response.statusCode).toBe(400);
       expect(response.body.status).toBe(400);
-      expect(response.body.message).toBe('Bad Request: Invalid Id');
+      expect(response.body.message).toBe('Bad Request: Invalid record_id');
     });
   });
 

@@ -1,7 +1,6 @@
+import { Request } from "express";
 import { INewRecord, IRecords } from "../../../features/interfaces/interfaces";
 import { Records } from "../../../features/Records";
-import { isObjectId } from "../../../infra/database/mongodb";
-import { BadRequest } from "../../../util/errors/HttpStatusCode";
 import { checkForMissingProperties } from "./utils";
 
 
@@ -10,7 +9,7 @@ export default [
     method: 'get', path: '/records',
     handler: async function getRecords(req: any) {
       const records = await Records.getAllRecords();
-  
+
       return {
         body: records
       }
@@ -18,11 +17,8 @@ export default [
   },
   {
     method: 'get', path: '/records/up/:record_id',
-    handler: async function updateRecordLevel(req: any) {
+    handler: async function updateRecordLevel(req: Request) {
       const { record_id } = req.params;
-
-      if (!isObjectId(record_id))
-        throw new BadRequest('Invalid Id');
   
       await Records.updateRecordLevel(record_id, 1);
   
@@ -34,15 +30,12 @@ export default [
   },
   {
     method: 'post', path: '/records/new',
-    handler: async function createNewRecord(req: any) {
+    handler: async function createNewRecord(req: Request) {
       const  {
         title, description, metric, categories, questline_id,
         waitTime,
         stageAmount,
-      } = req.body
-
-      if (!isObjectId(questline_id))
-        throw new BadRequest('Invalid questline_id');
+      } = req.body;
   
       const record: INewRecord = {
         questline_id,
