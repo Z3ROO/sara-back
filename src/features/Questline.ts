@@ -1,3 +1,4 @@
+import { isObjectId } from "../infra/database/mongodb";
 import QuestlineRepo from "../repositories/QuestlineRepo";
 import QuestRepo from "../repositories/QuestRepo";
 import { BadRequest } from "../util/errors/HttpStatusCode";
@@ -10,7 +11,7 @@ export class Questline {
     if (!questline)
       throw new BadRequest('No active questline found');
 
-    return questline
+    return questline;
   }
 
   static async getAllQuestlines() {
@@ -23,24 +24,44 @@ export class Questline {
     return questlines;
   }
 
-  static async getOneQuestline(identifier: string) {
-    const questline = await QuestlineRepo.findOneQuestline(identifier);
+  static async getOneQuestline(questline_id: string) {
+    
+    if (!isObjectId(questline_id))
+      throw new BadRequest('Invalid questline_id');
+
+    const questline = await QuestlineRepo.findOneQuestline(questline_id);
     return questline;
   }
 
-  static async getFineshedQuestlinesOfOneDay(date: Date|string) {
-    if (typeof date === 'string')
-      date = new Date(date);
-
+  static async getFineshedQuestlinesOfOneDay(date: Date) {
     const begin = new Date(date.setHours(0,0,0));
     const end =  new Date(date.setHours(23,59,59));
-    const questlines = await QuestlineRepo.findFineshedQuestlineInDateRange({begin, end});
+    const questlines = await QuestlineRepo.findFineshedQuestlinesInDateRange({begin, end});
 
     return questlines
   }
 
-  static async createNewQuestline(questline: INewQuestline) {
-    return QuestlineRepo.createNewQuestline(questline);
+  static async createNewQuestline(properties: INewQuestline) {
+    const { 
+      title,
+      description,
+      timecap
+    } = properties;
+
+    const mainQuestline = await QuestlineRepo.findActiveQuestline();
+
+    if (mainQuestline)
+      throw new BadRequest('An active main questline already exist');
+
+    return QuestlineRepo.insertOneQuestline({
+      title,
+      description,
+      state: 'active',
+      timecap: timecap,
+      created_at: new Date(),
+      finished_at: null,
+      xp: null
+    });
   }
 
   static async terminateActiveQuestline(action: 'finished'|'invalidated') {

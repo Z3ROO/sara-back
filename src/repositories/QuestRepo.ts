@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { INewFeat, INewQuest, IQuest } from "./../features/interfaces/interfaces";
-import { RepositoryError } from "./../util/errors/RepositoryError"
-import Repository, { NoSQLRepository } from "./RepoResultHandler"
+import { RepositoryError } from "./../util/errors/RepositoryError";
+import Repository, { NoSQLRepository } from "./RepoResultHandler";
 
 class QuestRepo extends NoSQLRepository<IQuest>{
   async findActiveMainQuest() {
@@ -9,8 +9,8 @@ class QuestRepo extends NoSQLRepository<IQuest>{
     return quest;
   }
 
-  async findOneQuest(identifier: string) {
-    const quest = await this.collection().findOne({_id: new ObjectId(identifier)});
+  async findOneQuest(quest_id: string) {
+    const quest = await this.collection().findOne({_id: new ObjectId(quest_id)});
     return quest;
   }
 
@@ -30,7 +30,7 @@ class QuestRepo extends NoSQLRepository<IQuest>{
   }
 
   async findAllFinishedMainQuests() {
-    const quests = await this.collection().find({type: 'main', state: 'finished'}).toArray();
+    const quests = await this.collection().find({type: 'main', $or: [ {state: 'finished'}, {state: 'invalidated'}]}).toArray();
     return quests;
   }
 
@@ -49,83 +49,44 @@ class QuestRepo extends NoSQLRepository<IQuest>{
     return quests;
   }
 
-  async insertNewQuest(properties: INewQuest) {
-    const { 
-      questline_id,
-      skill_id,
-      mission_id,
-      title,
-      description,
-      type,
-      todos,
-      timecap
-    } = properties;
-
-    if (type === 'main') {
-      const mainQuest = await this.findActiveMainQuest();
-
-      if (mainQuest)
-        throw new RepositoryError('An active main quest already exist.');
-    }
-    else if (type === 'side'){
-      const sideQuests = await this.findAllUnfineshedSideQuests();
-
-      if (sideQuests.length >= 5)
-        throw new RepositoryError('Maximun amount of side quests pre-registered reached.');
-    }
-
-    await this.collection().insertOne({
-      questline_id: questline_id ? questline_id : null,
-      skill_id: skill_id ? skill_id : null,
-      mission_id: mission_id ? mission_id : null,
-      title,
-      description,
-      type,
-      state: ['main','practice'].includes(type) ? 'active' : 'deferred',
-      todos: todos.map((todo: string) => ({description: todo, state: 'active', finished_at: null})),
-      timecap,
-      focus_score: 0,
-      distraction_score: [],
-      created_at: new Date(),
-      finished_at: null,
-      xp: null
-    });
+  async insertOneQuest(properties: IQuest) {
+    await this.collection().insertOne(properties);
   }
 
-  async finishQuest(identifier: string, focus_score: number) {
-    await this.collection().findOneAndUpdate({_id: new ObjectId(identifier)}, {$set: {
+  async finishQuest(quest_id: string, focus_score: number) {
+    await this.collection().findOneAndUpdate({_id: new ObjectId(quest_id)}, {$set: {
       finished_at: new Date(),
       focus_score,
       state: 'finished'
     }})
   }
 
-  async insertDistractionPoint(identifier: string) {
+  async insertDistractionPoint(quest_id: string) {
     await this.collection().findOneAndUpdate(
-      {_id: new ObjectId(identifier)}, 
+      {_id: new ObjectId(quest_id)}, 
       { $push: {distraction_score: new Date()} }
     );
   }
 
-  async deleteQuest(identifier: string) {
-    await this.collection().findOneAndDelete({_id: new ObjectId(identifier)});
+  async deleteQuest(quest_id: string) {
+    await this.collection().findOneAndDelete({_id: new ObjectId(quest_id)});
   }
 
-  async activateSideQuest(identifier: string) {
+  async activateSideQuest(quest_id: string) {
     const activeSideQuest = await this.findActiveSideQuest();
 
     if (activeSideQuest)
       throw new RepositoryError('An active side quest already exists.')
 
     await this.collection().findOneAndUpdate(
-      {_id: new ObjectId(identifier)},
+      {_id: new ObjectId(quest_id)},
       {$set: { state: 'active' }}
-      );
+    );
   }
 
-  async questTodoStatus(questIdentifier: string, todoIdentifier: string) {
-    const quest = await this.collection().findOne({_id: new ObjectId(questIdentifier)});
-    const todo = quest.todos.find(todo => (todo.description === todoIdentifier))
+  async questTodoStatus(quest_id: string, todoDescription: string) {
+    const quest = await this.collection().findOne({_id: new ObjectId(quest_id)});
+    const todo = quest.todos.find(todo => (todo.description === todoDescription));
     
     if (todo)
       return todo.state;
@@ -133,31 +94,29 @@ class QuestRepo extends NoSQLRepository<IQuest>{
     return null;
   }
   
-  async invalidateQuestTodo(questIdentifier: string, todoIdentifier: string,) {
-    await this.collection().findOneAndUpdate({_id: new ObjectId(questIdentifier)}, {
+  async invalidateQuestTodo(quest_id: string, todoDescription: string,) {
+    await this.collection().findOneAndUpdate({_id: new ObjectId(quest_id)}, {
       $set: {
         "todos.$[tds].state": 'invalidated',
         "todos.$[tds].finished_at": new Date()
       }
     },
     {
-      arrayFilters: [ { "tds.description": todoIdentifier } ]
+      arrayFilters: [ { "tds.description": todoDescription } ]
     });
   }
 
-  async finishQuestTodo(questIdentifier: string, todoIdentifier: string,) {
-    await this.collection().findOneAndUpdate({_id: new ObjectId(questIdentifier)}, {
+  async finishQuestTodo(quest_id: string, todoDescription: string,) {
+    await this.collection().findOneAndUpdate({_id: new ObjectId(quest_id)}, {
       $set: {
         "todos.$[tds].state": 'finished',
         "todos.$[tds].finished_at": new Date()
       }
     },
     {
-      arrayFilters: [ { "tds.description": todoIdentifier } ]
+      arrayFilters: [ { "tds.description": todoDescription } ]
     });
   }
 }
-
-
 
 export default new QuestRepo('leveling', 'quests')

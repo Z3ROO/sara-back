@@ -1,21 +1,30 @@
 import request from 'supertest';
+import { IQuestline } from '../../../features/interfaces/interfaces';
+import { Quest } from '../../../features/Quest';
 import { closeDb, db, initMongoDB } from '../../../infra/database/mongodb';
 import { app } from '../../../infra/http-server';
 import QuestlineRepo from '../../../repositories/QuestlineRepo';
 import QuestRepo from '../../../repositories/QuestRepo';
 
 describe('Quests HTTP API Routes', () => {
-  const dummyFinishedQuestline:any = {
+  const dummyFinishedQuestline: IQuestline = {
     title: 'Finished questline',
     description: 'Finished questline',
-    type: 'main',
-    timecap: 30*24*60*60*1000
+    state: 'finished',
+    timecap: 132132,
+    created_at: new Date(),
+    finished_at: new Date(),
+    xp: null
   }
 
   const dummyMainQuestline:any = {
     title: 'Main questline',
     description: 'Main questline',
-    timecap: 30*24*60*60*1000
+    state: 'active',
+    timecap: 132132,
+    created_at: new Date(),
+    finished_at: null,
+    xp: null
   }
 
   const dummyQuest: any = {
@@ -33,16 +42,15 @@ describe('Quests HTTP API Routes', () => {
   beforeEach(async () => {
     await wipeCollections();
     
-    await QuestlineRepo.createNewQuestline(dummyFinishedQuestline);
-    await QuestlineRepo.terminateActiveQuestline('finished');
+    await QuestlineRepo.insertOneQuestline(dummyFinishedQuestline);
 
-    await QuestlineRepo.createNewQuestline(dummyMainQuestline);
+    await QuestlineRepo.insertOneQuestline(dummyMainQuestline);
 
     const questline = await QuestlineRepo.findActiveQuestline();
 
-    await QuestRepo.insertNewQuest({
+    await Quest.createNewQuest({
       ...dummyQuest,
-      questline_id: questline._id.toHexString()
+      questline_id: questline!._id.toHexString()
     });
   });
 
@@ -54,15 +62,19 @@ describe('Quests HTTP API Routes', () => {
   describe('/quests/questline', () => {
     test('Should respond with 200 status code and the active questline if has one', async () => {
       const response = await request(app).get('/quests/questline');
-
+      const dummyQuestline = {
+        ...dummyMainQuestline
+      }
+      delete dummyQuestline.created_at;
+      
       expect(response.status).toBe(200);
       expect(response.body.status).toBe(200);
       expect(response.body.message).toBe('');
-      expect(response.body.body).toMatchObject(dummyMainQuestline);
+      expect(response.body.body).toMatchObject(dummyQuestline);
     });
 
     test('Should respond with 400 status code and correct message if no active questline', async () => {
-      const quest = await QuestRepo.findActiveMainQuest();
+      const quest = (await QuestRepo.findActiveMainQuest())!;
       await QuestRepo.finishQuestTodo(quest._id.toHexString(), quest.todos[0].description);
       await QuestRepo.finishQuest(quest._id.toHexString(), 1);
       await QuestlineRepo.terminateActiveQuestline('finished');
@@ -78,15 +90,20 @@ describe('Quests HTTP API Routes', () => {
 
   describe('/quests/questline/:questline_id', () => {
     test('Should respond with 200 status code and a questline uppon valid questline_id', async () => {
-      const _id = (await QuestlineRepo.findActiveQuestline())._id.toHexString();
+      const _id = (await QuestlineRepo.findActiveQuestline())!._id.toHexString();
       const response = await request(app).get(`/quests/questline/${_id}`);
+      
+      const dummyQuestline = {
+        ...dummyMainQuestline
+      }
+      delete dummyQuestline.created_at;
 
       expect(response.status).toBe(200);
       expect(response.body.status).toBe(200);
       expect(response.body.message).toBe('');
       expect(response.body.body).toMatchObject({
         _id,
-        ...dummyMainQuestline
+        ...dummyQuestline
       });
     });
 
@@ -103,7 +120,7 @@ describe('Quests HTTP API Routes', () => {
 
   describe('/quests/questline/finish', () => {
     test('Should return 202 status code and correct message if main questline active', async () => {
-      const quest = await QuestRepo.findActiveMainQuest();
+      const quest = (await QuestRepo.findActiveMainQuest())!;
       await QuestRepo.finishQuestTodo(quest._id.toHexString(), quest.todos[0].description);
       await QuestRepo.finishQuest(quest._id.toHexString(), 1);
       const response = await request(app).get(`/quests/questline/finish`);
@@ -148,7 +165,7 @@ describe('Quests HTTP API Routes', () => {
 
   describe('/quests/questline/new', () => {
     test('Should respond with 201 status code and correct message uppon correct properties provided', async () => {
-      const quest = await QuestRepo.findActiveMainQuest();
+      const quest = (await QuestRepo.findActiveMainQuest())!;
       await QuestRepo.finishQuestTodo(quest._id.toHexString(), quest.todos[0].description);
       await QuestRepo.finishQuest(quest._id.toHexString(), 1);
       await QuestlineRepo.terminateActiveQuestline('finished');
@@ -200,10 +217,10 @@ describe('Quests HTTP API Routes', () => {
 
   describe('/quests/quest/new', () => {
     test('Should respond with 201 status code and correct message uppon correct properties provided', async () => {
-      const quest = await QuestRepo.findActiveMainQuest();
+      const quest = (await QuestRepo.findActiveMainQuest())!;
       await QuestRepo.finishQuestTodo(quest._id.toHexString(), quest.todos[0].description);
       await QuestRepo.finishQuest(quest._id.toHexString(), 1);
-      const questline_id = (await QuestlineRepo.findActiveQuestline())._id;
+      const questline_id = (await QuestlineRepo.findActiveQuestline())!._id;
 
       const reqBody = {
         questline_id,
@@ -223,7 +240,7 @@ describe('Quests HTTP API Routes', () => {
     });
 
     test('Should respond with 400 status code if Questline no found', async () => {
-      const quest = await QuestRepo.findActiveMainQuest();
+      const quest = (await QuestRepo.findActiveMainQuest())!;
       await QuestRepo.finishQuestTodo(quest._id.toHexString(), quest.todos[0].description);
       await QuestRepo.finishQuest(quest._id.toHexString(), 1);
 
@@ -281,7 +298,7 @@ describe('Quests HTTP API Routes', () => {
 
   describe('/quests/quest/handle-todo', () => {
     test('Should respond with 202 status code and correct message uppon correct properties provided', async () => {
-      const quest_id = (await QuestRepo.findActiveMainQuest())._id.toHexString();
+      const quest_id = (await QuestRepo.findActiveMainQuest())!._id.toHexString();
       const reqBody = {
         quest_id,
         todoDescription: dummyQuest.todos[0],
@@ -296,7 +313,7 @@ describe('Quests HTTP API Routes', () => {
     });
 
     test('Should respond with 400 status code and correct message uppon already finished to-do', async () => {
-      const quest_id = (await QuestRepo.findActiveMainQuest())._id.toHexString();
+      const quest_id = (await QuestRepo.findActiveMainQuest())!._id.toHexString();
       await QuestRepo.finishQuestTodo(quest_id, dummyQuest.todos[0]);
       const reqBody = {
         quest_id,
@@ -340,7 +357,7 @@ describe('Quests HTTP API Routes', () => {
     });
 
     test('Should respond with 400 status code and correct message uppon invalid todoDescription', async () => {
-      const quest_id = (await QuestRepo.findActiveMainQuest())._id.toHexString();
+      const quest_id = (await QuestRepo.findActiveMainQuest())!._id.toHexString();
       const reqBody = {
         quest_id,
         action: 'finish',
@@ -357,7 +374,7 @@ describe('Quests HTTP API Routes', () => {
 
   describe('/quests/quest/finish', () => {
     test('Should respond with 202 status code and correct message uppon correct properties', async () => {
-      const quest_id = (await QuestRepo.findActiveMainQuest())._id.toHexString();
+      const quest_id = (await QuestRepo.findActiveMainQuest())!._id.toHexString();
       await QuestRepo.finishQuestTodo(quest_id, dummyQuest.todos[0]);
       const reqBody = {
         quest_id,
@@ -409,7 +426,7 @@ describe('Quests HTTP API Routes', () => {
     });
 
     test('Should respond with 400 and correct message if no active quest', async () => {
-      const quest = await QuestRepo.findActiveMainQuest();
+      const quest = (await QuestRepo.findActiveMainQuest())!;
       await QuestRepo.finishQuestTodo(quest._id.toHexString(), quest.todos[0].description);
       await QuestRepo.finishQuest(quest._id.toHexString(), 1);
 

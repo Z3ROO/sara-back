@@ -27,7 +27,7 @@ export default [
   },
   {
     method: 'get', path: '/quests/questline/:questline_id',
-    handler: QuestsAPIHandlers.getQuestlineInfo
+    handler: QuestsAPIHandlers.getOneQuestline
   },
   {
     method: 'post', path: '/quests/quest/new',

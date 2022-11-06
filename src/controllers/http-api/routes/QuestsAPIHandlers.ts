@@ -1,3 +1,4 @@
+import { Request } from "express";
 import { INewQuest, INewQuestline, IQuest, IQuestline } from "../../../features/interfaces/interfaces";
 import { Quest } from "../../../features/Quest";
 import { Questline } from "../../../features/Questline";
@@ -8,7 +9,7 @@ import { checkForMissingProperties } from "./utils";
 
 export default class QuestsAPIHandlers {
 
-  //dev purposes
+  //[get]/tey  dev purposes
   static async teyzada() {
     return {
       body: await QuestRepo.findAllFinishedQuests()
@@ -16,7 +17,7 @@ export default class QuestsAPIHandlers {
   }
 
   //[GET]/quests/questline/
-  static async getListOfActiveQuestlines(req: any) {
+  static async getListOfActiveQuestlines() {
     const questline = await Questline.getActiveQuestline();
 
     return {
@@ -25,7 +26,7 @@ export default class QuestsAPIHandlers {
   }
 
   // ## TEST THIS ### /[GET]/quests/questline/all
-  static async getAllQuestlines(req: any, res: any) {
+  static async getAllQuestlines() {
     const questlines = await Questline.getAllQuestlines();
 
     return {
@@ -34,11 +35,8 @@ export default class QuestsAPIHandlers {
   }
 
   //[GET]/quests/questline/:questline_id
-  static async getQuestlineInfo(req: any) {
+  static async getOneQuestline(req: Request) {
     const { questline_id } = req.params;
-
-    if (!isObjectId(questline_id))
-      throw new BadRequest('Invalid questline_id')
 
     const questline = await Questline.getOneQuestline(questline_id);
 
@@ -48,7 +46,7 @@ export default class QuestsAPIHandlers {
   }  
 
   //[GET]/quests/questline/finish
-  static async finishMainQuestline(req: any, res: any) {
+  static async finishMainQuestline() {
     await Questline.terminateActiveQuestline('finished');
     
     return {
@@ -58,7 +56,7 @@ export default class QuestsAPIHandlers {
   }
 
   ///[GET]/quests/questline/all-finished
-  static async getAllFinishedQuestlines(req: any, res: any) {
+  static async getAllFinishedQuestlines() {
     const questlines = await Questline.getAllFineshedQuestlines();
 
     return {
@@ -67,7 +65,7 @@ export default class QuestsAPIHandlers {
   }
 
   //[POST]/quests/questline/new
-  static async createNewQuestline(req: any, res: any) {
+  static async createNewQuestline(req: Request) {
     const { title, description, timecap } = req.body;
     
     const questline: INewQuestline = {
@@ -86,7 +84,7 @@ export default class QuestsAPIHandlers {
   }
 
   //[GET]/quests/active-quest
-  static async getActiveQuest(req: any) {
+  static async getActiveQuest() {
     const questBody = await Quest.getActiveMainQuest();
 
     return {
@@ -95,7 +93,7 @@ export default class QuestsAPIHandlers {
   }
 
   //[POST]/quests/quest/new
-  static async createNewQuest(req: any) {
+  static async createNewQuest(req: Request) {
     const { questline_id, title, description, timecap, type, todos } = req.body;
     
     const questBody: INewQuest = {
@@ -111,9 +109,6 @@ export default class QuestsAPIHandlers {
     
     checkForMissingProperties(questBody);
 
-    if (!isObjectId(questline_id))
-      throw new BadRequest('Invalid questline_id')
-
     await Quest.createNewQuest(questBody);
 
     return {
@@ -123,7 +118,7 @@ export default class QuestsAPIHandlers {
   }
 
   //[POST]/quests/quest/handle-todo
-  static async handleQuestTodo(req: any, res: any) {
+  static async handleQuestTodo(req: Request) {
     const { 
       quest_id, 
       todoDescription, 
@@ -136,9 +131,6 @@ export default class QuestsAPIHandlers {
       action 
     });
 
-    if (!isObjectId(quest_id))
-      throw new BadRequest('Invalid quest_id')
-
     await Quest.handleQuestTodo(quest_id, todoDescription, action);
     
     return {
@@ -148,13 +140,10 @@ export default class QuestsAPIHandlers {
   }
 
   //[POST]/quests/quest/finish
-  static async finishQuest(req: any, res: any) {
+  static async finishQuest(req: Request) {
     const { quest_id, focusScore } = req.body;
     
     checkForMissingProperties({ quest_id, focusScore });
-
-    if (!isObjectId(quest_id))
-      throw new BadRequest('Invalid quest_id');
 
     await Quest.finishQuest(quest_id, focusScore);
     
@@ -165,13 +154,12 @@ export default class QuestsAPIHandlers {
   }
 
   //[GET]/quests/quest/distraction
-  static async increaseDistractionScore(req: any, res: any) {
+  static async increaseDistractionScore() {
     await Quest.insertDistractionPoint();
 
     return {
       status: 202,
       message: 'Distraction score increased'
     };
-  }
-  
+  }  
 }
