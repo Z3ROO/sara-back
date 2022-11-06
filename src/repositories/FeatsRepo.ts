@@ -54,7 +54,7 @@ class FeatsRepo extends NoSQLRepository<IFeats>{
     await this.collection().findOneAndDelete({_id});
   }
 
-  async proceedAcceptanceLevel(feat_id: string, stage: 'reviewed'|'ready') {
+  async updateAcceptanceLevel(feat_id: string, stage: 'reviewed'|'ready') {
     const _id = new ObjectId(feat_id);
     await this.collection().findOneAndUpdate({_id}, {
       $set:{"acceptance.stage": stage},
