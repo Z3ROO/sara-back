@@ -3,14 +3,16 @@ import NotesAPIRoutes from './routes/NotesAPIRoutes';
 import FlashcardsAPIRoutes from './routes/FlashcardsAPIRoutes';
 import StatsAPIRoutes from './routes/LevelingAPIRoutes';
 import FeatsAPIRoutes from './routes/leveling/FeatsAPIRoutes';
-import RecordsAPIRoutes from './routes/RecordsAPIRoutes';
-import QuestsAPIRoutes from './routes/QuestsAPIRoutes';
-import PillsAPIRoutes from './routes/PillsAPIRoutes';
+import RecordsAPIRoutes from './routes/leveling/RecordsAPIRoutes';
+import QuestsAPIRoutes from './routes/leveling/quests/QuestsAPIRoutes';
+import PillsAPIRoutes from './routes/leveling/pills/PillsAPIRoutes';
+import QuestlinesAPIRoutes from './routes/leveling/questlines/QuestlinesAPIRoutes';
 
 export default [
   ...defaultMiddlewares,
   ...NotesAPIRoutes,
   ...FlashcardsAPIRoutes,
+  ...QuestlinesAPIRoutes,
   ...QuestsAPIRoutes,
   ...FeatsAPIRoutes,
   ...RecordsAPIRoutes,

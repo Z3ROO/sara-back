@@ -43,18 +43,21 @@ export class Questlines {
   }
 
   static async createNewQuestline(properties: INewQuestline) {
-    
-    checkForMissingProperties(properties);
-
     const { 
       title,
       description,
       timecap
     } = properties;
-
-    const mainQuestline = await QuestlineRepo.findActiveQuestline();
-
-    if (mainQuestline)
+    
+    checkForMissingProperties({ 
+      title,
+      description,
+      timecap
+    });
+    
+    const activeQuestline = await QuestlineRepo.findActiveQuestline();
+    console.log(activeQuestline)
+    if (activeQuestline)
       throw new BadRequest('An active main questline already exist');
 
     return QuestlineRepo.insertOneQuestline({

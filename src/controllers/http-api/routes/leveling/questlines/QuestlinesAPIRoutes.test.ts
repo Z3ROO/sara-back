@@ -73,12 +73,9 @@ describe('Quests HTTP API Routes', () => {
     });
 
     test('Should respond with 400 status code and correct message if no active questline', async () => {
-      const quest = (await QuestRepo.findActiveMainQuest())!;
-      await QuestRepo.finishQuestTodo(quest._id.toHexString(), quest.todos[0].description);
-      await QuestRepo.finishQuest(quest._id.toHexString(), 1);
-      await QuestlinesRepo.terminateActiveQuestline('finished');
+      await wipeCollections();
 
-      const response = await request(app).get('/leveling/questline');
+      const response = await request(app).get('/leveling/questlines');
 
       expect(response.status).toBe(400);
       expect(response.body.status).toBe(400);
@@ -227,7 +224,7 @@ describe('Quests HTTP API Routes', () => {
       
       expect(response.status).toBe(400);
       expect(response.body.status).toBe(400);
-      expect(response.body.message).toBe('Bad Request: Invalide questline_id');
+      expect(response.body.message).toBe('Bad Request: Invalid questline_id');
       expect(response.body.body).toBe(null);
     });
   });
@@ -236,5 +233,5 @@ describe('Quests HTTP API Routes', () => {
 
 async function wipeCollections() {
   await QuestlinesRepo.wipeCollection();
-  await db('leveling').collection('quests').deleteMany({});
+  await QuestRepo.wipeCollection();
 }

@@ -11,4 +11,6 @@ export DB_PORT=3003
 
 #source ./scripts/prepare-dev.sh
 
-npx jest
+npx jest src/controllers/http-api/routes/leveling/questlines/QuestlinesAPIRoutes.test.ts
+#src/features/leveling/Questlines.test.ts
+#/src/repositories/leveling/QuestlinesRepo.test.ts

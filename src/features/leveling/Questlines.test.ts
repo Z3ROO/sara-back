@@ -4,6 +4,7 @@ import { BadRequest } from "../../util/errors/HttpStatusCode";
 import { INewQuest, INewQuestline, IQuestline } from "../interfaces/interfaces";
 import { Questlines } from './Questlines'
 import { Quest } from '../Quest'
+import QuestRepo from "../../repositories/QuestRepo";
 
 describe('Questlines domain logic', () => {
   const dummyQuestline01: IQuestline = {
@@ -34,6 +35,7 @@ describe('Questlines domain logic', () => {
 
   beforeEach(async () => {
     await QuestlinesRepo.wipeCollection();
+    await QuestRepo.wipeCollection();
     await QuestlinesRepo.insertOneQuestline(dummyQuestline01);
     await QuestlinesRepo.insertOneQuestline(dummyQuestline02);
     await QuestlinesRepo.insertOneQuestline(dummyQuestline03);
@@ -41,6 +43,7 @@ describe('Questlines domain logic', () => {
 
   afterAll(async () => {
     await QuestlinesRepo.wipeCollection();
+    await QuestRepo.wipeCollection();
     await closeDb();
   });
 
@@ -51,9 +54,10 @@ describe('Questlines domain logic', () => {
   });
 
   test('Should throw Bad Request if no active questline is found', async () => {
+    await QuestlinesRepo.wipeCollection();
     const questline = async () => await Questlines.getActiveQuestline();
 
-    expect(questline).toThrow(new BadRequest('No active questline found'));
+    expect(questline).rejects.toThrow(new BadRequest('No active questline found'));
   });
 
   test('Should return all existing questlines', async () => {
@@ -79,11 +83,11 @@ describe('Questlines domain logic', () => {
     const _id = 'invalid_id'
     const questline = async () => await Questlines.getOneQuestline(_id);
 
-    expect(questline).toThrow(new BadRequest('Invalid questline_id'));
+    expect(questline).rejects.toThrow(new BadRequest('Invalid questline_id'));
   })
 
   test('Should get all questlines finished in an specified day', async () => {
-    const day = new Date();
+    const day = new Date('2022-07-03 10:00:00');
     const questlines = await Questlines.getFineshedQuestlinesOfOneDay(day);
 
     expect(questlines.length).toBe(2);
@@ -111,13 +115,11 @@ describe('Questlines domain logic', () => {
       description: 'description',
       //timecap: 23131321
     };
+    
+    const createdQuestline = async () => await Questlines.createNewQuestline(dummyQuestline);
 
-    await Questlines.createNewQuestline(dummyQuestline);
-
-    const createdQuestline = async () => await Questlines.getActiveQuestline();
-
-    expect(createdQuestline).toThrow(new BadRequest('Property "timecap" is missing'));
-  })
+    expect(createdQuestline).rejects.toThrow(new BadRequest('Property "timecap" is missing'));
+  });
 
   test('Should throw Bad Request if active questline already exist when creating new questline', async () => {
     const dummyQuestline: any = {
@@ -126,11 +128,9 @@ describe('Questlines domain logic', () => {
       timecap: 23131321
     };
 
-    await Questlines.createNewQuestline(dummyQuestline);
+    const createQuestline = async () => await Questlines.createNewQuestline(dummyQuestline);
 
-    const createdQuestline = async () => await Questlines.getActiveQuestline();
-
-    expect(createdQuestline).toThrow(new BadRequest('An active main questline already exist'));
+    expect(createQuestline).rejects.toThrow(new BadRequest('An active main questline already exist'));
   });
 
   test('Should succesfully finish/invalidate questline', async () => {
@@ -142,7 +142,9 @@ describe('Questlines domain logic', () => {
   });
 
   test('Should throw Bad Request if active quest when trying to finish/invalidate questline', async () => {
+    const questline_id = (await Questlines.getActiveQuestline())._id.toHexString();
     const quest: INewQuest = {
+      questline_id, //must fix making it not required
       title: 'Quest',
       description: 'Description',
       timecap: 123132,
@@ -153,14 +155,14 @@ describe('Questlines domain logic', () => {
     await Quest.createNewQuest(quest)
     const questline = async () => await Questlines.terminateActiveQuestline('finished');
 
-    expect(questline).toThrow(new BadRequest('Can\'t finish, a quest is currently active'));
+    expect(questline).rejects.toThrow(new BadRequest('Can\'t finish, a quest is currently active'));
   });
 
   test('Should throw Bad Request if no active questline when trying to finish/invalidate questline', async () => {
     await QuestlinesRepo.wipeCollection();
     const questline = async () => await Questlines.terminateActiveQuestline('finished');
 
-    expect(questline).toThrow(new BadRequest('No active Main Questline to be finished'));
+    expect(questline).rejects.toThrow(new BadRequest('No active Main Questline to be finished'));
   });
   
   test('Should successfully delete one specified questline', async () => {
@@ -177,6 +179,6 @@ describe('Questlines domain logic', () => {
 
     const questline = async () => await Questlines.deleteOneQuestline(questline_id);
 
-    expect(questline).toThrow(new BadRequest('Invalid questline_id'));
+    expect(questline).rejects.toThrow(new BadRequest('Invalid questline_id'));
   });
 });

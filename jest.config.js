@@ -3,7 +3,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  silent: true,
+  silent: false,
   noStackTrace: true,
   verbose: true,
   setupFiles: [
