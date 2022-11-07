@@ -1,10 +1,11 @@
-import { isObjectId } from "../infra/database/mongodb";
-import QuestlineRepo from "../repositories/QuestlineRepo";
-import QuestRepo from "../repositories/QuestRepo";
-import { BadRequest } from "../util/errors/HttpStatusCode";
-import { INewQuestline, IQuestline } from "./interfaces/interfaces";
+import { checkForMissingProperties } from "../../controllers/http-api/routes/utils";
+import { isObjectId } from "../../infra/database/mongodb";
+import QuestlineRepo from "../../repositories/leveling/QuestlinesRepo";
+import QuestRepo from "../../repositories/QuestRepo";
+import { BadRequest } from "../../util/errors/HttpStatusCode";
+import { INewQuestline, IQuestline } from "../interfaces/interfaces";
 
-export class Questline {
+export class Questlines {
   static async getActiveQuestline() {
     const questline = await QuestlineRepo.findActiveQuestline();
 
@@ -42,6 +43,9 @@ export class Questline {
   }
 
   static async createNewQuestline(properties: INewQuestline) {
+    
+    checkForMissingProperties(properties);
+
     const { 
       title,
       description,
@@ -76,5 +80,12 @@ export class Questline {
       throw new BadRequest('No active Main Questline to be finished');
     
     return;
+  }
+
+  static async deleteOneQuestline(questline_id: string) {
+    if (!isObjectId(questline_id))
+      throw new BadRequest('Invalid questline_id');
+
+    await QuestlineRepo.deleteQuestline(questline_id);
   }
 }

@@ -4,30 +4,6 @@ export default [
   {
     method: 'get', path: '/quests/active-quest',
     handler: QuestsAPIHandlers.getActiveQuest
-  },  
-  {
-    method: 'post', path: '/quests/questline/new',
-    handler: QuestsAPIHandlers.createNewQuestline
-  },  
-  {
-    method: 'get', path: '/quests/questline/all',
-    handler: QuestsAPIHandlers.getAllQuestlines
-  },  
-  {
-    method: 'get', path: '/quests/questline/all-finished',
-    handler: QuestsAPIHandlers.getAllFinishedQuestlines
-  },
-  {
-    method: 'get', path: '/quests/questline',
-    handler: QuestsAPIHandlers.getListOfActiveQuestlines
-  },
-  {
-    method: 'get', path: '/quests/questline/finish',
-    handler: QuestsAPIHandlers.finishMainQuestline
-  },
-  {
-    method: 'get', path: '/quests/questline/:questline_id',
-    handler: QuestsAPIHandlers.getOneQuestline
   },
   {
     method: 'post', path: '/quests/quest/new',
@@ -49,4 +25,4 @@ export default [
     method: 'get', path: '/tey',
     handler: QuestsAPIHandlers.teyzada
   }
-]
+];

@@ -2,7 +2,7 @@ import { UserRepo } from "../repositories/UserRepo";
 import { Feats } from "./Feats";
 import { IQuest, IQuestline, IStats } from "./interfaces/interfaces";
 import { Quest } from "./Quest";
-import { Questline } from "./Questline";
+import { Questline } from "./leveling/Questlines";
 import { Records } from "./Records";
 
 export class Leveling {

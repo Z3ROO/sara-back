@@ -1,9 +1,9 @@
 import { Request } from "express";
-import { Feats } from "../../../features/Feats";
-import { INewFeat } from "../../../features/interfaces/interfaces";
-import { isObjectId } from "../../../infra/database/mongodb";
-import { BadRequest } from "../../../util/errors/HttpStatusCode";
-import { checkForMissingProperties } from "./utils";
+import { Feats } from "../../../../features/Feats";
+import { INewFeat } from "../../../../features/interfaces/interfaces";
+import { isObjectId } from "../../../../infra/database/mongodb";
+import { BadRequest } from "../../../../util/errors/HttpStatusCode";
+import { checkForMissingProperties } from "../utils";
 
 export default [
   {

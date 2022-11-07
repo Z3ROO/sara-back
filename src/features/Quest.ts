@@ -2,7 +2,7 @@ import { isObjectId } from "../infra/database/mongodb";
 import QuestRepo from "../repositories/QuestRepo";
 import { BadRequest } from "../util/errors/HttpStatusCode";
 import { INewQuest, IQuest } from "./interfaces/interfaces";
-import { Questline } from "./Questline";
+import { Questlines } from "./leveling/Questlines";
 
 export class Quest {
   static async getActiveMainQuest() {
@@ -78,7 +78,7 @@ export class Quest {
       throw new BadRequest('Invalid questline_id')
 
     //==== THIS SNIPET ASSUMES THAT I ALWAYS HAVE questline_id
-    const {_id} = await Questline.getActiveQuestline(); /* throws if none */
+    const {_id} = await Questlines.getActiveQuestline(); /* throws if none */
 
     if (_id.toHexString() !== properties.questline_id)
       throw new BadRequest('Issued questline_id does not match with current Questline');
@@ -107,6 +107,7 @@ export class Quest {
       state: ['main','practice'].includes(type) ? 'active' : 'deferred',
       todos: todos.map((todo: string) => ({description: todo, state: 'active', finished_at: null})),
       timecap,
+      pause: [],
       focus_score: 0,
       distraction_score: [],
       created_at: new Date(),

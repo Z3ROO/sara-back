@@ -1,9 +1,9 @@
 import { Request } from "express";
-import { INewPill } from "../../../features/interfaces/interfaces";
-import Pills from "../../../features/Pills"
-import { isObjectId } from "../../../infra/database/mongodb";
-import { BadRequest } from "../../../util/errors/HttpStatusCode";
-import { checkForMissingProperties } from "./utils";
+import { INewPill } from "../../../../../features/interfaces/interfaces";
+import Pills from "../../../../../features/Pills"
+import { isObjectId } from "../../../../../infra/database/mongodb";
+import { BadRequest } from "../../../../../util/errors/HttpStatusCode";
+import { checkForMissingProperties } from "../../utils";
 
 export default [
   {

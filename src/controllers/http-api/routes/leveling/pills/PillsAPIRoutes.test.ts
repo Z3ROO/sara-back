@@ -1,7 +1,7 @@
 import request from 'supertest';
-import { closeDb, initMongoDB, db } from '../../../infra/database/mongodb';
-import { app } from '../../../infra/http-server/index';
-import PillsRepo from '../../../repositories/PillsRepo';
+import { closeDb, initMongoDB, db } from '../../../../../infra/database/mongodb';
+import { app } from '../../../../../infra/http-server/index';
+import PillsRepo from '../../../../../repositories/PillsRepo';
 
 describe('Pills HTTP API Routes', () => {
   const dummyPill = {
