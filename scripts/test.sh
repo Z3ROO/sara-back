@@ -12,6 +12,8 @@ export DB_PORT=3003
 #source ./scripts/prepare-dev.sh
 
 npx jest --runInBand 
+#src/features/leveling/Pills.test.ts 
+#/src/repositories/leveling/PillsRepo.test.ts
 #src/controllers/http-api/routes/leveling/quests/QuestsAPIRoutes.test.ts src/features/leveling/Quests.test.ts src/controllers/http-api/routes/leveling/quests/QuestsAPIRoutes.test.ts 
 #
 #src/controllers/http-api/routes/leveling/questlines/QuestlinesAPIRoutes.test.ts 

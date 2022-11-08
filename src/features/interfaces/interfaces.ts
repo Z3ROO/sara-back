@@ -136,12 +136,11 @@ export interface INewRecord {
 }
 
 export interface IPills {
-  immune: boolean
   name: string
   description: string
   times_taken: number
   next_shot: Date
-  history: Date[]
+  history: {increment:number, date: Date}[]
 }
 
 export interface INewPill {
