@@ -2,27 +2,27 @@ import QuestsAPIHandlers from "./QuestsAPIHandlers";
 
 export default [
   {
-    method: 'get', path: '/quests/active-quest',
+    method: 'get', path: '/leveling/active-quest',
     handler: QuestsAPIHandlers.getActiveQuest
   },
   {
-    method: 'post', path: '/quests/quest/new',
-    handler: QuestsAPIHandlers.createNewQuest
-  },
-  {
-    method: 'post', path: '/quests/quest/handle-todo',
-    handler: QuestsAPIHandlers.handleQuestTodo
-  },
-  {
-    method: 'post', path: '/quests/quest/finish',
-    handler: QuestsAPIHandlers.finishQuest
-  },
-  {
-    method: 'get', path: '/quests/quest/distraction',
+    method: 'get', path: '/leveling/quest/distraction',
     handler: QuestsAPIHandlers.increaseDistractionScore
   },
   {
-    method: 'get', path: '/tey',
-    handler: QuestsAPIHandlers.teyzada
+    method: 'post', path: '/leveling/quest/handle-todo',
+    handler: QuestsAPIHandlers.handleQuestTodo
+  },
+  {
+    method: 'post', path: '/leveling/quest/new',
+    handler: QuestsAPIHandlers.createNewQuest
+  },
+  {
+    method: 'post', path: '/leveling/quest/finish',
+    handler: QuestsAPIHandlers.finishQuest
+  },
+  {
+    method: 'post', path: '/leveling/quest/finish',
+    handler: QuestsAPIHandlers.invalidateQuest
   }
 ];

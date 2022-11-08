@@ -1,17 +1,17 @@
 import request from 'supertest';
 import { IQuestline } from '../../../../../features/interfaces/interfaces';
-import { Quest } from '../../../../../features/Quest';
+import { Quests } from '../../../../../features/leveling/Quests';
 import { closeDb, db, initMongoDB } from '../../../../../infra/database/mongodb';
 import { app } from '../../../../../infra/http-server';
-import QuestlineRepo from '../../../../../repositories/QuestlineRepo';
-import QuestRepo from '../../../../../repositories/QuestRepo';
+import QuestlineRepo from '../../../../../repositories/leveling/QuestlinesRepo';
+import QuestsRepo from '../../../../../repositories/leveling/QuestsRepo';
 
 describe('Quests HTTP API Routes', () => {
   const dummyFinishedQuestline: IQuestline = {
     title: 'Finished questline',
     description: 'Finished questline',
     state: 'finished',
-    timecap: 132132,
+    timecap: 10*60*60*1000,
     created_at: new Date(),
     finished_at: new Date(),
     xp: null
@@ -21,7 +21,7 @@ describe('Quests HTTP API Routes', () => {
     title: 'Main questline',
     description: 'Main questline',
     state: 'active',
-    timecap: 132132,
+    timecap: 10*60*60*1000,
     created_at: new Date(),
     finished_at: null,
     xp: null
@@ -32,7 +32,7 @@ describe('Quests HTTP API Routes', () => {
     description: 'Quest 1',
     type: 'main',
     todos: ['to-do 1'],
-    timecap: 4*60*60*1000
+    timecap: 10*60*60*1000
   }
 
   beforeAll(async () => {
@@ -48,7 +48,7 @@ describe('Quests HTTP API Routes', () => {
 
     const questline = await QuestlineRepo.findActiveQuestline();
 
-    await Quest.createNewQuest({
+    await Quests.createNewQuest({
       ...dummyQuest,
       questline_id: questline!._id.toHexString()
     });
@@ -76,9 +76,9 @@ describe('Quests HTTP API Routes', () => {
 
   describe('/leveling/quest/new', () => {
     test('Should respond with 201 status code and correct message uppon correct properties provided', async () => {
-      const quest = (await QuestRepo.findActiveMainQuest())!;
-      await QuestRepo.finishQuestTodo(quest._id.toHexString(), quest.todos[0].description);
-      await QuestRepo.finishQuest(quest._id.toHexString(), 1);
+      const quest = (await QuestsRepo.findActiveQuest())!;
+      await QuestsRepo.handleQuestTodo(quest._id.toHexString(), quest.todos[0].description, 'finished');
+      await QuestsRepo.terminateQuest(quest._id.toHexString(), 1, 'finished');
       const questline_id = (await QuestlineRepo.findActiveQuestline())!._id;
 
       const reqBody = {
@@ -87,7 +87,7 @@ describe('Quests HTTP API Routes', () => {
         description: 'Quest 2',
         type: 'main',
         todos: ['to-do 1'],
-        timecap: 4*60*60*1000
+        timecap: 10*60*60*1000
       };
 
       const response = await request(app).post('/leveling/quest/new').send(reqBody);
@@ -99,9 +99,9 @@ describe('Quests HTTP API Routes', () => {
     });
 
     test('Should respond with 400 status code if Questline no found', async () => {
-      const quest = (await QuestRepo.findActiveMainQuest())!;
-      await QuestRepo.finishQuestTodo(quest._id.toHexString(), quest.todos[0].description);
-      await QuestRepo.finishQuest(quest._id.toHexString(), 1);
+      const quest = (await QuestsRepo.findActiveQuest())!;
+      await QuestsRepo.handleQuestTodo(quest._id.toHexString(), quest.todos[0].description, 'finished');
+      await QuestsRepo.terminateQuest(quest._id.toHexString(), 1, 'finished');
 
       const reqBody = {
         questline_id: '123456789123456789123456',
@@ -157,7 +157,7 @@ describe('Quests HTTP API Routes', () => {
 
   describe('/leveling/quest/handle-todo', () => {
     test('Should respond with 202 status code and correct message uppon correct properties provided', async () => {
-      const quest_id = (await QuestRepo.findActiveMainQuest())!._id.toHexString();
+      const quest_id = (await QuestsRepo.findActiveQuest())!._id.toHexString();
       const reqBody = {
         quest_id,
         todoDescription: dummyQuest.todos[0],
@@ -172,8 +172,8 @@ describe('Quests HTTP API Routes', () => {
     });
 
     test('Should respond with 400 status code and correct message uppon already finished to-do', async () => {
-      const quest_id = (await QuestRepo.findActiveMainQuest())!._id.toHexString();
-      await QuestRepo.finishQuestTodo(quest_id, dummyQuest.todos[0]);
+      const quest_id = (await QuestsRepo.findActiveQuest())!._id.toHexString();
+      await QuestsRepo.handleQuestTodo(quest_id, dummyQuest.todos[0], 'finished');
       const reqBody = {
         quest_id,
         todoDescription: dummyQuest.todos[0],
@@ -216,7 +216,7 @@ describe('Quests HTTP API Routes', () => {
     });
 
     test('Should respond with 400 status code and correct message uppon invalid todoDescription', async () => {
-      const quest_id = (await QuestRepo.findActiveMainQuest())!._id.toHexString();
+      const quest_id = (await QuestsRepo.findActiveQuest())!._id.toHexString();
       const reqBody = {
         quest_id,
         action: 'finish',
@@ -233,8 +233,8 @@ describe('Quests HTTP API Routes', () => {
 
   describe('/leveling/quest/finish', () => {
     test('Should respond with 202 status code and correct message uppon correct properties', async () => {
-      const quest_id = (await QuestRepo.findActiveMainQuest())!._id.toHexString();
-      await QuestRepo.finishQuestTodo(quest_id, dummyQuest.todos[0]);
+      const quest_id = (await QuestsRepo.findActiveQuest())!._id.toHexString();
+      await QuestsRepo.handleQuestTodo(quest_id, dummyQuest.todos[0], 'finished');
       const reqBody = {
         quest_id,
         focusScore: 10
@@ -285,9 +285,9 @@ describe('Quests HTTP API Routes', () => {
     });
 
     test('Should respond with 400 and correct message if no active quest', async () => {
-      const quest = (await QuestRepo.findActiveMainQuest())!;
-      await QuestRepo.finishQuestTodo(quest._id.toHexString(), quest.todos[0].description);
-      await QuestRepo.finishQuest(quest._id.toHexString(), 1);
+      const quest = (await QuestsRepo.findActiveQuest())!;
+      await QuestsRepo.handleQuestTodo(quest._id.toHexString(), quest.todos[0].description, 'finished');
+      await QuestsRepo.terminateQuest(quest._id.toHexString(), 1, 'finished');
 
       const response = await request(app).get('/leveling/quest/distraction');
 

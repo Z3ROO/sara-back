@@ -1,21 +1,13 @@
 import { Request } from "express";
 import { INewQuest } from "../../../../../features/interfaces/interfaces";
-import { Quest } from "../../../../../features/Quest";
-import QuestRepo from "../../../../../repositories/QuestRepo";
+import { Quests } from "../../../../../features/leveling/Quests";
 import { checkForMissingProperties } from "../../utils";
 
 export default class QuestsAPIHandlers {
-
-  //[get]/tey  dev purposes
-  static async teyzada() {
-    return {
-      body: await QuestRepo.findAllFinishedQuests()
-    }
-  }
-
+  
  //[GET]/quests/active-quest
   static async getActiveQuest() {
-    const questBody = await Quest.getActiveMainQuest();
+    const questBody = await Quests.getActiveQuest();
 
     return {
       body: questBody ? questBody : null
@@ -39,7 +31,7 @@ export default class QuestsAPIHandlers {
     
     checkForMissingProperties(questBody);
 
-    await Quest.createNewQuest(questBody);
+    await Quests.createNewQuest(questBody);
 
     return {
       status: 201,
@@ -61,7 +53,7 @@ export default class QuestsAPIHandlers {
       action 
     });
 
-    await Quest.handleQuestTodo(quest_id, todoDescription, action);
+    await Quests.handleQuestTodo(quest_id, todoDescription, action);
     
     return {
       status: 202,
@@ -75,7 +67,7 @@ export default class QuestsAPIHandlers {
     
     checkForMissingProperties({ quest_id, focusScore });
 
-    await Quest.finishQuest(quest_id, focusScore);
+    await Quests.terminateQuest(quest_id, focusScore, 'finished');
     
     return {
       status: 202,
@@ -83,9 +75,23 @@ export default class QuestsAPIHandlers {
     };
   }
 
+  //[POST]/quests/quest/invalidate
+  static async invalidateQuest(req: Request) {
+    const { quest_id, focusScore } = req.body;
+    
+    checkForMissingProperties({ quest_id, focusScore });
+
+    await Quests.terminateQuest(quest_id, focusScore, 'invalidated');
+    
+    return {
+      status: 202,
+      message: 'Quest invalidated'
+    };
+  }
+
   //[GET]/quests/quest/distraction
   static async increaseDistractionScore() {
-    await Quest.insertDistractionPoint();
+    await Quests.insertDistractionPoint();
 
     return {
       status: 202,

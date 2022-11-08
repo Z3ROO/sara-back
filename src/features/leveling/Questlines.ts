@@ -1,7 +1,7 @@
 import { checkForMissingProperties } from "../../controllers/http-api/routes/utils";
 import { isObjectId } from "../../infra/database/mongodb";
 import QuestlineRepo from "../../repositories/leveling/QuestlinesRepo";
-import QuestRepo from "../../repositories/QuestRepo";
+import QuestsRepo from "../../repositories/leveling/QuestsRepo";
 import { BadRequest } from "../../util/errors/HttpStatusCode";
 import { INewQuestline, IQuestline } from "../interfaces/interfaces";
 
@@ -56,7 +56,7 @@ export class Questlines {
     });
     
     const activeQuestline = await QuestlineRepo.findActiveQuestline();
-    console.log(activeQuestline)
+
     if (activeQuestline)
       throw new BadRequest('An active main questline already exist');
 
@@ -72,7 +72,7 @@ export class Questlines {
   }
 
   static async terminateActiveQuestline(action: 'finished'|'invalidated') {
-    const questline = await QuestRepo.findActiveMainQuest();
+    const questline = await QuestsRepo.findActiveQuest();
     
     if (questline)
       throw new BadRequest('Can\'t finish, a quest is currently active');

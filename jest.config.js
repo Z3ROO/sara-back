@@ -8,5 +8,5 @@ module.exports = {
   verbose: true,
   setupFiles: [
     './src/infra/database/mongodb.ts'
-  ]
+  ],
 };

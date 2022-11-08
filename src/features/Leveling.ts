@@ -1,7 +1,7 @@
 import { UserRepo } from "../repositories/UserRepo";
 import { Feats } from "./Feats";
 import { IQuest, IQuestline, IStats } from "./interfaces/interfaces";
-import { Quest } from "./Quest";
+import { Quests } from "./leveling/Quests";
 import { Questlines } from "./leveling/Questlines";
 import { Records } from "./Records";
 
@@ -66,7 +66,7 @@ export class Leveling {
     if (yesterday) 
       await this.prepareForNewDay(yesterday);
     const today = this.stats.day;
-    const todaysFineshedQuests = await Quest.getEveryFinishedQuestOfOneDay(today);
+    const todaysFineshedQuests = await Quests.getEveryFinishedQuestOfOneDay(today);
     
     await this.sideEventsOfToday(today);
 
