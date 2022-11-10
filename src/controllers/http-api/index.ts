@@ -7,6 +7,7 @@ import RecordsAPIRoutes from './routes/leveling/RecordsAPIRoutes';
 import QuestsAPIRoutes from './routes/leveling/quests/QuestsAPIRoutes';
 import PillsAPIRoutes from './routes/leveling/pills/PillsAPIRoutes';
 import QuestlinesAPIRoutes from './routes/leveling/questlines/QuestlinesAPIRoutes';
+import InboxAPIRoutes from './routes/leveling/inbox/InboxAPIRoutes';
 
 export default [
   ...defaultMiddlewares,
@@ -17,5 +18,6 @@ export default [
   ...FeatsAPIRoutes,
   ...RecordsAPIRoutes,
   ...StatsAPIRoutes,
-  ...PillsAPIRoutes
+  ...PillsAPIRoutes,
+  ...InboxAPIRoutes
 ]

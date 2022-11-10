@@ -1,5 +1,13 @@
 type levelHistory = {direction:-1|0|1, date: Date}[]
 
+export type IInbox = IInboxItem[]
+
+export interface IInboxItem {
+  content: string
+  reviewed: boolean
+  nextReview: Date
+}
+
 export interface IQuestline {
   title: string
   description: string
