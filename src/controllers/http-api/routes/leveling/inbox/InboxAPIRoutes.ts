@@ -84,17 +84,5 @@ export default [
         message: 'Inbox item deleted'
       }
     }
-  },
-  {
-    method: 'get', path: '/leveling/inbox',
-    handler: async () => {
-
-    }
-  },
-  {
-    method: 'get', path: '/leveling/inbox',
-    handler: async () => {
-
-    }
   }
 ];
