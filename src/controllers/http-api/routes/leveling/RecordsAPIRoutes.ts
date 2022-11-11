@@ -1,7 +1,7 @@
 import { Request } from "express";
-import { INewRecord, IRecords } from "../../../features/interfaces/interfaces";
-import { Records } from "../../../features/Records";
-import { checkForMissingProperties } from "./utils";
+import { INewRecord, IRecords } from "../../../../features/interfaces/interfaces";
+import { Records } from "../../../../features/Records";
+import { checkForMissingProperties } from "../utils";
 
 
 export default [  

@@ -1,6 +1,6 @@
-import { IQuestline } from "../features/interfaces/interfaces";
-import { closeDb, db, initMongoDB } from "../infra/database/mongodb";
-import QuestlineRepo from "./QuestlineRepo";
+import { IQuestline } from "../../features/interfaces/interfaces";
+import { closeDb, initMongoDB } from "../../infra/database/mongodb";
+import QuestlinesRepo from "./QuestlinesRepo";
 
 describe('Questline Repository', () => {
   const dummyQuestline01: IQuestline = {
@@ -30,33 +30,33 @@ describe('Questline Repository', () => {
   });
 
   beforeEach(async () => {
-    await db('leveling').collection('questlines').deleteMany({});
-    await QuestlineRepo.insertOneQuestline(dummyQuestline01);
-    await QuestlineRepo.insertOneQuestline(dummyQuestline02);
-    await QuestlineRepo.insertOneQuestline(dummyQuestline03);
+    await QuestlinesRepo.wipeCollection();
+    await QuestlinesRepo.insertOneQuestline(dummyQuestline01);
+    await QuestlinesRepo.insertOneQuestline(dummyQuestline02);
+    await QuestlinesRepo.insertOneQuestline(dummyQuestline03);
   });
 
   afterAll(async () => {
-    await db('leveling').collection('questlines').deleteMany({});
+    await QuestlinesRepo.wipeCollection();
     await closeDb();
   });
 
-  test('Should successfully retrieve main questline', async () => {
-    const questline = await QuestlineRepo.findActiveQuestline();
+  test('Should successfully retrieve active questline', async () => {
+    const questline = await QuestlinesRepo.findActiveQuestline();
 
     expect(dummyQuestline03).toMatchObject(questline!);
   });
 
   test('Should successfully retrieve all finished questlines', async () => {
-    const questlines = await QuestlineRepo.findAllFinishedQuestlines();
+    const questlines = await QuestlinesRepo.findAllFinishedQuestlines();
 
     expect(questlines[0]).toMatchObject(dummyQuestline01);
     expect(questlines[1]).toMatchObject(dummyQuestline02);
   })
 
   test('Should successfully retrieve the specified questline by id', async () => {
-    const questline_id = (await QuestlineRepo.findAllQuestlines())[0]._id;
-    const questline = await QuestlineRepo.findOneQuestline(questline_id.toHexString());
+    const questline_id = (await QuestlinesRepo.findAllQuestlines())[0]._id;
+    const questline = await QuestlinesRepo.findOneQuestline(questline_id.toHexString());
 
     expect(questline!._id).toMatchObject(questline_id);
   });
@@ -64,7 +64,7 @@ describe('Questline Repository', () => {
   test('Should successfully retrieve finished questlines in date range', async () => {
     const begin = new Date('2022-07-03 00:00:00');
     const end = new Date('2022-07-03 23:59:00');
-    const questlines = await QuestlineRepo.findFineshedQuestlinesInDateRange({begin, end});
+    const questlines = await QuestlinesRepo.findFineshedQuestlinesInDateRange({begin, end});
     
     expect(questlines.length).toBe(2);
     expect(questlines[0].state).toBe('finished');
@@ -72,44 +72,44 @@ describe('Questline Repository', () => {
   })
 
   test('Should succesfully create a questline', async () => {
-    await db('leveling').collection('questlines').deleteMany({});
+    await QuestlinesRepo.wipeCollection();
 
     const dummyQuestline: IQuestline = {
       ...dummyQuestline03,
       title: 'New Questline'
     }
 
-    await QuestlineRepo.insertOneQuestline(dummyQuestline);
+    await QuestlinesRepo.insertOneQuestline(dummyQuestline);
     
-    const questline = await QuestlineRepo.findActiveQuestline();
+    const questline = await QuestlinesRepo.findActiveQuestline();
 
     expect(dummyQuestline).toMatchObject(questline!);
   });
 
   test('Should succesfully finish questline', async () => {
-    const questline_id = (await QuestlineRepo.findActiveQuestline())!._id
-    await QuestlineRepo.terminateActiveQuestline('finished');
+    const questline_id = (await QuestlinesRepo.findActiveQuestline())!._id
+    await QuestlinesRepo.terminateActiveQuestline('finished');
 
-    const questline = await QuestlineRepo.findOneQuestline(questline_id.toHexString());
+    const questline = await QuestlinesRepo.findOneQuestline(questline_id.toHexString());
     
     expect(questline!.state).toBe('finished');
   });
 
   test('Should succesfully invalidate questline', async () => {
-    const questline_id = (await QuestlineRepo.findActiveQuestline())!._id
-    await QuestlineRepo.terminateActiveQuestline('invalidated');
+    const questline_id = (await QuestlinesRepo.findActiveQuestline())!._id
+    await QuestlinesRepo.terminateActiveQuestline('invalidated');
 
-    const questline = await QuestlineRepo.findOneQuestline(questline_id.toHexString());
+    const questline = await QuestlinesRepo.findOneQuestline(questline_id.toHexString());
     
     expect(questline!.state).toBe('invalidated');
   });
 
   test('Should successfully delete questline', async () => {
-    const questline_id = (await QuestlineRepo.findActiveQuestline())!._id;
+    const questline_id = (await QuestlinesRepo.findActiveQuestline())!._id;
 
-    await QuestlineRepo.deleteQuestline(questline_id.toHexString());
+    await QuestlinesRepo.deleteQuestline(questline_id.toHexString());
 
-    const questline = await QuestlineRepo.findOneQuestline(questline_id.toHexString());
+    const questline = await QuestlinesRepo.findOneQuestline(questline_id.toHexString());
 
     expect(questline).toBe(null);
   });

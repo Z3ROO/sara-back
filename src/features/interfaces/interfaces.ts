@@ -1,5 +1,13 @@
 type levelHistory = {direction:-1|0|1, date: Date}[]
 
+export type IInbox = IInboxItem[]
+
+export interface IInboxItem {
+  content: string
+  reviewed: boolean
+  nextReview: Date
+}
+
 export interface IQuestline {
   title: string
   description: string
@@ -16,6 +24,15 @@ export interface INewQuestline {
   timecap: number
 }
 
+export interface Skill {
+  title: string
+  description: string
+  created_at: Date
+  last_commit: Date
+  level: number
+  totalXp: number
+}
+
 export interface IQuest {
   questline_id: string|null
   skill_id: string|null
@@ -26,6 +43,10 @@ export interface IQuest {
   state: 'active'|'deferred'|'finished'|'invalidated'
   todos: ITodo[]
   timecap: number|string
+  pause: {
+    start: Date
+    finish: Date
+  }[]
   focus_score: number|null
   distraction_score: Date[]
   created_at: Date
@@ -48,6 +69,15 @@ export interface INewQuest {
   type: 'main'|'side'|'mission'|'practice'
   todos: string[],
   timecap: number|string
+}
+
+export interface IActions {
+  questline_id?: string
+  skill_id?: string
+  mission_id?: string
+  title: string
+  description: string
+  history: any[]
 }
 
 export interface IFeats {
@@ -114,12 +144,11 @@ export interface INewRecord {
 }
 
 export interface IPills {
-  immune: boolean
   name: string
   description: string
   times_taken: number
   next_shot: Date
-  history: Date[]
+  history: {increment:number, date: Date}[]
 }
 
 export interface INewPill {

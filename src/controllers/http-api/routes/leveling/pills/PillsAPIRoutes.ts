@@ -1,13 +1,13 @@
 import { Request } from "express";
-import { INewPill } from "../../../features/interfaces/interfaces";
-import Pills from "../../../features/Pills"
-import { isObjectId } from "../../../infra/database/mongodb";
-import { BadRequest } from "../../../util/errors/HttpStatusCode";
-import { checkForMissingProperties } from "./utils";
+import { INewPill } from "../../../../../features/interfaces/interfaces";
+import Pills from "../../../../../features/leveling/Pills"
+import { isObjectId } from "../../../../../infra/database/mongodb";
+import { BadRequest } from "../../../../../util/errors/HttpStatusCode";
+import { checkForMissingProperties } from "../../utils";
 
 export default [
   {
-    method: 'get', path: '/pills',
+    method: 'get', path: '/leveling/pills',
     handler: async () => {
       const pills = await Pills.getTakeablePills();
 
@@ -17,7 +17,7 @@ export default [
     }
   },
   {
-    method: 'get', path: '/pills/all',
+    method: 'get', path: '/leveling/pills/all',
     handler: async () => {
       const pills = await Pills.getAllPills();
 
@@ -27,7 +27,7 @@ export default [
     }
   },
   {
-    method: 'get', path: '/pills/take/:pill_id',
+    method: 'get', path: '/leveling/pills/take/:pill_id',
     handler: async (req: Request) => {
       const { pill_id } = req.params;
 
@@ -43,7 +43,7 @@ export default [
     }
   },
   {
-    method: 'post', path: '/pills/new', 
+    method: 'post', path: '/leveling/pills/new', 
     handler: async (req: Request) => {
       const { name, description } = req.body;
 

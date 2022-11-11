@@ -1,6 +1,7 @@
 import { db } from "../infra/database/mongodb";
 import { RepositoryError, DatabaseError } from "../util/errors/RepositoryError";
 import { Collection } from 'mongodb';
+import { BadRequest } from "../util/errors/HttpStatusCode";
 
 interface IRepositoryResult {
   record?: any
@@ -16,6 +17,13 @@ export class NoSQLRepository<Document> {
     this.dbName = dbName;
     this.collectionName = collectionName;
     this.collection = () => db(this.dbName).collection(this.collectionName);
+  }
+
+  async wipeCollection() {
+    if (process.env.NODE_ENV !== 'dev')
+      throw new BadRequest('Can only wipe collections on development mode')
+
+    await this.collection().deleteMany({});
   }
 }
 

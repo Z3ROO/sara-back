@@ -1,7 +1,8 @@
 import request from 'supertest';
-import { closeDb, initMongoDB, db } from '../../../infra/database/mongodb';
-import { app } from '../../../infra/http-server/index';
-import PillsRepo from '../../../repositories/PillsRepo';
+import Pills from '../../../../../features/leveling/Pills';
+import { closeDb, initMongoDB, db } from '../../../../../infra/database/mongodb';
+import { app } from '../../../../../infra/http-server/index';
+import PillsRepo from '../../../../../repositories/leveling/PillsRepo';
 
 describe('Pills HTTP API Routes', () => {
   const dummyPill = {
@@ -15,7 +16,7 @@ describe('Pills HTTP API Routes', () => {
 
   beforeEach(async () => {
     await db('leveling').collection('pills').deleteMany({});
-    await PillsRepo.insertOnePill(dummyPill);
+    await Pills.addNewPill(dummyPill);
   })
 
   afterAll(async () => {
@@ -23,9 +24,9 @@ describe('Pills HTTP API Routes', () => {
     await closeDb();
   });
 
-  describe('/pills', () => {
+  describe('/leveling/pills', () => {
     test('Should respond with 200 status code and array of pills if any to take', async () => {
-      const response = await request(app).get('/pills');
+      const response = await request(app).get('/leveling/pills');
 
       expect(response.status).toBe(200);
       expect(response.body.status).toBe(200);
@@ -34,9 +35,9 @@ describe('Pills HTTP API Routes', () => {
     });
   });
 
-  describe('/pills/all', () => {
+  describe('/leveling/pills/all', () => {
     test('Should respond with 200 status code and array of all existing pills if any', async () => {
-      const response = await request(app).get('/pills/all');
+      const response = await request(app).get('/leveling/pills/all');
 
       expect(response.status).toBe(200);
       expect(response.body.status).toBe(200);
@@ -45,11 +46,11 @@ describe('Pills HTTP API Routes', () => {
     });
   });
 
-  describe('/pills/take/:pill_id', () => {
+  describe('/leveling/pills/take/:pill_id', () => {
     test('Should respond with 202 status code and correct message uppon valid pill_id', async () => {
 
       const pill_id = (await PillsRepo.findAllPills())[0]._id
-      const response = await request(app).get('/pills/take/'+pill_id);
+      const response = await request(app).get('/leveling/pills/take/'+pill_id);
 
       expect(response.status).toBe(202);
       expect(response.body.status).toBe(202);
@@ -59,7 +60,7 @@ describe('Pills HTTP API Routes', () => {
 
     test('Should respond with 400 status code and correct message uppon invalid pill_id', async () => {
       const pill_id = 'invalid_id'
-      const response = await request(app).get('/pills/take/'+pill_id);
+      const response = await request(app).get('/leveling/pills/take/'+pill_id);
 
       expect(response.status).toBe(400);
       expect(response.body.status).toBe(400);
@@ -68,13 +69,13 @@ describe('Pills HTTP API Routes', () => {
     });
   });
 
-  describe('/pills/new', () => {
+  describe('/leveling/pills/new', () => {
     test('Should respond with 201 status code and correct message uppon valid properties', async () => {
       const pill = {
         name: 'pill 02',
         description: 'pill description'
       }
-      const response = await request(app).post('/pills/new').send(pill);
+      const response = await request(app).post('/leveling/pills/new').send(pill);
 
       expect(response.status).toBe(201);
       expect(response.body.status).toBe(201);
@@ -87,7 +88,7 @@ describe('Pills HTTP API Routes', () => {
         //name: 'pill 02',
         description: 'pill description'
       }
-      const response = await request(app).post('/pills/new').send(pill);
+      const response = await request(app).post('/leveling/pills/new').send(pill);
 
       expect(response.status).toBe(400);
       expect(response.body.status).toBe(400);

@@ -1,10 +1,11 @@
-import { isObjectId } from "../infra/database/mongodb";
-import QuestlineRepo from "../repositories/QuestlineRepo";
-import QuestRepo from "../repositories/QuestRepo";
-import { BadRequest } from "../util/errors/HttpStatusCode";
-import { INewQuestline, IQuestline } from "./interfaces/interfaces";
+import { checkForMissingProperties } from "../../controllers/http-api/routes/utils";
+import { isObjectId } from "../../infra/database/mongodb";
+import QuestlineRepo from "../../repositories/leveling/QuestlinesRepo";
+import QuestsRepo from "../../repositories/leveling/QuestsRepo";
+import { BadRequest } from "../../util/errors/HttpStatusCode";
+import { INewQuestline, IQuestline } from "../interfaces/interfaces";
 
-export class Questline {
+export class Questlines {
   static async getActiveQuestline() {
     const questline = await QuestlineRepo.findActiveQuestline();
 
@@ -47,10 +48,16 @@ export class Questline {
       description,
       timecap
     } = properties;
+    
+    checkForMissingProperties({ 
+      title,
+      description,
+      timecap
+    });
+    
+    const activeQuestline = await QuestlineRepo.findActiveQuestline();
 
-    const mainQuestline = await QuestlineRepo.findActiveQuestline();
-
-    if (mainQuestline)
+    if (activeQuestline)
       throw new BadRequest('An active main questline already exist');
 
     return QuestlineRepo.insertOneQuestline({
@@ -65,7 +72,7 @@ export class Questline {
   }
 
   static async terminateActiveQuestline(action: 'finished'|'invalidated') {
-    const questline = await QuestRepo.findActiveMainQuest();
+    const questline = await QuestsRepo.findActiveQuest();
     
     if (questline)
       throw new BadRequest('Can\'t finish, a quest is currently active');
@@ -76,5 +83,12 @@ export class Questline {
       throw new BadRequest('No active Main Questline to be finished');
     
     return;
+  }
+
+  static async deleteOneQuestline(questline_id: string) {
+    if (!isObjectId(questline_id))
+      throw new BadRequest('Invalid questline_id');
+
+    await QuestlineRepo.deleteQuestline(questline_id);
   }
 }

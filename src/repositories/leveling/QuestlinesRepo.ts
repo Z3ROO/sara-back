@@ -1,7 +1,6 @@
-import { NoSQLRepository } from "./RepoResultHandler"
-import { INewQuestline, IQuestline } from "../features/interfaces/interfaces";
+import { NoSQLRepository } from "../RepoResultHandler"
+import { IQuestline } from "../../features/interfaces/interfaces";
 import { ObjectId } from "mongodb";
-import { BadRequest } from "../util/errors/HttpStatusCode";
 
 class QuestlineRepo extends NoSQLRepository<IQuestline>{
 

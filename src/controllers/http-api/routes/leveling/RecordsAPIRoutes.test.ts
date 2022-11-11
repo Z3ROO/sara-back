@@ -1,9 +1,9 @@
-import { app } from '../../../infra/http-server/index';
+import { app } from '../../../../infra/http-server/index';
 import request from 'supertest';
-import { initMongoDB, db, closeDb } from '../../../infra/database/mongodb';
-import RecordsRepo from '../../../repositories/RecordsRepo';
-import { INewRecord, IRecords } from '../../../features/interfaces/interfaces';
-import { Records } from '../../../features/Records';
+import { initMongoDB, db, closeDb } from '../../../../infra/database/mongodb';
+import RecordsRepo from '../../../../repositories/RecordsRepo';
+import { INewRecord, IRecords } from '../../../../features/interfaces/interfaces';
+import { Records } from '../../../../features/Records';
 
 describe('Records HTTP API Routes', () => {
   const dummyRecord: INewRecord = {

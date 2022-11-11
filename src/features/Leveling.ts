@@ -1,8 +1,8 @@
 import { UserRepo } from "../repositories/UserRepo";
 import { Feats } from "./Feats";
 import { IQuest, IQuestline, IStats } from "./interfaces/interfaces";
-import { Quest } from "./Quest";
-import { Questline } from "./Questline";
+import { Quests } from "./leveling/Quests";
+import { Questlines } from "./leveling/Questlines";
 import { Records } from "./Records";
 
 export class Leveling {
@@ -66,7 +66,7 @@ export class Leveling {
     if (yesterday) 
       await this.prepareForNewDay(yesterday);
     const today = this.stats.day;
-    const todaysFineshedQuests = await Quest.getEveryFinishedQuestOfOneDay(today);
+    const todaysFineshedQuests = await Quests.getEveryFinishedQuestOfOneDay(today);
     
     await this.sideEventsOfToday(today);
 
@@ -91,7 +91,7 @@ export class Leveling {
       this.updateFocusHashira(quest);
     }
 
-    const todaysFinishedQuestlines = await Questline.getFineshedQuestlinesOfOneDay(today);
+    const todaysFinishedQuestlines = await Questlines.getFineshedQuestlinesOfOneDay(today);
 
     //what if invalidate 2 questlines in one day
     for (let index = 0; index < todaysFinishedQuestlines.length; index++){
