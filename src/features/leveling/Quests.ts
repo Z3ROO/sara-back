@@ -75,7 +75,7 @@ export class Quests {
         throw new BadRequest('Issued questline_id does not match with current Questline');
     }
     
-    if (timecap < (10 * 60 * 60 * 1000))
+    if (timecap < (10 * 60 * 1000))
       throw new BadRequest('timecap must be above 10 minutes')
 
     const activeQuest = await QuestRepo.findActiveQuest();    
