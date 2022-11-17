@@ -158,7 +158,7 @@ describe('Quests Domain Logic', () => {
       timecap: 10*60*60*1000
     }
 
-    await Quests.createNewQuest(dummyQuest);
+    await Quests.createNewQuest(dummyQuest, true);
     const newQuest = await Quests.getActiveQuest();
     delete dummyQuest.todos;
 
@@ -177,31 +177,29 @@ describe('Quests Domain Logic', () => {
       timecap: (10*60*60*1000) - 1
     }
 
-    const createQuest = async () => await Quests.createNewQuest(dummyQuest);
+    const createQuest = async () => await Quests.createNewQuest(dummyQuest, true);
 
     await expect(createQuest).rejects.toThrow(new BadRequest('timecap must be above 10 minutes'));
   });
 
-  test('Should throw Bad Request uppon invalid questline_id', async () => {
+  test('Should throw Bad Request if no active questline when trying to create one', async () => {
+    await QuestlinesRepo.wipeCollection();
+    await QuestsRepo.wipeCollection();
     const dummyQuest: INewQuest = {
-      questline_id: 'invalid_id',
       title: 'New Quest',
       description: 'Description',
       type: 'main',
       todos: ['to-do'],
       timecap: 10*60*60*1000
-    }
+    };
 
-    const createQuest = async () => await Quests.createNewQuest(dummyQuest);
+    const createQuest = async () => await Quests.createNewQuest(dummyQuest, true);
 
-    await expect(createQuest).rejects.toThrow(new BadRequest('Invalid questline_id'));
+    await expect(createQuest).rejects.toThrow(new BadRequest('No active questline found'));
   })
 
-  test('Should throw Bad Request uppon not existent questline_id', async () => {
-    await QuestlinesRepo.wipeCollection();
-    await QuestsRepo.wipeCollection();
+  test('Should throw Bad Request if try to create quest with no group', async () => {
     const dummyQuest: INewQuest = {
-      questline_id: '123456789123456789123456',
       title: 'New Quest',
       description: 'Description',
       type: 'main',
@@ -211,23 +209,8 @@ describe('Quests Domain Logic', () => {
 
     const createQuest = async () => await Quests.createNewQuest(dummyQuest);
 
-    await expect(createQuest).rejects.toThrow(new BadRequest('No active questline found'));
+    await expect(createQuest).rejects.toThrow(new BadRequest('A quest group must be specified; Questline, skill or mission'));
   })
-
-  test('Should throw Bad Request uppon not matching questline_id', async () => {
-    const dummyQuest: INewQuest = {
-      questline_id: '123456789123456789123456',
-      title: 'New Quest',
-      description: 'Description',
-      type: 'main',
-      todos: ['to-do'],
-      timecap: 10*60*60*1000
-    }
-
-    const createQuest = async () => await Quests.createNewQuest(dummyQuest);
-
-    await expect(createQuest).rejects.toThrow(new BadRequest('Issued questline_id does not match with current Questline'));
-  });
 
   test('Should throw Bad Request if an active quest already exists', async () => {
     const questline_id = (await Questlines.getActiveQuestline())!._id.toHexString();
@@ -240,7 +223,7 @@ describe('Quests Domain Logic', () => {
       timecap: 10*60*60*1000
     }
 
-    const createQuest = async () => await Quests.createNewQuest(dummyQuest);
+    const createQuest = async () => await Quests.createNewQuest(dummyQuest, true);
 
     await expect(createQuest).rejects.toThrow(new BadRequest('An active quest already exist'));
   });
