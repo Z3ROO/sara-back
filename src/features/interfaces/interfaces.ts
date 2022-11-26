@@ -24,13 +24,11 @@ export interface INewQuestline {
   timecap: number
 }
 
-export interface Skill {
+export interface ISkill {
   title: string
   description: string
   created_at: Date
-  last_commit: Date
   level: number
-  totalXp: number
 }
 
 export interface IQuest {
