@@ -3,20 +3,19 @@ import SkillsRepo from './SkillsRepo'
 
 describe('Skills Repositories', () => {
   const dummySkill01 = {
-    title: 'skill 01',
+    name: 'skill 01',
     description: 'Description of one skill',
     created_at: new Date(),
-    level: 15
   }
 
   const dummySkill02 = {
     ...dummySkill01,
-    title: 'skill 02'
+    name: 'skill 02'
   }
 
   const dummySkill03 = {
     ...dummySkill01,
-    title: 'skill 03'
+    name: 'skill 03'
   }
 
   beforeAll(async () => {

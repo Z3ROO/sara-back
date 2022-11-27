@@ -25,10 +25,14 @@ export interface INewQuestline {
 }
 
 export interface ISkill {
-  title: string
+  name: string
   description: string
   created_at: Date
-  level: number
+}
+
+export interface INewSkill {
+  name: string
+  description: string
 }
 
 export interface IQuest {

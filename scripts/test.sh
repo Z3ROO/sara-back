@@ -11,7 +11,8 @@ export DB_PORT=3003
 
 #source ./scripts/prepare-dev.sh
 
-npx jest --runInBand 
+npx jest --runInBand src/controllers/http-api/routes/leveling/skills/SkillsAPIRoutes.test.ts
+#src/features/leveling/Skills.test.ts 
 #/src/repositories/leveling/SkillsRepo.test.ts
 #src/controllers/http-api/routes/leveling/inbox/InboxAPIRoutes.test.ts src/features/leveling/Inbox.test.ts src/repositories/leveling/InboxRepo.test.ts
 #src/features/leveling/Pills.test.ts 
