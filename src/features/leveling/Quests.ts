@@ -53,7 +53,7 @@ export class Quests {
     return;
   }
 
-  static async createNewQuest(properties: INewQuest, questline?: boolean) {
+  static async createNewQuest(properties: INewQuest, questGroup: {questline?:boolean, skill?:string}) {
     let {
       questline_id,
       skill_id,
@@ -64,18 +64,27 @@ export class Quests {
       todos,
       timecap
     } = properties;
-    
+
     const activeQuest = await QuestRepo.findActiveQuest();    
     if (activeQuest)
       throw new BadRequest('An active quest already exist');
     
-    if (questline)
+    if (questGroup.questline)
       questline_id = (await Questlines.getActiveQuestline())._id.toHexString();
-
-    if (!questline_id && !skill_id && !mission_id)
-      throw new BadRequest('A quest group must be specified; Questline, skill or mission')
     
-    if (timecap < (10 * 60 * 1000))
+    if (questGroup.skill)
+      if (isObjectId(questGroup.skill))
+        skill_id = questGroup.skill;
+      else
+        throw new BadRequest('Invalid skill_id')
+    
+    const isOnlyOneQuestGroup = [questline_id, skill_id, mission_id].filter(v => v).length === 1;
+
+    if (!isOnlyOneQuestGroup)
+      throw new BadRequest('Quest groups are at least one and no more than that.')
+      
+
+    if (timecap < (10 * 60 * 60 * 1000))
       throw new BadRequest('timecap must be above 10 minutes')
 
     await QuestRepo.insertOneQuest({

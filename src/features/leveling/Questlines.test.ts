@@ -3,8 +3,8 @@ import QuestlinesRepo from "../../repositories/leveling/QuestlinesRepo";
 import { BadRequest } from "../../util/errors/HttpStatusCode";
 import { INewQuest, INewQuestline, IQuestline } from "../interfaces/interfaces";
 import { Questlines } from './Questlines'
-import { Quest } from '../Quest'
-import QuestRepo from "../../repositories/QuestRepo";
+import { Quests } from './Quests'
+import QuestRepo from "../../repositories/leveling/QuestsRepo";
 
 describe('Questlines domain logic', () => {
   const dummyQuestline01: IQuestline = {
@@ -125,7 +125,7 @@ describe('Questlines domain logic', () => {
     const dummyQuestline: any = {
       title: 'New questline',
       description: 'description',
-      timecap: 23131321
+      timecap: 231313211321
     };
 
     const createQuestline = async () => await Questlines.createNewQuestline(dummyQuestline);
@@ -142,17 +142,15 @@ describe('Questlines domain logic', () => {
   });
 
   test('Should throw Bad Request if active quest when trying to finish/invalidate questline', async () => {
-    const questline_id = (await Questlines.getActiveQuestline())._id.toHexString();
     const quest: INewQuest = {
-      questline_id, //must fix making it not required
       title: 'Quest',
       description: 'Description',
-      timecap: 123132,
+      timecap: 1231313213212,
       type: 'main',
       todos: ['To-do']
     };
 
-    await Quest.createNewQuest(quest)
+    await Quests.createNewQuest(quest, {questline: true})
     const questline = async () => await Questlines.terminateActiveQuestline('finished');
 
     expect(questline).rejects.toThrow(new BadRequest('Can\'t finish, a quest is currently active'));

@@ -46,12 +46,7 @@ describe('Quests HTTP API Routes', () => {
 
     await QuestlineRepo.insertOneQuestline(dummyMainQuestline);
 
-    const questline = await QuestlineRepo.findActiveQuestline();
-
-    await Quests.createNewQuest({
-      ...dummyQuest,
-      questline_id: questline!._id.toHexString()
-    });
+    await Quests.createNewQuest(dummyQuest, { questline: true });
   });
 
   afterAll(async () => {
@@ -79,10 +74,8 @@ describe('Quests HTTP API Routes', () => {
       const quest = (await QuestsRepo.findActiveQuest())!;
       await QuestsRepo.handleQuestTodo(quest._id.toHexString(), quest.todos[0].description, 'finished');
       await QuestsRepo.terminateQuest(quest._id.toHexString(), 1, 'finished');
-      const questline_id = (await QuestlineRepo.findActiveQuestline())!._id;
 
       const reqBody = {
-        questline_id,
         title: 'Quest 2',
         description: 'Quest 2',
         type: 'main',
@@ -90,67 +83,44 @@ describe('Quests HTTP API Routes', () => {
         timecap: 10*60*60*1000
       };
 
-      const response = await request(app).post('/leveling/quest/new').send(reqBody);
+      const response = await request(app).post('/leveling/quest/new?questline=true').send(reqBody);
 
       expect(response.status).toBe(201);
       expect(response.body.status).toBe(201);
       expect(response.body.message).toBe('Quest created');
       expect(response.body.body).toBe(null);
     });
-
-    test('Should respond with 400 status code if Questline no found', async () => {
-      const quest = (await QuestsRepo.findActiveQuest())!;
-      await QuestsRepo.handleQuestTodo(quest._id.toHexString(), quest.todos[0].description, 'finished');
-      await QuestsRepo.terminateQuest(quest._id.toHexString(), 1, 'finished');
-
-      const reqBody = {
-        questline_id: '123456789123456789123456',
-        title: 'Quest 2',
-        description: 'Quest 2',
-        type: 'main',
-        todos: ['to-do 1'],
-        timecap: 4*60*60*1000
-      };
-
-      const response = await request(app).post('/leveling/quest/new').send(reqBody);
-
-      expect(response.status).toBe(400);
-      expect(response.body.status).toBe(400);
-      expect(response.body.message).toBe('Bad Request: Issued questline_id does not match with current Questline');
-      expect(response.body.body).toBe(null);
-    });
     
     test('Should respond with 400 status code and correct message uppon incorrect properties provided', async () => {
       const reqBody = {
-        //questline_id: undefined,
         title: 'Quest 2',
         description: 'Quest 2',
         type: 'main',
         todos: ['to-do 1'],
-        timecap: 4*60*60*1000
+        //timecap: 4*60*60*1000
       };
-      const response = await request(app).post('/leveling/quest/new').send(reqBody);
+      const response = await request(app).post('/leveling/quest/new?questline=true').send(reqBody);
 
       expect(response.status).toBe(400);
       expect(response.body.status).toBe(400);
-      expect(response.body.message).toBe('Bad Request: Property "questline_id" is missing');
+      expect(response.body.message).toBe('Bad Request: Property "timecap" is missing');
       expect(response.body.body).toBe(null);
     });
 
-    test('Should respond with 400 status code and correct message uppon correct properties provided', async () => {
+    test('Should respond with 400 status code and correct message uppon invalid property provided', async () => {
+      await QuestsRepo.wipeCollection();
       const reqBody = {
-        questline_id: 'invalid_id',
         title: 'Quest 2',
         description: 'Quest 2',
         type: 'main',
         todos: ['to-do 1'],
         timecap: 4*60*60*1000
       };
-      const response = await request(app).post('/leveling/quest/new').send(reqBody);
+      const response = await request(app).post('/leveling/quest/new?skill=invalid_id').send(reqBody);
 
       expect(response.status).toBe(400);
       expect(response.body.status).toBe(400);
-      expect(response.body.message).toBe('Bad Request: Invalid questline_id');
+      expect(response.body.message).toBe('Bad Request: Invalid skill_id');
       expect(response.body.body).toBe(null);
     });
   });
@@ -301,6 +271,6 @@ describe('Quests HTTP API Routes', () => {
 
 
 async function wipeCollections() {
-  await db('leveling').collection('questlines').deleteMany({});
-  await db('leveling').collection('quests').deleteMany({});
+  await QuestsRepo.wipeCollection();
+  await QuestlineRepo.wipeCollection();
 }

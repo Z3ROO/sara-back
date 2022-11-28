@@ -148,9 +148,7 @@ describe('Quests Domain Logic', () => {
 
   test('Should successfully create new quest', async () => {
     await QuestsRepo.wipeCollection();
-    const questline_id = (await Questlines.getActiveQuestline())!._id.toHexString();
     const dummyQuest: any = {
-      questline_id: questline_id,
       title: 'New Quest',
       description: 'Description',
       type: 'main',
@@ -158,7 +156,7 @@ describe('Quests Domain Logic', () => {
       timecap: 10*60*60*1000
     }
 
-    await Quests.createNewQuest(dummyQuest, true);
+    await Quests.createNewQuest(dummyQuest, {questline:true});
     const newQuest = await Quests.getActiveQuest();
     delete dummyQuest.todos;
 
@@ -167,9 +165,7 @@ describe('Quests Domain Logic', () => {
 
   test('Should throw Bad Request if try to create quest with less than minimun timecap', async () => {
     await QuestsRepo.wipeCollection();
-    const questline_id = (await Questlines.getActiveQuestline())!._id.toHexString();
     const dummyQuest: any = {
-      questline_id: questline_id,
       title: 'New Quest',
       description: 'Description',
       type: 'main',
@@ -177,7 +173,7 @@ describe('Quests Domain Logic', () => {
       timecap: (10*60*60*1000) - 1
     }
 
-    const createQuest = async () => await Quests.createNewQuest(dummyQuest, true);
+    const createQuest = async () => await Quests.createNewQuest(dummyQuest, {questline:true});
 
     await expect(createQuest).rejects.toThrow(new BadRequest('timecap must be above 10 minutes'));
   });
@@ -193,12 +189,13 @@ describe('Quests Domain Logic', () => {
       timecap: 10*60*60*1000
     };
 
-    const createQuest = async () => await Quests.createNewQuest(dummyQuest, true);
+    const createQuest = async () => await Quests.createNewQuest(dummyQuest, {questline:true});
 
     await expect(createQuest).rejects.toThrow(new BadRequest('No active questline found'));
   })
 
   test('Should throw Bad Request if try to create quest with no group', async () => {
+    await QuestsRepo.wipeCollection();
     const dummyQuest: INewQuest = {
       title: 'New Quest',
       description: 'Description',
@@ -207,15 +204,28 @@ describe('Quests Domain Logic', () => {
       timecap: 10*60*60*1000
     };
 
-    const createQuest = async () => await Quests.createNewQuest(dummyQuest);
+    const createQuest = async () => await Quests.createNewQuest(dummyQuest,{});
 
-    await expect(createQuest).rejects.toThrow(new BadRequest('A quest group must be specified; Questline, skill or mission'));
-  })
+    await expect(createQuest).rejects.toThrow(new BadRequest('Quest groups are at least one and no more than that.'));
+  });
+
+  test('Should throw Bad Request if try to create quest with too many groups', async () => {
+    await QuestsRepo.wipeCollection();
+    const dummyQuest: INewQuest = {
+      title: 'New Quest',
+      description: 'Description',
+      type: 'main',
+      todos: ['to-do'],
+      timecap: 10*60*60*1000
+    };
+
+    const createQuest = async () => await Quests.createNewQuest(dummyQuest,{questline:true, skill: '123456789123456789123456'});
+
+    await expect(createQuest).rejects.toThrow(new BadRequest('Quest groups are at least one and no more than that.'));
+  });
 
   test('Should throw Bad Request if an active quest already exists', async () => {
-    const questline_id = (await Questlines.getActiveQuestline())!._id.toHexString();
     const dummyQuest: INewQuest = {
-      questline_id: questline_id,
       title: 'New Quest',
       description: 'Description',
       type: 'main',
@@ -223,9 +233,24 @@ describe('Quests Domain Logic', () => {
       timecap: 10*60*60*1000
     }
 
-    const createQuest = async () => await Quests.createNewQuest(dummyQuest, true);
+    const createQuest = async () => await Quests.createNewQuest(dummyQuest, {questline:true});
 
     await expect(createQuest).rejects.toThrow(new BadRequest('An active quest already exist'));
+  });
+
+  test('Should throw Bad Request if Invalid skill_id is issued', async () => {
+    await QuestsRepo.wipeCollection();
+    const dummyQuest: INewQuest = {
+      title: 'New Quest',
+      description: 'Description',
+      type: 'main',
+      todos: ['to-do'],
+      timecap: 10*60*60*1000
+    }
+
+    const createQuest = async () => await Quests.createNewQuest(dummyQuest, {skill: 'invalid_id'});
+
+    await expect(createQuest).rejects.toThrow(new BadRequest('Invalid skill_id'));
   });
 
   test('Should successfully increase distraction points', async () => {

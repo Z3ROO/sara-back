@@ -16,10 +16,10 @@ export default class QuestsAPIHandlers {
 
   //[POST]/quests/quest/new
   static async createNewQuest(req: Request) {
-    const { questline } = req.query;
-    const { title, description, timecap, type, todos } = req.body;
+    const { questline, skill } = req.query;
+    const { title, description, timecap, type, todos} = req.body;
     
-    const questBody: INewQuest = {
+    const questProps: INewQuest = {
       // skill_id,
       // mission_id,
       title,
@@ -29,9 +29,12 @@ export default class QuestsAPIHandlers {
       todos
     }
     
-    checkForMissingProperties(questBody);
+    checkForMissingProperties(questProps);
 
-    await Quests.createNewQuest(questBody, !!questline);
+    await Quests.createNewQuest(questProps, {
+      questline: !!questline,
+      skill: skill as string
+    });
 
     return {
       status: 201,
