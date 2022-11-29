@@ -63,7 +63,7 @@ describe('Quests Domain Logic', () => {
     await Questlines.createNewQuestline({
       title: 'Questline',
       description: 'Description',
-      timecap: 1000000
+      timecap: 100000000
     });
     await QuestsRepo.insertOneQuest(dummyQuest01);
     await QuestsRepo.insertOneQuest(dummyQuest02);
@@ -153,7 +153,7 @@ describe('Quests Domain Logic', () => {
       description: 'Description',
       type: 'main',
       todos: ['to-do'],
-      timecap: 10*60*60*1000
+      timecap: 10*60*1000
     }
 
     await Quests.createNewQuest(dummyQuest, {questline:true});
@@ -170,7 +170,7 @@ describe('Quests Domain Logic', () => {
       description: 'Description',
       type: 'main',
       todos: ['to-do'],
-      timecap: (10*60*60*1000) - 1
+      timecap: (10*60*1000) - 1
     }
 
     const createQuest = async () => await Quests.createNewQuest(dummyQuest, {questline:true});
@@ -186,7 +186,7 @@ describe('Quests Domain Logic', () => {
       description: 'Description',
       type: 'main',
       todos: ['to-do'],
-      timecap: 10*60*60*1000
+      timecap: 10*60*1000
     };
 
     const createQuest = async () => await Quests.createNewQuest(dummyQuest, {questline:true});
@@ -201,7 +201,7 @@ describe('Quests Domain Logic', () => {
       description: 'Description',
       type: 'main',
       todos: ['to-do'],
-      timecap: 10*60*60*1000
+      timecap: 10*60*1000
     };
 
     const createQuest = async () => await Quests.createNewQuest(dummyQuest,{});
@@ -216,7 +216,7 @@ describe('Quests Domain Logic', () => {
       description: 'Description',
       type: 'main',
       todos: ['to-do'],
-      timecap: 10*60*60*1000
+      timecap: 10*60*1000
     };
 
     const createQuest = async () => await Quests.createNewQuest(dummyQuest,{questline:true, skill: '123456789123456789123456'});
@@ -230,7 +230,7 @@ describe('Quests Domain Logic', () => {
       description: 'Description',
       type: 'main',
       todos: ['to-do'],
-      timecap: 10*60*60*1000
+      timecap: 10*60*1000
     }
 
     const createQuest = async () => await Quests.createNewQuest(dummyQuest, {questline:true});
@@ -245,7 +245,7 @@ describe('Quests Domain Logic', () => {
       description: 'Description',
       type: 'main',
       todos: ['to-do'],
-      timecap: 10*60*60*1000
+      timecap: 10*60*1000
     }
 
     const createQuest = async () => await Quests.createNewQuest(dummyQuest, {skill: 'invalid_id'});

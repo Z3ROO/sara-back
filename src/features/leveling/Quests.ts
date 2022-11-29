@@ -84,7 +84,7 @@ export class Quests {
       throw new BadRequest('Quest groups are at least one and no more than that.')
       
 
-    if (timecap < (10 * 60 * 60 * 1000))
+    if (timecap < (10 * 60 * 1000))
       throw new BadRequest('timecap must be above 10 minutes')
 
     await QuestRepo.insertOneQuest({
