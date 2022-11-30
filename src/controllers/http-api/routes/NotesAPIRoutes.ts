@@ -28,4 +28,12 @@ export default [
     method: 'delete', path: '/notes/folder',
     handler: NotesAPIHandlers.deleteFolder
   },
+  {
+    method: 'get', path: '/notes/handy',
+    handler: NotesAPIHandlers.getHandyNote
+  },
+  {
+    method: 'post', path: '/notes/handy',
+    handler: NotesAPIHandlers.updateHandyNote
+  }
 ];
