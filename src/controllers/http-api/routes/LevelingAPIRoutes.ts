@@ -1,4 +1,6 @@
+import { Request } from "express";
 import { Leveling } from "../../../features/Leveling";
+import { Stats } from "../../../features/Stats";
 
 export default [
   {
@@ -12,4 +14,22 @@ export default [
       };
     }
   },
+  {
+    method: 'get', path: '/leveling/stats/gains-history',
+    handler: async (req: Request) => {
+      const {date} = req.query;
+      let day: Date;
+
+      if (date)
+        day = new Date(date as string);
+      else
+        day = new Date();
+
+      const history = await Stats.getGainsHistoryInOneDay(day);
+      
+      return {
+        body: history
+      }
+    }
+  }
 ];
