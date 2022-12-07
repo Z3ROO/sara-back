@@ -1,4 +1,5 @@
-import { Dirent } from 'fs';
+import { Request } from 'express';
+import { Dirent, writeFile } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -8,8 +9,6 @@ export default class NotesAPIHandlers {
   // get'/notes/tree-listing/:category'
   static async getTreeListing(req: any, res: any) {
     const { category } = req.params;
-
-    console.log(req.params)
 
     const listing = [await NotesAPIHandlers.buildListing([category])]
 
@@ -118,6 +117,35 @@ export default class NotesAPIHandlers {
       return {
         status: 202,
         message: 'Note deleted'
+      }
+    }
+
+    // get'/notes/handy'
+    static async getHandyNote() {
+      const dir = path.join(notesDir, 'handy');
+      let note:string;
+      try {
+        note = await fs.readFile(dir, 'utf-8');
+      }catch(e) {
+        await fs.writeFile(dir, '', 'utf-8');
+        note = await fs.readFile(dir, 'utf-8');
+      }
+
+      return {
+        body: note
+      }
+    }
+
+    // post'/notes/handy'
+    static async updateHandyNote(req: Request) {
+      const { note } = req.body
+      const dir = path.join(notesDir, 'handy');
+
+      await fs.writeFile(dir, note, 'utf-8');
+
+      return {
+        status: 202,
+        message: 'Handy note updated'
       }
     }
 }
