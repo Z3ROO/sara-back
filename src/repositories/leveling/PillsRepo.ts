@@ -12,7 +12,7 @@ class PillsRepo extends NoSQLRepository<IPills> {
   async findAllTakeablePills() {
     const pills = await this.collection().find({
       next_shot: {$lte: new Date()}
-    }).sort({next_shot: -1}).toArray();
+    }).sort({next_shot: 1}).toArray();
 
     return pills;
   }
