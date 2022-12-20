@@ -43,42 +43,30 @@ export class Records {
 
   static async createNewRecord(properties: INewRecord) {    
     const {
-      questline_id,
       skill_id,
       title,
       description,
-      metric,
-      status,
+      todos,
+      type,
       categories
     } = properties;
 
-    if (!isObjectId(questline_id))
-      throw new BadRequest('Invalid questline_id');
-
     await RecordsRepo.insertOneRecord({
-      questline_id: questline_id ? questline_id : null,
       skill_id: skill_id ? skill_id : null,
       title,
       description,
+      todos,
+      type,
+      categories: categories ? categories : [],
+      groups: {},
       acceptance: {
         stage: 'created',
         date: [new Date()]
-      },
-      metric,
-      status: {
-        waitTime: status.waitTime,
-        stageAmount: status.stageAmount,
-        stage: null,
-        last_commitment: null
-      },
-      categories: categories ? categories : [],
-      level: 0,
-      history: [],
-      xp: null
+      }  
     });
   }
 
-  static async proceedFeatAcceptanceLevel(record_id: string) {
+  static async proceedRecordAcceptanceLevel(record_id: string) {
     const feat = await RecordsRepo.findOneRecord(record_id);
     const stage = nextAcceptanceLevel(feat);
 

@@ -60,7 +60,6 @@ export class Quests {
       mission_id,
       title,
       description,
-      type,
       todos,
       timecap
     } = properties;
@@ -93,9 +92,8 @@ export class Quests {
       mission_id: mission_id ? mission_id : null,
       title,
       description,
-      type,
-      state: 'active',
       todos: todos.map((todo: string) => ({description: todo, state: 'active', finished_at: null})),
+      state: 'active',
       timecap,
       pause: [],
       focus_score: 0,
@@ -120,6 +118,10 @@ export class Quests {
 
   static async getQuestTodoStatus(quest_id: string, todoDescription: string) {
     const quest = await this.getOneQuest(quest_id);
+    
+    if (typeof quest.todos === 'string')
+      throw new Error('There\'s no to-do in this quest');
+
     const todo = quest.todos.find(todo => (todo.description === todoDescription));
     
     if (todo)

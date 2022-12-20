@@ -1,5 +1,3 @@
-type levelHistory = {direction:-1|0|1, date: Date}[]
-
 export type IInbox = IInboxItem[]
 
 export interface IInboxItem {
@@ -16,6 +14,7 @@ export interface IQuestline {
   created_at: Date
   finished_at: Date|null
   xp: number|null
+  requerements?: []
 }
 
 export interface INewQuestline {
@@ -25,14 +24,25 @@ export interface INewQuestline {
 }
 
 export interface ISkill {
-  name: string
+  title: string
   description: string
   created_at: Date
+  xp: number|null
 }
 
 export interface INewSkill {
-  name: string
+  title: string
   description: string
+}
+
+export interface ISkillGroup extends ISkill {
+  parent: string
+  children: string[]
+}
+
+export interface INewSkillGroup extends INewSkill{
+  parent: string
+  children: string[]
 }
 
 export interface IQuest {
@@ -40,10 +50,9 @@ export interface IQuest {
   skill_id: string|null
   mission_id: string|null
   title: string
-  description: string
-  type: 'main'|'side'|'mission'|'practice'
-  state: 'active'|'deferred'|'finished'|'invalidated'
+  description: string 
   todos: ITodo[]
+  state: 'active'|'finished'|'invalidated'
   timecap: number|string
   pause: {
     start: Date
@@ -57,8 +66,10 @@ export interface IQuest {
 }
 
 export type ITodo = {
+  doable_id?: string
+  title?: string
   description: string
-  state: 'invalidated'|'finished'|'active'
+  state: 'active'|'finished'|'invalidated'
   finished_at: Date|null
 };
 
@@ -68,9 +79,55 @@ export interface INewQuest {
   mission_id?: string
   title: string
   description: string
-  type: 'main'|'side'|'mission'|'practice'
-  todos: string[],
+  //type: 'main'|'mission'|'practice'
+  todos: string[]
   timecap: number|string
+}
+
+export interface IDeeds {
+  title?: string
+  description: string
+  categories: string[]
+  created_at: Date
+  //remember: {}
+}
+
+export interface INewDeed {
+  title?: string
+  description: string
+}
+
+export type RecordsMetricUnits = 'unit'|'time'|'distance';
+
+export interface IRecords {
+  skill_id: string|null
+  title: string
+  description: string
+  todos: ITodo[]
+  type: 'book'|'move'|'flashcard'
+  categories: string[]
+  groups: {
+    [key in RecordsMetricUnits]?: {
+      cap: number|null
+      history: {
+        date: Date[], 
+        progress: number
+      }[]
+    }
+  }
+  acceptance: {
+    stage: 'created'|'reviewed'|'ready',
+    date: Date[]
+  }
+}
+
+export interface INewRecord {
+  skill_id: string|null
+  title: string
+  description: string
+  todos: ITodo[]
+  type: 'book'|'move'|'flashcard'
+  categories: string[]
 }
 
 export interface IActions {
@@ -110,40 +167,40 @@ export interface INewFeat {
 }
 
 
-export interface IRecords {
-  questline_id: string|null
-  skill_id: string|null
-  title: string
-  description: string
-  acceptance: {
-    stage: 'created'|'reviewed'|'ready',
-    date: Date[]
-  }
-  metric: 'unit'|'time'|'distance'
-  status: {
-    waitTime: number
-    stageAmount: number
-    stage: number|null
-    last_commitment: Date|null
-  }
-  categories: string[]
-  level: number
-  history: levelHistory
-  xp: number|null
-}
+// export interface IRecords {
+//   questline_id: string|null
+//   skill_id: string|null
+//   title: string
+//   description: string
+//   acceptance: {
+//     stage: 'created'|'reviewed'|'ready',
+//     date: Date[]
+//   }
+//   metric: 'unit'|'time'|'distance'
+//   status: {
+//     waitTime: number
+//     stageAmount: number
+//     stage: number|null
+//     last_commitment: Date|null
+//   }
+//   categories: string[]
+//   level: number
+//   history: levelHistory
+//   xp: number|null
+// }
 
-export interface INewRecord {
-  questline_id?: string|null
-  skill_id?: string|null
-  title: string
-  description: string
-  metric: 'unit'|'time'|'distance'
-  status: {
-    waitTime: number
-    stageAmount: number
-  }
-  categories: string[]
-}
+// export interface INewRecord {
+//   questline_id?: string|null
+//   skill_id?: string|null
+//   title: string
+//   description: string
+//   metric: 'unit'|'time'|'distance'
+//   status: {
+//     waitTime: number
+//     stageAmount: number
+//   }
+//   categories: string[]
+// }
 
 export interface IPills {
   name: string
