@@ -45,6 +45,7 @@ export interface INewSkillGroup extends INewSkill{
   children: string[]
 }
 
+// Quests exist to record the details of the action, basicly what I did in this brief period of time.
 export interface IQuest {
   questline_id: string|null
   skill_id: string|null
@@ -103,20 +104,36 @@ export interface INewDeed {
   description: string
 }
 
-export type RecordsTypes = 'book'|'kick'|'punch'|'flashcard';
+export type ItemTypes = 'book'|'kick'|'punch'|'flashcard';
 
-export type RecordsActions = 'read'|'perform'|'answer'|'revised-read';
+export type RecordsActionTypes = 'read'|'perform'|'answer'|'revised-read';
 
-export type RecordsMetricUnits = 'unit'|'time'|'distance'|'page';
+export type MetricUnits = 'unit'|'time'|'distance'|'page';
 
+export type RecordsMetric = '-0+'|'unit'|'current-state';
+
+//Records exists to "record" the current state of an long-term action uppon an item.
 export interface IRecords {
   skill_id: string|null
   title: string
   description: string
   todos: ITodo[]
-  type: RecordsTypes
+  actionType: RecordsActionTypes
+  itemType: ItemTypes
+  item_id: string|null
   categories: string[]
-  actions: IActions
+  progress: number
+  qtd: number
+  level: number
+  levelCap: number|null
+  metric: RecordsMetric
+  metricUnit: MetricUnits
+  complete: boolean
+  difficulty: 1|2|3|4|5
+  history: {
+    date: Date[], 
+    progress: number
+  }[]
 }
 
 export interface INewRecord {
@@ -124,24 +141,8 @@ export interface INewRecord {
   title: string
   description: string
   todos: ITodo[]
-  type: RecordsTypes
+  type: ItemTypes
   categories: string[]
-}
-
-export type IActions = {
-  [key in RecordsActions]?: {
-    qtd: number
-    qtdCap: number|null
-    level: number
-    levelCap: number|null
-    metric: RecordsMetricUnits
-    //state: string
-    //density: 300|1-5
-    history: {
-      date: Date[], 
-      progress: number
-    }[]
-  }
 }
 
 export interface IFeats {
