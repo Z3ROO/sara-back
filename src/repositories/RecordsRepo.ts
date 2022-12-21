@@ -1,4 +1,4 @@
-import { INewRecord, IRecords } from "./../features/interfaces/interfaces";
+import { INewRecord, IRecords, RecordsActions } from "./../features/interfaces/interfaces";
 import { RepositoryError } from "./../util/errors/RepositoryError";
 import { NoSQLRepository } from "./RepoResultHandler";
 import { buildSearchString, uniqueIdentifier } from "./FeatsRepo";
@@ -51,21 +51,16 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
     const _id = new ObjectID(record_id);
     await this.collection().findOneAndUpdate({_id}, {$set: properties});
   }
-  
-  async updateAcceptanceLevel(record_id: string, stage: 'reviewed'|'ready') {
-    const _id = new ObjectID(record_id);
-    await this.collection().findOneAndUpdate({_id}, {
-      $set: {"acceptance.stage":stage},
-      $push: {"acceptance.date": new Date()}
-    });
-  }
 
-  async updateRecordLevel(record_id: string, direction: -1|0|1) {
+  async updateRecordLevel(record_id: string, action: RecordsActions, progress: number) {
     const _id = new ObjectID(record_id);
     await this.collection().findOneAndUpdate({_id}, {
+      $inc: {
+        [`groups.${action}.current`]: progress
+      },
       $push: {
-        history: {
-          direction: direction,
+        [`groups.${action}.history`]: {
+          progress,
           date: new Date()
         }
       }

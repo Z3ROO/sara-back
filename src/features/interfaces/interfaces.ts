@@ -48,6 +48,7 @@ export interface INewSkillGroup extends INewSkill{
 export interface IQuest {
   questline_id: string|null
   skill_id: string|null
+  metric: string|null
   mission_id: string|null
   title: string
   description: string 
@@ -80,7 +81,12 @@ export interface INewQuest {
   title: string
   description: string
   //type: 'main'|'mission'|'practice'
-  todos: string[]
+  todos: {
+    doable_id?: string
+    title?: string
+    description: string
+  }[]
+  metric: string
   timecap: number|string
 }
 
@@ -97,28 +103,20 @@ export interface INewDeed {
   description: string
 }
 
-export type RecordsMetricUnits = 'unit'|'time'|'distance';
+export type RecordsTypes = 'book'|'kick'|'punch'|'flashcard';
+
+export type RecordsActions = 'read'|'perform'|'answer'|'revised-read';
+
+export type RecordsMetricUnits = 'unit'|'time'|'distance'|'page';
 
 export interface IRecords {
   skill_id: string|null
   title: string
   description: string
   todos: ITodo[]
-  type: 'book'|'move'|'flashcard'
+  type: RecordsTypes
   categories: string[]
-  groups: {
-    [key in RecordsMetricUnits]?: {
-      cap: number|null
-      history: {
-        date: Date[], 
-        progress: number
-      }[]
-    }
-  }
-  acceptance: {
-    stage: 'created'|'reviewed'|'ready',
-    date: Date[]
-  }
+  actions: IActions
 }
 
 export interface INewRecord {
@@ -126,17 +124,24 @@ export interface INewRecord {
   title: string
   description: string
   todos: ITodo[]
-  type: 'book'|'move'|'flashcard'
+  type: RecordsTypes
   categories: string[]
 }
 
-export interface IActions {
-  questline_id?: string
-  skill_id?: string
-  mission_id?: string
-  title: string
-  description: string
-  history: any[]
+export type IActions = {
+  [key in RecordsActions]?: {
+    qtd: number
+    qtdCap: number|null
+    level: number
+    levelCap: number|null
+    metric: RecordsMetricUnits
+    //state: string
+    //density: 300|1-5
+    history: {
+      date: Date[], 
+      progress: number
+    }[]
+  }
 }
 
 export interface IFeats {

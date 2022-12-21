@@ -1,5 +1,5 @@
 import RecordsRepo from "../repositories/RecordsRepo";
-import { INewRecord, IRecords } from "./interfaces/interfaces";
+import { INewRecord, IRecords, RecordsActions } from "./interfaces/interfaces";
 import { nextAcceptanceLevel } from "./Feats";
 import { isObjectId } from "../infra/database/mongodb";
 import { BadRequest } from "../util/errors/HttpStatusCode";
@@ -31,14 +31,11 @@ export class Records {
     return records;
   }
 
-  static async updateRecordLevel(record_id: string, direction: -1|0|1) {
+  static async updateRecordLevel(record_id: string, action: RecordsActions, progress: number) {
     if (!isObjectId(record_id))
       throw new BadRequest('Invalid record_id');
 
-    if (direction < -1 || direction > 1)
-      throw new Error('Direction must be -1, 0 or 1');
-
-    await RecordsRepo.updateRecordLevel(record_id, direction);
+    await RecordsRepo.updateRecordLevel(record_id, action, progress);
   }
 
   static async createNewRecord(properties: INewRecord) {    
@@ -58,18 +55,7 @@ export class Records {
       todos,
       type,
       categories: categories ? categories : [],
-      groups: {},
-      acceptance: {
-        stage: 'created',
-        date: [new Date()]
-      }  
+      actions: {}
     });
-  }
-
-  static async proceedRecordAcceptanceLevel(record_id: string) {
-    const feat = await RecordsRepo.findOneRecord(record_id);
-    const stage = nextAcceptanceLevel(feat);
-
-    await RecordsRepo.updateAcceptanceLevel(record_id, stage);
   }
 }

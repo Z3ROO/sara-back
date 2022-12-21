@@ -61,6 +61,7 @@ export class Quests {
       title,
       description,
       todos,
+      metric,
       timecap
     } = properties;
 
@@ -92,7 +93,14 @@ export class Quests {
       mission_id: mission_id ? mission_id : null,
       title,
       description,
-      todos: todos.map((todo: string) => ({description: todo, state: 'active', finished_at: null})),
+      todos: todos.map((todo) => ({
+        doable_id: todo.doable_id,
+        title: todo.title,
+        description: todo.description,
+        state: 'active',
+        finished_at: null,
+      })),
+      metric,
       state: 'active',
       timecap,
       pause: [],
@@ -109,11 +117,8 @@ export class Quests {
     await QuestRepo.insertDistractionPoint(activeQuest._id.toString());
   }
 
-  static async terminateQuest(quest_id: string, focus_score: number, state: 'finished'|'invalidated') {
-    if (!isObjectId(quest_id))
-      throw new BadRequest('Invalid quest_id');
-
-    await QuestRepo.terminateQuest(quest_id, focus_score, state);
+  static async terminateQuest(focus_score: number, state: 'finished'|'invalidated') {
+    await QuestRepo.terminateQuest(focus_score, state);
   }
 
   static async getQuestTodoStatus(quest_id: string, todoDescription: string) {
