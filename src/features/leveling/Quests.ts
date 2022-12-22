@@ -1,6 +1,7 @@
 import { isObjectId } from "../../infra/database/mongodb";
 import QuestRepo from "../../repositories/leveling/QuestsRepo";
 import { BadRequest } from "../../util/errors/HttpStatusCode";
+import { Deeds } from "../Deeds";
 import { INewQuest, IQuest } from "../interfaces/interfaces";
 import { Questlines } from "./Questlines";
 
@@ -56,12 +57,11 @@ export class Quests {
   static async createNewQuest(properties: INewQuest, questGroup: {questline?:boolean, skill?:string}) {
     let {
       questline_id,
-      skill_id,
+      record_id,
       mission_id,
       title,
       description,
       todos,
-      metric,
       timecap
     } = properties;
 
@@ -74,11 +74,11 @@ export class Quests {
     
     if (questGroup.skill)
       if (isObjectId(questGroup.skill))
-        skill_id = questGroup.skill;
+        record_id = questGroup.skill;
       else
-        throw new BadRequest('Invalid skill_id')
+        throw new BadRequest('Invalid record_id')
     
-    const isOnlyOneQuestGroup = [questline_id, skill_id, mission_id].filter(v => v).length === 1;
+    const isOnlyOneQuestGroup = [questline_id, record_id, mission_id].filter(v => v).length === 1;
 
     if (!isOnlyOneQuestGroup)
       throw new BadRequest('Quest groups are at least one and no more than that.')
@@ -89,18 +89,16 @@ export class Quests {
 
     await QuestRepo.insertOneQuest({
       questline_id: questline_id ? questline_id : null,
-      skill_id: skill_id ? skill_id : null,
+      record_id: record_id ? record_id : null,
       mission_id: mission_id ? mission_id : null,
       title,
       description,
       todos: todos.map((todo) => ({
         doable_id: todo.doable_id,
-        title: todo.title,
         description: todo.description,
         state: 'active',
         finished_at: null,
       })),
-      metric,
       state: 'active',
       timecap,
       pause: [],
@@ -118,6 +116,27 @@ export class Quests {
   }
 
   static async terminateQuest(focus_score: number, state: 'finished'|'invalidated') {
+    const quest = await Quests.getActiveQuest();
+
+    if (quest.mission_id) {
+
+    } else {
+      if (quest.record_id) {
+        //act record
+      }
+
+      if (quest.questline_id) {
+        
+      }
+
+    }
+
+    //Remove finished deeds
+    quest.todos.forEach(async todo => {
+      if (todo.doable_id && todo.state === 'finished')
+        await Deeds.deleteDeed(todo.doable_id);
+    })
+
     await QuestRepo.terminateQuest(focus_score, state);
   }
 

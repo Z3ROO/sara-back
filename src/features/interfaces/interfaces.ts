@@ -48,8 +48,7 @@ export interface INewSkillGroup extends INewSkill{
 // Quests exist to record the details of the action, basicly what I did in this brief period of time.
 export interface IQuest {
   questline_id: string|null
-  skill_id: string|null
-  metric: string|null
+  record_id: string|null
   mission_id: string|null
   title: string
   description: string 
@@ -68,23 +67,24 @@ export interface IQuest {
 }
 
 export type ITodo = {
-  doable_id?: string
+  doable_id?: string|null
   description: string
   state: 'active'|'finished'|'invalidated'
   finished_at: Date|null
 };
 
+export type INewTodo = {
+  doable_id?: string|null
+  description: string
+}
+
 export interface INewQuest {
   questline_id?: string
-  skill_id?: string
+  record_id?: string
   mission_id?: string
   title: string
   description: string
-  todos: {
-    doable_id?: string
-    title?: string
-    description: string
-  }[]
+  todos: INewTodo[]
   timecap: number|string
 }
 
@@ -166,42 +166,6 @@ export interface INewFeat {
   categories: string[]
   tier: number
 }
-
-
-// export interface IRecords {
-//   questline_id: string|null
-//   skill_id: string|null
-//   title: string
-//   description: string
-//   acceptance: {
-//     stage: 'created'|'reviewed'|'ready',
-//     date: Date[]
-//   }
-//   metric: 'unit'|'time'|'distance'
-//   status: {
-//     waitTime: number
-//     stageAmount: number
-//     stage: number|null
-//     last_commitment: Date|null
-//   }
-//   categories: string[]
-//   level: number
-//   history: levelHistory
-//   xp: number|null
-// }
-
-// export interface INewRecord {
-//   questline_id?: string|null
-//   skill_id?: string|null
-//   title: string
-//   description: string
-//   metric: 'unit'|'time'|'distance'
-//   status: {
-//     waitTime: number
-//     stageAmount: number
-//   }
-//   categories: string[]
-// }
 
 export interface IPills {
   name: string
