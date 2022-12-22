@@ -69,7 +69,6 @@ export interface IQuest {
 
 export type ITodo = {
   doable_id?: string
-  title?: string
   description: string
   state: 'active'|'finished'|'invalidated'
   finished_at: Date|null
@@ -81,18 +80,15 @@ export interface INewQuest {
   mission_id?: string
   title: string
   description: string
-  //type: 'main'|'mission'|'practice'
   todos: {
     doable_id?: string
     title?: string
     description: string
   }[]
-  metric: string
   timecap: number|string
 }
 
 export interface IDeeds {
-  title?: string
   description: string
   categories: string[]
   created_at: Date
@@ -100,7 +96,6 @@ export interface IDeeds {
 }
 
 export interface INewDeed {
-  title?: string
   description: string
 }
 
@@ -110,7 +105,7 @@ export type RecordsActionTypes = 'read'|'perform'|'answer'|'revised-read';
 
 export type MetricUnits = 'unit'|'time'|'distance'|'page';
 
-export type RecordsMetric = '-0+'|'unit'|'current-state';
+export type RecordsMetric = '-0+'|'unit'|'current-progress-state';
 
 //Records exists to "record" the current state of an long-term action uppon an item.
 export interface IRecords {

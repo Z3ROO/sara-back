@@ -25,12 +25,10 @@ export class Deeds {
     
   static async createNewDeed(properties: INewDeed) {
     let {
-      title,
       description,
     } = properties;
    
     await DeedsRepo.insertOneDeed({
-      title,
       description,
       categories: [],
       created_at: new Date()
