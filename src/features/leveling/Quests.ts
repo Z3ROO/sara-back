@@ -55,9 +55,9 @@ export class Quests {
     return;
   }
 
-  static async createNewQuest(properties: INewQuest, questGroup: {questline?:boolean, skill?:string}) {
-    let {
-      questline_id,
+  static async createNewQuest(properties: INewQuest) {
+    let questline_id: string, {
+      questline,
       record_id,
       mission_id,
       title,
@@ -70,14 +70,11 @@ export class Quests {
     if (activeQuest)
       throw new BadRequest('An active quest already exist');
     
-    if (questGroup.questline)
+    if (questline)
       questline_id = (await Questlines.getActiveQuestline())._id.toHexString();
     
-    if (questGroup.skill)
-      if (isObjectId(questGroup.skill))
-        record_id = questGroup.skill;
-      else
-        throw new BadRequest('Invalid record_id')
+    if (record_id && !isObjectId(record_id))
+      throw new BadRequest('Invalid record_id');
     
     const isOnlyOneQuestGroup = [questline_id, record_id, mission_id].filter(v => v).length === 1;
 

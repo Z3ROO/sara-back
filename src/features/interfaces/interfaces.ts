@@ -80,7 +80,7 @@ export type INewTodo = {
 }
 
 export interface INewQuest {
-  questline_id?: string
+  questline?: boolean
   record_id?: string
   mission_id?: string
   title: string

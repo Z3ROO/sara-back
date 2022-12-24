@@ -101,7 +101,7 @@ export class Records {
     return record
   }
 
-  static async createNewRecord(properties: INewRecord) {    
+  static async createNewRecord(properties: INewRecord) {
     const {
       skill_id,
       title,
