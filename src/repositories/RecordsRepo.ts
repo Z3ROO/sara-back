@@ -1,8 +1,8 @@
-import { INewRecord, IRecords, RecordsActions } from "./../features/interfaces/interfaces";
+import { INewRecord, IRecords } from "./../features/interfaces/interfaces";
 import { RepositoryError } from "./../util/errors/RepositoryError";
 import { NoSQLRepository } from "./RepoResultHandler";
 import { buildSearchString, uniqueIdentifier } from "./FeatsRepo";
-import { ObjectID } from "bson";
+import { ObjectId, ObjectID } from "bson";
 
 const dbName = 'leveling';
 const collectionName = 'records';
@@ -52,19 +52,40 @@ class RecordsRepo extends NoSQLRepository<IRecords>{
     await this.collection().findOneAndUpdate({_id}, {$set: properties});
   }
 
-  async updateRecordLevel(record_id: string, action: RecordsActions, progress: number) {
+  async updateRecordLevel(record_id: string, progress_increase: number, quest_progress: number, next_shot: Date, max_level = false) {
     const _id = new ObjectID(record_id);
     await this.collection().findOneAndUpdate({_id}, {
-      $inc: {
-        [`groups.${action}.current`]: progress
+      $set: {
+        progress: progress_increase,
+        ['engageable.not_before']: next_shot,
+        complete: max_level
       },
       $push: {
-        [`groups.${action}.history`]: {
-          progress,
+        history: {
+          progress: quest_progress,
           date: new Date()
         }
       }
     });
+  }
+
+  async requirementsToComplete(requirementsOrRecord: string[]|string) {
+    let requirements: string[];
+    if (typeof requirementsOrRecord === 'string') {
+      const record_id = requirementsOrRecord
+      const record = await this.collection().findOne({_id: new ObjectId(record_id)});
+      requirements = record.engageable.requirements;
+    }
+    else
+      requirements = requirementsOrRecord;
+
+    const _ids = requirements.map(req => new ObjectId(req));
+    const records = await this.collection().find({_id: { $in: _ids }, level: {$gte: 1}}).toArray();
+    
+    if (records.length === 0)
+      return null
+
+    return records;
   }
   
   async deleteOneRecord(record_id: string) {

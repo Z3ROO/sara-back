@@ -24,14 +24,14 @@ export interface INewQuestline {
 }
 
 export interface ISkill {
-  title: string
+  name: string
   description: string
   created_at: Date
   xp: number|null
 }
 
 export interface INewSkill {
-  title: string
+  name: string
   description: string
 }
 
@@ -53,6 +53,7 @@ export interface IQuest {
   title: string
   description: string 
   todos: ITodo[]
+  progress: number
   state: 'active'|'finished'|'invalidated'
   timecap: number|string
   pause: {
@@ -105,7 +106,7 @@ export type RecordsActionTypes = 'read'|'perform'|'answer'|'revised-read';
 
 export type MetricUnits = 'unit'|'time'|'distance'|'page';
 
-export type RecordsMetric = '-0+'|'unit'|'current-progress-state';
+export type RecordsMetric = 'progress-made'|'total-progress'|'boolean';
 
 //Records exists to "record" the current state of an long-term action uppon an item.
 export interface IRecords {
@@ -118,15 +119,20 @@ export interface IRecords {
   item_id: string|null
   categories: string[]
   progress: number
-  qtd: number
+  cap: number
   level: number
   levelCap: number|null
   metric: RecordsMetric
   metricUnit: MetricUnits
   complete: boolean
   difficulty: 1|2|3|4|5
+  engageable: {
+    not_before: Date|null
+    not_after: Date|null
+    requirements: string[]
+  }
   history: {
-    date: Date[], 
+    date: Date, 
     progress: number
   }[]
 }
@@ -135,9 +141,16 @@ export interface INewRecord {
   skill_id: string|null
   title: string
   description: string
-  todos: ITodo[]
-  type: ItemTypes
+  todos: INewTodo[]
+  actionType: RecordsActionTypes
+  item_id: string
   categories: string[]
+  metric: RecordsMetric
+  engageable: {
+    not_before: Date|null
+    not_after: Date|null
+    requirements: string[]
+  }
 }
 
 export interface IFeats {

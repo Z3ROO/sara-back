@@ -3,6 +3,7 @@ import QuestRepo from "../../repositories/leveling/QuestsRepo";
 import { BadRequest } from "../../util/errors/HttpStatusCode";
 import { Deeds } from "../Deeds";
 import { INewQuest, IQuest } from "../interfaces/interfaces";
+import { Records } from "../Records";
 import { Questlines } from "./Questlines";
 
 export class Quests {
@@ -99,6 +100,7 @@ export class Quests {
         state: 'active',
         finished_at: null,
       })),
+      progress: 0,
       state: 'active',
       timecap,
       pause: [],
@@ -121,9 +123,8 @@ export class Quests {
     if (quest.mission_id) {
 
     } else {
-      if (quest.record_id) {
-        //act record
-      }
+      if (quest.record_id) 
+        Records.engage(quest);
 
       if (quest.questline_id) {
         

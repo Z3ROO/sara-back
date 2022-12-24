@@ -25,8 +25,7 @@ export default class QuestsAPIHandlers {
       title,
       description,
       timecap,
-      todos,
-      metric
+      todos
     }
     
     checkForMissingProperties(questProps);

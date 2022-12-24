@@ -1,5 +1,4 @@
 import { IDeeds, INewDeed, ITodo } from "../features/interfaces/interfaces";
-import { RepositoryError } from "../util/errors/RepositoryError"
 import { NoSQLRepository } from "./RepoResultHandler"
 import { ObjectId } from 'mongodb'
 
