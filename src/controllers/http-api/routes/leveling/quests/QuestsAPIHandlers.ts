@@ -21,7 +21,7 @@ export default class QuestsAPIHandlers {
     const questProps: INewQuest = {
       questline,
       record_id,
-      mission_id,
+      mission_id: mission_id || null,
       title,
       description,
       timecap,

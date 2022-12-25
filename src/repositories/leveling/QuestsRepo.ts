@@ -54,8 +54,8 @@ class QuestRepo extends NoSQLRepository<IQuest>{
   async handleQuestTodo(quest_id: string, todoDescription: string, state: 'finished'|'invalidated') {
     await this.collection().findOneAndUpdate({_id: new ObjectId(quest_id)}, {
       $set: {
-        "description.$[tds].state": state,
-        "description.$[tds].finished_at": new Date()
+        "todos.$[tds].state": state,
+        "todos.$[tds].finished_at": new Date()
       }
     },
     {
