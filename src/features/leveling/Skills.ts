@@ -19,6 +19,7 @@ export class Skills {
       name: props.name,
       description: props.description,
       created_at: new Date(),
+      children: [],
       xp: null
     };
 

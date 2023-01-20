@@ -19,15 +19,16 @@ export default [
     method: 'post', path: '/records/new',
     handler: async function createNewRecord(req: Request) {
       const  {
-        title, description, metric, categories, skill_id, engageable, todos, actionType, item_id
+        title, description, metric, categories, skill_id, engageable, todos, action_skill_id, item_id, item_type
       } = req.body;
   
       const record: INewRecord = {
         skill_id,
-        item_id,
+        action_skill_id,
         title,
         description,
-        actionType,
+        item_type,
+        item_id,
         metric,
         engageable,
         categories,

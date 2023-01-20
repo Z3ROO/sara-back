@@ -26,6 +26,7 @@ export interface INewQuestline {
 export interface ISkill {
   name: string
   description: string
+  children: string[]
   created_at: Date
   xp: number|null
 }
@@ -33,16 +34,6 @@ export interface ISkill {
 export interface INewSkill {
   name: string
   description: string
-}
-
-export interface ISkillGroup extends ISkill {
-  parent: string
-  children: string[]
-}
-
-export interface INewSkillGroup extends INewSkill{
-  parent: string
-  children: string[]
 }
 
 // Quests exist to record the details of the action, basicly what I did in this brief period of time.
@@ -100,9 +91,7 @@ export interface INewDeed {
   description: string
 }
 
-export type ItemTypes = 'book'|'kick'|'punch'|'flashcard';
-
-export type RecordsActionTypes = 'read'|'perform'|'answer'|'revised-read';
+export type ItemTypes = 'article'|'book'|'flashcard'|'song';
 
 export type MetricUnits = 'unit'|'time'|'distance'|'page';
 
@@ -110,20 +99,20 @@ export type RecordsMetric = 'progress-made'|'total-progress'|'boolean';
 
 //Records exists to "record" the current state of an long-term action uppon an item.
 export interface IRecords {
-  skill_id: string|null
+  skill_id: string
+  action_skill_id: string
   title: string
   description: string
   todos: ITodo[]
-  actionType: RecordsActionTypes
-  itemType: ItemTypes
+  item_type: ItemTypes
   item_id: string|null
   categories: string[]
   progress: number
   cap: number
   level: number
-  levelCap: number|null
+  level_cap: number|null
   metric: RecordsMetric
-  metricUnit: MetricUnits
+  metric_unit: MetricUnits
   complete: boolean
   difficulty: 1|2|3|4|5
   engageable: {
@@ -138,11 +127,12 @@ export interface IRecords {
 }
 
 export interface INewRecord {
-  skill_id: string|null
+  skill_id: string
+  action_skill_id: string
   title: string
   description: string
   todos: INewTodo[]
-  actionType: RecordsActionTypes
+  item_type: string
   item_id: string
   categories: string[]
   metric: RecordsMetric

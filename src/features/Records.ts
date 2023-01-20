@@ -53,7 +53,7 @@ export class Records {
         //verify other params like to-do to come up with date
       }      
       else if (quest.progress === 1) {
-        if (record.level + 1 === record.levelCap) {
+        if (record.level + 1 === record.level_cap) {
           next_shot = null;
           is_max_level = true;
         }
@@ -104,36 +104,37 @@ export class Records {
   static async createNewRecord(properties: INewRecord) {
     const {
       skill_id,
+      action_skill_id,
       title,
       description,
       todos,
-      actionType,
+      //item_type,
       item_id,
       categories,
       metric,
       engageable
     } = properties;
 
-    const itemType = 'book';
-    const itemCap = 300;
+    const item_type = 'book';
+    const item_cap = 300;
     const itemMetricUnit = 'page';
     const itemDifficulty = 1;
 
     await RecordsRepo.insertOneRecord({
       skill_id,
+      action_skill_id,
       title,
       description,
       todos: todos.map(todo => ({ ...todo, finished_at: null, state: 'active' })),
-      actionType,
-      itemType,
+      item_type,
       item_id,
       categories,
       progress: 0,
-      cap: itemCap,
+      cap: item_cap,
       level: 0,
-      levelCap: 3,
+      level_cap: 3,
       metric,
-      metricUnit: itemMetricUnit,
+      metric_unit: itemMetricUnit,
       complete: false,
       difficulty: itemDifficulty,
       engageable,
