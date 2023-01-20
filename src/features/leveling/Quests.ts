@@ -1,7 +1,9 @@
 import { isObjectId } from "../../infra/database/mongodb";
 import QuestRepo from "../../repositories/leveling/QuestsRepo";
 import { BadRequest } from "../../util/errors/HttpStatusCode";
+import { Deeds } from "../Deeds";
 import { INewQuest, IQuest } from "../interfaces/interfaces";
+import { Records } from "../Records";
 import { Questlines } from "./Questlines";
 
 export class Quests {
@@ -53,14 +55,13 @@ export class Quests {
     return;
   }
 
-  static async createNewQuest(properties: INewQuest, questGroup: {questline?:boolean, skill?:string}) {
-    let {
-      questline_id,
-      skill_id,
+  static async createNewQuest(properties: INewQuest) {
+    let questline_id: string, {
+      questline,
+      record_id,
       mission_id,
       title,
       description,
-      type,
       todos,
       timecap
     } = properties;
@@ -69,16 +70,13 @@ export class Quests {
     if (activeQuest)
       throw new BadRequest('An active quest already exist');
     
-    if (questGroup.questline)
+    if (questline)
       questline_id = (await Questlines.getActiveQuestline())._id.toHexString();
     
-    if (questGroup.skill)
-      if (isObjectId(questGroup.skill))
-        skill_id = questGroup.skill;
-      else
-        throw new BadRequest('Invalid skill_id')
+    if (record_id && !isObjectId(record_id))
+      throw new BadRequest('Invalid record_id');
     
-    const isOnlyOneQuestGroup = [questline_id, skill_id, mission_id].filter(v => v).length === 1;
+    const isOnlyOneQuestGroup = [questline_id, record_id, mission_id].filter(v => v).length === 1;
 
     if (!isOnlyOneQuestGroup)
       throw new BadRequest('Quest groups are at least one and no more than that.')
@@ -89,13 +87,18 @@ export class Quests {
 
     await QuestRepo.insertOneQuest({
       questline_id: questline_id ? questline_id : null,
-      skill_id: skill_id ? skill_id : null,
+      record_id: record_id ? record_id : null,
       mission_id: mission_id ? mission_id : null,
       title,
       description,
-      type,
+      todos: todos.map((todo) => ({
+        doable_id: todo.doable_id,
+        description: todo.description,
+        state: 'active',
+        finished_at: null,
+      })),
+      progress: 0,
       state: 'active',
-      todos: todos.map((todo: string) => ({description: todo, state: 'active', finished_at: null})),
       timecap,
       pause: [],
       focus_score: 0,
@@ -111,15 +114,36 @@ export class Quests {
     await QuestRepo.insertDistractionPoint(activeQuest._id.toString());
   }
 
-  static async terminateQuest(quest_id: string, focus_score: number, state: 'finished'|'invalidated') {
-    if (!isObjectId(quest_id))
-      throw new BadRequest('Invalid quest_id');
+  static async terminateQuest(focus_score: number, state: 'finished'|'invalidated') {
+    const quest = await Quests.getActiveQuest();
 
-    await QuestRepo.terminateQuest(quest_id, focus_score, state);
+    if (quest.mission_id) {
+
+    } else {
+      if (quest.record_id) 
+        Records.engage(quest);
+
+      if (quest.questline_id) {
+        
+      }
+
+    }
+
+    //Remove finished deeds
+    quest.todos.forEach(async todo => {
+      if (todo.doable_id && todo.state === 'finished')
+        await Deeds.deleteDeed(todo.doable_id);
+    })
+
+    await QuestRepo.terminateQuest(focus_score, state);
   }
 
   static async getQuestTodoStatus(quest_id: string, todoDescription: string) {
     const quest = await this.getOneQuest(quest_id);
+    
+    if (typeof quest.todos === 'string')
+      throw new Error('There\'s no to-do in this quest');
+
     const todo = quest.todos.find(todo => (todo.description === todoDescription));
     
     if (todo)

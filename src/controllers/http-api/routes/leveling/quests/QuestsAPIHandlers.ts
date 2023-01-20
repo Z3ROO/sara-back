@@ -16,25 +16,21 @@ export default class QuestsAPIHandlers {
 
   //[POST]/quests/quest/new
   static async createNewQuest(req: Request) {
-    const { questline, skill } = req.query;
-    const { title, description, timecap, type, todos} = req.body;
+    const { questline, record_id, mission_id, title, description, timecap, todos } = req.body;
     
     const questProps: INewQuest = {
-      // skill_id,
-      // mission_id,
+      questline,
+      record_id,
+      mission_id: mission_id || null,
       title,
       description,
       timecap,
-      type,
       todos
     }
     
     checkForMissingProperties(questProps);
 
-    await Quests.createNewQuest(questProps, {
-      questline: !!questline,
-      skill: skill as string
-    });
+    await Quests.createNewQuest(questProps);
 
     return {
       status: 201,
@@ -68,9 +64,9 @@ export default class QuestsAPIHandlers {
   static async finishQuest(req: Request) {
     const { quest_id, focusScore } = req.body;
     
-    checkForMissingProperties({ quest_id, focusScore });
+    checkForMissingProperties({ focusScore });
 
-    await Quests.terminateQuest(quest_id, focusScore, 'finished');
+    await Quests.terminateQuest(focusScore, 'finished');
     
     return {
       status: 202,
@@ -82,9 +78,9 @@ export default class QuestsAPIHandlers {
   static async invalidateQuest(req: Request) {
     const { quest_id, focusScore } = req.body;
     
-    checkForMissingProperties({ quest_id, focusScore });
+    checkForMissingProperties({ focusScore });
 
-    await Quests.terminateQuest(quest_id, focusScore, 'invalidated');
+    await Quests.terminateQuest( focusScore, 'invalidated');
     
     return {
       status: 202,

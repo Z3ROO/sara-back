@@ -16,37 +16,23 @@ export default [
     }
   },
   {
-    method: 'get', path: '/records/up/:record_id',
-    handler: async function updateRecordLevel(req: Request) {
-      const { record_id } = req.params;
-  
-      await Records.updateRecordLevel(record_id, 1);
-  
-      return {
-        status: 202,
-        message: 'Record level updated'
-      };
-    }
-  },
-  {
     method: 'post', path: '/records/new',
     handler: async function createNewRecord(req: Request) {
       const  {
-        title, description, metric, categories, questline_id,
-        waitTime,
-        stageAmount,
+        title, description, metric, categories, skill_id, engageable, todos, action_skill_id, item_id, item_type
       } = req.body;
   
       const record: INewRecord = {
-        questline_id,
+        skill_id,
+        action_skill_id,
         title,
         description,
+        item_type,
+        item_id,
         metric,
-        status: {
-          waitTime,
-          stageAmount
-        },
-        categories
+        engageable,
+        categories,
+        todos
       }
 
       checkForMissingProperties(record);

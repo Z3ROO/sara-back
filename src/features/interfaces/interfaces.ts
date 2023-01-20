@@ -1,5 +1,3 @@
-type levelHistory = {direction:-1|0|1, date: Date}[]
-
 export type IInbox = IInboxItem[]
 
 export interface IInboxItem {
@@ -16,6 +14,7 @@ export interface IQuestline {
   created_at: Date
   finished_at: Date|null
   xp: number|null
+  requerements?: []
 }
 
 export interface INewQuestline {
@@ -27,7 +26,9 @@ export interface INewQuestline {
 export interface ISkill {
   name: string
   description: string
+  children: string[]
   created_at: Date
+  xp: number|null
 }
 
 export interface INewSkill {
@@ -35,15 +36,16 @@ export interface INewSkill {
   description: string
 }
 
+// Quests exist to record the details of the action, basicly what I did in this brief period of time.
 export interface IQuest {
   questline_id: string|null
-  skill_id: string|null
+  record_id: string|null
   mission_id: string|null
   title: string
-  description: string
-  type: 'main'|'side'|'mission'|'practice'
-  state: 'active'|'deferred'|'finished'|'invalidated'
+  description: string 
   todos: ITodo[]
+  progress: number
+  state: 'active'|'finished'|'invalidated'
   timecap: number|string
   pause: {
     start: Date
@@ -57,29 +59,88 @@ export interface IQuest {
 }
 
 export type ITodo = {
+  doable_id?: string|null
   description: string
-  state: 'invalidated'|'finished'|'active'
+  state: 'active'|'finished'|'invalidated'
   finished_at: Date|null
 };
 
+export type INewTodo = {
+  doable_id?: string|null
+  description: string
+}
+
 export interface INewQuest {
-  questline_id?: string
-  skill_id?: string
+  questline?: boolean
+  record_id?: string
   mission_id?: string
   title: string
   description: string
-  type: 'main'|'side'|'mission'|'practice'
-  todos: string[],
+  todos: INewTodo[]
   timecap: number|string
 }
 
-export interface IActions {
-  questline_id?: string
-  skill_id?: string
-  mission_id?: string
+export interface IDeeds {
+  description: string
+  categories: string[]
+  created_at: Date
+  //remember: {}
+}
+
+export interface INewDeed {
+  description: string
+}
+
+export type ItemTypes = 'article'|'book'|'flashcard'|'song';
+
+export type MetricUnits = 'unit'|'time'|'distance'|'page';
+
+export type RecordsMetric = 'progress-made'|'total-progress'|'boolean';
+
+//Records exists to "record" the current state of an long-term action uppon an item.
+export interface IRecords {
+  skill_id: string
+  action_skill_id: string
   title: string
   description: string
-  history: any[]
+  todos: ITodo[]
+  item_type: ItemTypes
+  item_id: string|null
+  categories: string[]
+  progress: number
+  cap: number
+  level: number
+  level_cap: number|null
+  metric: RecordsMetric
+  metric_unit: MetricUnits
+  complete: boolean
+  difficulty: 1|2|3|4|5
+  engageable: {
+    not_before: Date|null
+    not_after: Date|null
+    requirements: string[]
+  }
+  history: {
+    date: Date, 
+    progress: number
+  }[]
+}
+
+export interface INewRecord {
+  skill_id: string
+  action_skill_id: string
+  title: string
+  description: string
+  todos: INewTodo[]
+  item_type: string
+  item_id: string
+  categories: string[]
+  metric: RecordsMetric
+  engageable: {
+    not_before: Date|null
+    not_after: Date|null
+    requirements: string[]
+  }
 }
 
 export interface IFeats {
@@ -107,42 +168,6 @@ export interface INewFeat {
   todos: string[]|null
   categories: string[]
   tier: number
-}
-
-
-export interface IRecords {
-  questline_id: string|null
-  skill_id: string|null
-  title: string
-  description: string
-  acceptance: {
-    stage: 'created'|'reviewed'|'ready',
-    date: Date[]
-  }
-  metric: 'unit'|'time'|'distance'
-  status: {
-    waitTime: number
-    stageAmount: number
-    stage: number|null
-    last_commitment: Date|null
-  }
-  categories: string[]
-  level: number
-  history: levelHistory
-  xp: number|null
-}
-
-export interface INewRecord {
-  questline_id?: string|null
-  skill_id?: string|null
-  title: string
-  description: string
-  metric: 'unit'|'time'|'distance'
-  status: {
-    waitTime: number
-    stageAmount: number
-  }
-  categories: string[]
 }
 
 export interface IPills {

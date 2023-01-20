@@ -1,13 +1,13 @@
 import { Request } from "express";
-import { Leveling } from "../../../features/Leveling";
+//import { Leveling } from "../../../features/Leveling";
 import { Stats } from "../../../features/Stats";
 
 export default [
   {
     method: 'get', path: '/leveling/stats',
     handler: async function getOverallStats(req: any, res: any) {
-      await Leveling.init();
-      const stats = Leveling.stats;
+      // await Leveling.init();
+      // const stats = Leveling.stats;
   
       return {
         body: {}

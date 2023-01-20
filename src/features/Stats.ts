@@ -14,10 +14,10 @@ export class Stats {
   static async getGainsHistoryInOneDay(date: Date): Promise<IGainsHistory[]> {
     const quests = (await Quests.getEveryFinishedQuestOfOneDay(date))
       .map(quest => {
-        const {title, xp, state, created_at, finished_at, type} = quest;
+        const {title, xp, state, created_at, finished_at} = quest;
         return {
           name: title,
-          type: type+'-quest',
+          type: 'quest',
           xp: xp,
           boostXp: 0,
           status: state === 'invalidated' ? -1 : 1,

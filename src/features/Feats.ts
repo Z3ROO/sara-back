@@ -66,30 +66,4 @@ export class Feats {
       finished_at: null
     });
   }
-
-  static async proceedFeatAcceptanceLevel(feat_id: string) {
-    const feat = await FeatsRepo.findOneFeat(feat_id);
-    const stage = nextAcceptanceLevel(feat);
-
-    await FeatsRepo.updateAcceptanceLevel(feat_id, stage);
-  }
-}
-
-export function nextAcceptanceLevel(item: IRecords|IFeats): 'reviewed'|'ready' {
-  const sevenDays = 1000 * 60 * 60 * 24 * 7;
-  let stage: 'reviewed'|'ready';
-
-  if (item.acceptance.stage === 'ready')
-    throw new Error('This \'feat\' already got accepted.');
-    
-  if (item.acceptance.stage === 'reviewed' &&
-    (item.acceptance.date[0].setHours(0,0,0) + sevenDays) < new Date().getTime())
-    stage = 'ready'
-  if (item.acceptance.stage === 'created' &&
-    (item.acceptance.date[1].setHours(0,0,0) + sevenDays) < new Date().getTime())
-    stage = 'reviewed'
-  else
-    throw new Error("Something went wrong proceeding Feat acceptance.");
-
-  return stage
 }

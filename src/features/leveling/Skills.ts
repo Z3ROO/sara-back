@@ -18,7 +18,9 @@ export class Skills {
     const reqBody = {
       name: props.name,
       description: props.description,
-      created_at: new Date()
+      created_at: new Date(),
+      children: [],
+      xp: null
     };
 
     await SkillsRepo.insertOneSkill(reqBody);

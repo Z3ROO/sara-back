@@ -39,8 +39,8 @@ class QuestRepo extends NoSQLRepository<IQuest>{
     await this.collection().insertOne(properties);
   }
 
-  async terminateQuest(quest_id: string, focus_score: number, state: 'finished'|'invalidated') {
-    await this.collection().findOneAndUpdate({_id: new ObjectId(quest_id)}, {$set: {
+  async terminateQuest(focus_score: number, state: 'finished'|'invalidated') {
+    await this.collection().findOneAndUpdate({state: 'active'}, {$set: {
       finished_at: new Date(),
       focus_score,
       state
